@@ -4024,7 +4024,7 @@ std::vector<size_t> wallet2::pick_preferred_rct_inputs(uint64_t needed_money, ui
   return picks;
 }
 
-static bool should_pick_a_second_output(bool use_rct, size_t n_transfers, const std::vector<size_t> &unused_transfers_indices, const std::vector<size_t> &unused_dust_indices)
+bool wallet2::should_pick_a_second_output(bool use_rct, size_t n_transfers, const std::vector<size_t> &unused_transfers_indices, const std::vector<size_t> &unused_dust_indices) const
 {
   if (!use_rct)
     return false;
@@ -4032,7 +4032,41 @@ static bool should_pick_a_second_output(bool use_rct, size_t n_transfers, const 
     return false;
   if (unused_dust_indices.empty() && unused_transfers_indices.empty())
     return false;
+  // we want at least one free rct output to avoid a corner case where
+  // we'd choose a non rct output which doesn't have enough "siblings"
+  // value-wise on the chain, and thus can't be mixed
+  bool found = false;
+  for (auto i: unused_dust_indices)
+  {
+    if (m_transfers[i].is_rct())
+    {
+      found = true;
+      break;
+    }
+  }
+  if (!found) for (auto i: unused_transfers_indices)
+  {
+    if (m_transfers[i].is_rct())
+    {
+      found = true;
+      break;
+    }
+  }
+  if (!found)
+    return false;
   return true;
+}
+
+std::vector<size_t> wallet2::get_only_rct(const std::vector<size_t> &unused_dust_indices, const std::vector<size_t> &unused_transfers_indices) const
+{
+  std::vector<size_t> indices;
+  for (size_t n: unused_dust_indices)
+    if (m_transfers[n].is_rct())
+      indices.push_back(n);
+  for (size_t n: unused_transfers_indices)
+    if (m_transfers[n].is_rct())
+      indices.push_back(n);
+  return indices;
 }
 
 // Another implementation of transaction creation that is hopefully better
@@ -4228,7 +4262,8 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions(std::vector<crypto
     size_t idx;
     if ((dsts.empty() || dsts[0].amount == 0) && !adding_fee) {
       // the "make rct txes 2/2" case - we pick a small value output to "clean up" the wallet too
-      idx = pop_best_value(unused_dust_indices.empty() ? unused_transfers_indices : unused_dust_indices, tx.selected_transfers, true);
+      std::vector<size_t> indices = get_only_rct(unused_dust_indices, unused_transfers_indices);
+      idx = pop_best_value(indices, tx.selected_transfers, true);
 
       // since we're trying to add a second output which is not strictly needed,
       // we only add it if it's unrelated enough to the first one
@@ -4238,6 +4273,8 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions(std::vector<crypto
         LOG_PRINT_L2("Second outout was not strictly needed, and relatedness " << relatedness << ", not adding");
         break;
       }
+      pop_if_present(unused_transfers_indices, idx);
+      pop_if_present(unused_dust_indices, idx);
     } else if (!prefered_inputs.empty()) {
       idx = pop_back(prefered_inputs);
       pop_if_present(unused_transfers_indices, idx);
