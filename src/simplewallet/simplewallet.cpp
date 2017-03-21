@@ -3287,9 +3287,9 @@ bool simple_wallet::show_transfers(const std::vector<std::string> &args_)
     try
     {
       m_wallet->update_pool_state();
-      std::list<std::pair<std::string, tools::wallet2::payment_details>> payments;
+      std::list<std::pair<crypto::hash, tools::wallet2::payment_details>> payments;
       m_wallet->get_unconfirmed_payments(payments, m_current_subaddress_account, subaddr_indices);
-      for (std::list<std::pair<std::string, tools::wallet2::payment_details>>::const_iterator i = payments.begin(); i != payments.end(); ++i) {
+      for (std::list<std::pair<crypto::hash, tools::wallet2::payment_details>>::const_iterator i = payments.begin(); i != payments.end(); ++i) {
         const tools::wallet2::payment_details &pd = i->second;
         std::string note = m_wallet->get_tx_note(pd.m_tx_hash);
         message_writer() << (boost::format("%8.8s %6.6s %16.16s %20.20s %s %s %d %s %s") % "pool" % "in" % get_human_readable_timestamp(pd.m_timestamp) % print_money(pd.m_amount) % string_tools::pod_to_hex(pd.m_tx_hash) % i->first % pd.m_subaddr_index.minor % "-" % note).str();

@@ -151,10 +151,9 @@ namespace tools
       bool on_query_key(const wallet_rpc::COMMAND_RPC_QUERY_KEY::request& req, wallet_rpc::COMMAND_RPC_QUERY_KEY::response& res, epee::json_rpc::error& er);
 
       // helpers
-      void fill_transfer_entry(tools::wallet_rpc::transfer_entry& entry, const crypto::hash& txid, const std::string& payment_id, const tools::wallet2::payment_details& pd);
       void fill_transfer_entry(tools::wallet_rpc::transfer_entry& entry, const crypto::hash& txid, const tools::wallet2::confirmed_transfer_details& pd);
       void fill_transfer_entry(tools::wallet_rpc::transfer_entry& entry, const crypto::hash& txid, const tools::wallet2::unconfirmed_transfer_details& pd);
-      void fill_transfer_entry(tools::wallet_rpc::transfer_entry& entry, const std::string& payment_id, const tools::wallet2::payment_details& pd);
+      void fill_transfer_entry(tools::wallet_rpc::transfer_entry& entry, const crypto::hash& txid, const tools::wallet2::payment_details& pd, bool pool);
       bool not_open(epee::json_rpc::error& er);
 
       wallet2& m_wallet;

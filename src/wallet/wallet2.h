@@ -189,6 +189,7 @@ namespace tools
       uint64_t m_timestamp;
       cryptonote::subaddress_index m_subaddr_index;
       std::string m_alias;
+      std::string m_payment_id;
     };
 
     struct unconfirmed_transfer_details
@@ -492,7 +493,7 @@ namespace tools
     void get_payments(std::list<std::pair<std::string, wallet2::payment_details>>& payments, uint64_t min_height, uint64_t max_height = (uint64_t)-1, uint64_t min_timestamp = 0, uint64_t max_timestamp = (uint64_t)-1, const boost::optional<uint32_t>& subaddr_account = boost::none, const std::set<uint32_t>& subaddr_indices = {}) const;
     void get_payments_out(std::list<std::pair<crypto::hash, wallet2::confirmed_transfer_details>>& confirmed_payments, uint64_t min_height, uint64_t max_height = (uint64_t)-1, uint64_t min_timestamp = 0, uint64_t max_timestamp = (uint64_t)-1, const boost::optional<uint32_t>& subaddr_account = boost::none, const std::set<uint32_t>& subaddr_indices = {}) const;
     void get_unconfirmed_payments_out(std::list<std::pair<crypto::hash, wallet2::unconfirmed_transfer_details>>& unconfirmed_payments, const boost::optional<uint32_t>& subaddr_account = boost::none, const std::set<uint32_t>& subaddr_indices = {}) const;
-    void get_unconfirmed_payments(std::list<std::pair<std::string, wallet2::payment_details>>& unconfirmed_payments, const boost::optional<uint32_t>& subaddr_account = boost::none, const std::set<uint32_t>& subaddr_indices = {}) const;
+    void get_unconfirmed_payments(std::list<std::pair<crypto::hash, wallet2::payment_details>>& unconfirmed_payments, const boost::optional<uint32_t>& subaddr_account = boost::none, const std::set<uint32_t>& subaddr_indices = {}) const;
 
     uint64_t get_blockchain_current_height() const { return m_local_bc_height; }
     void rescan_spent();
@@ -712,7 +713,7 @@ namespace tools
     std::atomic<uint64_t> m_local_bc_height; //temporary workaround
     std::unordered_map<crypto::hash, unconfirmed_transfer_details> m_unconfirmed_txs;
     std::unordered_map<crypto::hash, confirmed_transfer_details> m_confirmed_txs;
-    std::unordered_map<std::string, payment_details> m_unconfirmed_payments;
+    std::unordered_map<crypto::hash, payment_details> m_unconfirmed_payments;
     std::unordered_map<crypto::hash, crypto::secret_key> m_tx_keys;
 
     transfer_container m_transfers;
@@ -967,6 +968,8 @@ namespace boost
       if (ver < 2)
         return;
       a & x.m_subaddr_index;
+      a & x.m_payment_id;
+      a & x.m_alias;
     }
 
     template <class Archive>

@@ -1113,14 +1113,15 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
 	  	payment.m_timestamp = ts;
 		  payment.m_subaddr_index = i.first;
       payment.m_alias = extra_nonce.nonce;
+      payment.m_payment_id = payment_id;
 
 	  	if (pool) {
-		  	m_unconfirmed_payments.emplace(payment_id, payment);
+		  	m_unconfirmed_payments.emplace(payment.m_tx_hash, payment);
 			  if (0 != m_callback)
-				  m_callback->on_unconfirmed_money_received(height, txid, tx, payment.m_amount, payment.m_subaddr_index);
+				  m_callback->on_unconfirmed_money_received(height, payment.m_tx_hash, tx, payment.m_amount, payment.m_subaddr_index);
   		}
 	  	else
-		  	m_payments.emplace(payment_id, payment);
+		  	m_payments.emplace(payment.m_payment_id, payment);
   		LOG_PRINT_L2("Payment found in " << (pool ? "pool" : "block") << ": " << payment_id << " / " << payment.m_tx_hash << " / " << payment.m_amount);
 	  }
   }
@@ -1511,14 +1512,14 @@ void wallet2::update_pool_state()
   }
 
   // remove pool txes to us that aren't in the pool anymore
-  std::unordered_map<std::string, wallet2::payment_details>::iterator uit = m_unconfirmed_payments.begin();
+  std::unordered_map<crypto::hash, wallet2::payment_details>::iterator uit = m_unconfirmed_payments.begin();
   while (uit != m_unconfirmed_payments.end())
   {
-    const std::string txid = uit->first;
+    const crypto::hash txid = uit->first;
     bool found = false;
     for (auto it2: res.transactions)
     {
-      if (it2.id_hash == txid)
+      if (it2.id_hash == epee::string_tools::pod_to_hex(txid))
       {
         found = true;
         break;
@@ -1534,10 +1535,14 @@ void wallet2::update_pool_state()
   // add new pool txes to us
   for (auto it : res.transactions) {
     cryptonote::blobdata txid_data;
-    if (epee::string_tools::parse_hexstr_to_binbuff(it.id_hash, txid_data)) {
-      const crypto::hash txid = *reinterpret_cast<const crypto::hash*>(txid_data.data()); // LUKAS TODO fix
-      if (m_unconfirmed_payments.find(txid_data) == m_unconfirmed_payments.end()) {
-        LOG_PRINT_L3("Found new pool tx: " << txid);
+    if (epee::string_tools::parse_hexstr_to_binbuff(it.id_hash, txid_data) && txid_data.size() == sizeof(crypto::hash)) {
+      const crypto::hash txid = *reinterpret_cast<const crypto::hash*>(txid_data.data());
+      if (m_scanned_pool_txs[0].find(txid) != m_scanned_pool_txs[0].end() || m_scanned_pool_txs[1].find(txid) != m_scanned_pool_txs[1].end()) {
+        LOG_PRINT_L2("Already seen " << txid << ", skipped");
+        continue;
+      }
+      if (m_unconfirmed_payments.find(txid) == m_unconfirmed_payments.end()) {
+        LOG_PRINT_L1("Found new pool tx: " << txid);
         bool found = false;
         for (const auto &i: m_unconfirmed_txs) {
           if (i.first == txid) {
@@ -1560,9 +1565,11 @@ void wallet2::update_pool_state()
           cryptonote::COMMAND_RPC_GET_TRANSACTIONS::request req;
           cryptonote::COMMAND_RPC_GET_TRANSACTIONS::response res;
           req.txs_hashes.push_back(it.id_hash);
+          LOG_PRINT_L2("asking for " << it.id_hash);
           req.decode_as_json = false;
           m_daemon_rpc_mutex.lock();
           bool r = epee::net_utils::invoke_http_json("/gettransactions", req, res, m_http_client, rpc_timeout);
+          LOG_PRINT_L2("asked for " << it.id_hash << ", got " << r << " and " << res.status);
           m_daemon_rpc_mutex.unlock();
           if (r && res.status == CORE_RPC_STATUS_OK)
           {
@@ -1581,6 +1588,12 @@ void wallet2::update_pool_state()
                     if (tx_hash == txid)
                     {
                       process_new_transaction(txid, tx, std::vector<uint64_t>(), 0, time(NULL), false, true);
+                      m_scanned_pool_txs[0].insert(txid);
+                      if (m_scanned_pool_txs[0].size() > 5000)
+                      {
+                        std::swap(m_scanned_pool_txs[0], m_scanned_pool_txs[1]);
+                        m_scanned_pool_txs[0].clear();
+                      }
                     }
                     else
                     {
@@ -1619,7 +1632,7 @@ void wallet2::update_pool_state()
       }
       else
       {
-        LOG_PRINT_L1("Already saw that one");
+        LOG_PRINT_L1("Already saw that one, it's for us");
       }
     }
     else
@@ -2784,7 +2797,7 @@ void wallet2::get_unconfirmed_payments_out(std::list<std::pair<crypto::hash, wal
 	}
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::get_unconfirmed_payments(std::list<std::pair<std::string, wallet2::payment_details>>& unconfirmed_payments, const boost::optional<uint32_t>& subaddr_account, const std::set<uint32_t>& subaddr_indices) const
+void wallet2::get_unconfirmed_payments(std::list<std::pair<crypto::hash, wallet2::payment_details>>& unconfirmed_payments, const boost::optional<uint32_t>& subaddr_account, const std::set<uint32_t>& subaddr_indices) const
 {
 	for (auto i = m_unconfirmed_payments.begin(); i != m_unconfirmed_payments.end(); ++i) {
     if(!subaddr_account && subaddr_indices.empty())
