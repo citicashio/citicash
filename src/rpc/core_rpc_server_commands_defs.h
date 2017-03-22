@@ -1028,6 +1028,26 @@ namespace cryptonote
     };
   };
 
+  struct COMMAND_RPC_GET_TRANSACTION_POOL_HASHES
+  {
+    struct request
+    {
+      BEGIN_KV_SERIALIZE_MAP()
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string status;
+      std::vector<crypto::hash> tx_hashes;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(status)
+        KV_SERIALIZE_CONTAINER_POD_AS_BLOB(tx_hashes)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
   struct COMMAND_RPC_GET_CONNECTIONS
   {
     struct request

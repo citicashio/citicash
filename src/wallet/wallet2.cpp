@@ -1448,24 +1448,24 @@ void wallet2::pull_next_blocks(uint64_t start_height, uint64_t &blocks_start_hei
 void wallet2::update_pool_state()
 {
   // get the pool state
-  cryptonote::COMMAND_RPC_GET_TRANSACTION_POOL::request req;
-  cryptonote::COMMAND_RPC_GET_TRANSACTION_POOL::response res;
+  cryptonote::COMMAND_RPC_GET_TRANSACTION_POOL_HASHES::request req;
+  cryptonote::COMMAND_RPC_GET_TRANSACTION_POOL_HASHES::response res;
   m_daemon_rpc_mutex.lock();
-  bool r = epee::net_utils::invoke_http_json("/get_transaction_pool", req, res, m_http_client, rpc_timeout);
+  bool r = epee::net_utils::invoke_http_json("/get_transaction_pool_hashes.bin", req, res, m_http_client, rpc_timeout);
   m_daemon_rpc_mutex.unlock();
-  THROW_WALLET_EXCEPTION_IF(!r, error::no_connection_to_daemon, "get_transaction_pool");
-  THROW_WALLET_EXCEPTION_IF(res.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "get_transaction_pool");
+  THROW_WALLET_EXCEPTION_IF(!r, error::no_connection_to_daemon, "get_transaction_pool_hashes.bin");
+  THROW_WALLET_EXCEPTION_IF(res.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "get_transaction_pool_hashes.bin");
   THROW_WALLET_EXCEPTION_IF(res.status != CORE_RPC_STATUS_OK, error::get_tx_pool_error);
 
   // remove any pending tx that's not in the pool
   std::unordered_map<crypto::hash, wallet2::unconfirmed_transfer_details>::iterator it = m_unconfirmed_txs.begin();
   while (it != m_unconfirmed_txs.end())
   {
-    const std::string txid = epee::string_tools::pod_to_hex(it->first);
+    const crypto::hash &txid = it->first;
     bool found = false;
-    for (auto it2: res.transactions)
+    for (const auto &it2: res.tx_hashes)
     {
-      if (it2.id_hash == txid)
+      if (it2 == txid)
       {
         found = true;
         break;
@@ -1513,132 +1513,107 @@ void wallet2::update_pool_state()
 
   // remove pool txes to us that aren't in the pool anymore
   std::unordered_map<crypto::hash, wallet2::payment_details>::iterator uit = m_unconfirmed_payments.begin();
-  while (uit != m_unconfirmed_payments.end())
-  {
-    const crypto::hash txid = uit->first;
+  while (uit != m_unconfirmed_payments.end()) {
+    const crypto::hash &txid = uit->first;
     bool found = false;
-    for (auto it2: res.transactions)
-    {
-      if (it2.id_hash == epee::string_tools::pod_to_hex(txid))
-      {
+    for (const auto &it2: res.tx_hashes) {
+      if (it2 == txid) {
         found = true;
         break;
       }
     }
     auto pit = uit++;
-    if (!found)
-    {
+    if (!found) {
+      LOG_PRINT_L2("Removing " << txid << " from unconfirmed payments, not found in pool");
       m_unconfirmed_payments.erase(pit);
     }
   }
 
-  // add new pool txes to us
-  for (auto it : res.transactions) {
-    cryptonote::blobdata txid_data;
-    if (epee::string_tools::parse_hexstr_to_binbuff(it.id_hash, txid_data) && txid_data.size() == sizeof(crypto::hash)) {
-      const crypto::hash txid = *reinterpret_cast<const crypto::hash*>(txid_data.data());
-      if (m_scanned_pool_txs[0].find(txid) != m_scanned_pool_txs[0].end() || m_scanned_pool_txs[1].find(txid) != m_scanned_pool_txs[1].end()) {
-        LOG_PRINT_L2("Already seen " << txid << ", skipped");
-        continue;
-      }
-      if (m_unconfirmed_payments.find(txid) == m_unconfirmed_payments.end()) {
-        LOG_PRINT_L1("Found new pool tx: " << txid);
-        bool found = false;
-        for (const auto &i: m_unconfirmed_txs) {
-          if (i.first == txid) {
-            found = true;
-  			    // if this is a payment to yourself at a different subaddress account, don't skip it
-	  		    // so that you can see the incoming pool tx with 'show_transfers' on that receiving subaddress account
-      			const unconfirmed_transfer_details& utd = i.second;
-		      	for (const auto& dst : utd.m_dests) {
-    		  		auto subaddr_index = m_subaddresses.find(dst.addr.m_spend_public_key);
-		    	  	if (subaddr_index != m_subaddresses.end() && subaddr_index->second.major != utd.m_subaddr_account) {
-    				  	found = false;
-					      break;
-      				}
-	  	    	}
-            break;
-          }
+  // gather txids of new pool txes to us
+  std::vector<crypto::hash> txids;
+  for (const auto &txid: res.tx_hashes) {
+    if (m_scanned_pool_txs[0].find(txid) != m_scanned_pool_txs[0].end() || m_scanned_pool_txs[1].find(txid) != m_scanned_pool_txs[1].end()) {
+      LOG_PRINT_L2("Already seen " << txid << ", skipped");
+      continue;
+    }
+    if (m_unconfirmed_payments.find(txid) == m_unconfirmed_payments.end()) {
+      LOG_PRINT_L1("Found new pool tx: " << txid);
+      bool found = false;
+      for (const auto &i: m_unconfirmed_txs) {
+        if (i.first == txid) {
+          found = true;
+  			  // if this is a payment to yourself at a different subaddress account, don't skip it
+	  		  // so that you can see the incoming pool tx with 'show_transfers' on that receiving subaddress account
+      		const unconfirmed_transfer_details& utd = i.second;
+		      for (const auto& dst : utd.m_dests) {
+    		  	auto subaddr_index = m_subaddresses.find(dst.addr.m_spend_public_key);
+		    	 	if (subaddr_index != m_subaddresses.end() && subaddr_index->second.major != utd.m_subaddr_account) {
+    			  	found = false;
+					    break;
+      		  }
+	  	    }
+          break;
         }
-        if (!found) {
-          // not one of those we sent ourselves
-          cryptonote::COMMAND_RPC_GET_TRANSACTIONS::request req;
-          cryptonote::COMMAND_RPC_GET_TRANSACTIONS::response res;
-          req.txs_hashes.push_back(it.id_hash);
-          LOG_PRINT_L2("asking for " << it.id_hash);
-          req.decode_as_json = false;
-          m_daemon_rpc_mutex.lock();
-          bool r = epee::net_utils::invoke_http_json("/gettransactions", req, res, m_http_client, rpc_timeout);
-          LOG_PRINT_L2("asked for " << it.id_hash << ", got " << r << " and " << res.status);
-          m_daemon_rpc_mutex.unlock();
-          if (r && res.status == CORE_RPC_STATUS_OK)
-          {
-            if (res.txs.size() == 1)
-            {
-              // might have just been put in a block
-              if (res.txs[0].in_pool)
-              {
-                cryptonote::transaction tx;
-                cryptonote::blobdata bd;
-                crypto::hash tx_hash, tx_prefix_hash;
-                if (epee::string_tools::parse_hexstr_to_binbuff(res.txs[0].as_hex, bd))
-                {
-                  if (cryptonote::parse_and_validate_tx_from_blob(bd, tx, tx_hash, tx_prefix_hash))
-                  {
-                    if (tx_hash == txid)
-                    {
-                      process_new_transaction(txid, tx, std::vector<uint64_t>(), 0, time(NULL), false, true);
-                      m_scanned_pool_txs[0].insert(txid);
-                      if (m_scanned_pool_txs[0].size() > 5000)
-                      {
-                        std::swap(m_scanned_pool_txs[0], m_scanned_pool_txs[1]);
-                        m_scanned_pool_txs[0].clear();
-                      }
-                    }
-                    else
-                    {
-                      LOG_PRINT_L0("Mismatched txids when processing unconfimed txes from pool");
-                    }
-                  }
-                  else
-                  {
-                    LOG_PRINT_L0("failed to validate transaction from daemon");
+      }
+      if (!found) // not one of those we sent ourselves
+        txids.push_back(txid);
+      else
+        LOG_PRINT_L1("We sent that one");
+    }
+    else
+      LOG_PRINT_L1("Already saw that one, it's for us");
+  }
+
+  // get those txes
+  if (!txids.empty()) {
+    cryptonote::COMMAND_RPC_GET_TRANSACTIONS::request req;
+    cryptonote::COMMAND_RPC_GET_TRANSACTIONS::response res;
+    for (const auto &txid: txids)
+      req.txs_hashes.push_back(epee::string_tools::pod_to_hex(txid));
+    LOG_PRINT_L2("asking for " << txids.size() << " transactions");
+    req.decode_as_json = false;
+    m_daemon_rpc_mutex.lock();
+    bool r = epee::net_utils::invoke_http_json("/gettransactions", req, res, m_http_client, rpc_timeout);
+    m_daemon_rpc_mutex.unlock();
+    LOG_PRINT_L2("Got " << r << " and " << res.status);
+    if (r && res.status == CORE_RPC_STATUS_OK) {
+      if (res.txs.size() == txids.size()) {
+        size_t n = 0;
+        for (const auto &txid: txids) {
+          // might have just been put in a block
+          if (res.txs[n].in_pool) {
+            cryptonote::transaction tx;
+            cryptonote::blobdata bd;
+            crypto::hash tx_hash, tx_prefix_hash;
+            if (epee::string_tools::parse_hexstr_to_binbuff(res.txs[n].as_hex, bd)) {
+              if (cryptonote::parse_and_validate_tx_from_blob(bd, tx, tx_hash, tx_prefix_hash)) {
+                if (tx_hash == txid) {
+                  process_new_transaction(txid, tx, std::vector<uint64_t>(), 0, time(NULL), false, true);
+                  m_scanned_pool_txs[0].insert(txid);
+                  if (m_scanned_pool_txs[0].size() > 5000) {
+                    std::swap(m_scanned_pool_txs[0], m_scanned_pool_txs[1]);
+                    m_scanned_pool_txs[0].clear();
                   }
                 }
                 else
-                {
-                  LOG_PRINT_L0("Failed to parse tx " << txid);
-                }
+                  LOG_PRINT_L0("Mismatched txids when processing unconfimed txes from pool");
               }
               else
-              {
-                LOG_PRINT_L1("Tx " << txid << " was in pool, but is no more");
-              }
+                LOG_PRINT_L0("failed to validate transaction from daemon");
             }
             else
-            {
-              LOG_PRINT_L0("Expected 1 tx, got " << res.txs.size());
-            }
+              LOG_PRINT_L0("Failed to parse tx " << txid);
           }
           else
-          {
-            LOG_PRINT_L0("Error calling gettransactions daemon RPC: r " << r << ", status " << res.status);
-          }
-        }
-        else
-        {
-          LOG_PRINT_L1("We sent that one");
+            LOG_PRINT_L1("Tx " << txid << " was in pool, but is no more");
+          ++n;
         }
       }
       else
-      {
-        LOG_PRINT_L1("Already saw that one, it's for us");
-      }
+        LOG_PRINT_L0("Expected " << txids.size() << " tx(es), got " << res.txs.size());
     }
     else
-    {
-      LOG_PRINT_L0("Failed to parse txid");
-    }
+      LOG_PRINT_L0("Error calling gettransactions daemon RPC: r " << r << ", status " << res.status);
   }
 }
 //----------------------------------------------------------------------------------------------------
