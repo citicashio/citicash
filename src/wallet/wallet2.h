@@ -702,6 +702,7 @@ namespace tools
     crypto::public_key get_tx_pub_key_from_received_outs(const tools::wallet2::transfer_details &td) const;
     bool should_pick_a_second_output(bool use_rct, size_t n_transfers, const std::vector<size_t> &unused_transfers_indices, const std::vector<size_t> &unused_dust_indices) const;
     std::vector<size_t> get_only_rct(const std::vector<size_t> &unused_dust_indices, const std::vector<size_t> &unused_transfers_indices) const;
+    void scan_output(const cryptonote::account_keys &keys, const cryptonote::transaction &tx, const crypto::public_key &out_key, tx_scan_info_t &tx_scan_info, size_t i, crypto::key_image &ki, uint64_t &amount, int &num_vouts_received, uint64_t &tx_money_got_in_outs, rct::key &mask, std::vector<size_t> &outs);
 
     cryptonote::account_base m_account;
     boost::optional<epee::net_utils::http::login> m_daemon_login;
