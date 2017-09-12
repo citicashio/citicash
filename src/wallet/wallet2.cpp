@@ -701,16 +701,16 @@ void wallet2::check_acc_out_precomp_once(const tx_out &o, const crypto::key_deri
     already_seen = true;
 }
 
-void wallet2::scan_output(const cryptonote::account_keys &keys, const cryptonote::transaction &tx, const crypto::public_key &out_key, tx_scan_info_t &tx_scan_info, size_t i, crypto::key_image &ki, uint64_t &amount, int &num_vouts_received, uint64_t &tx_money_got_in_outs, rct::key &mask, std::vector<size_t> &outs)
+void wallet2::scan_output(const cryptonote::account_keys &keys, const cryptonote::transaction &tx, const crypto::public_key &out_key, size_t i, tx_scan_info_t &tx_scan_info, int &num_vouts_received, uint64_t &tx_money_got_in_outs, std::vector<size_t> &outs)
 {
-  cryptonote::generate_key_image_helper_precomp(keys, out_key, tx_scan_info.received->derivation, i, tx_scan_info.received->index, tx_scan_info.in_ephemeral, ki);
+  cryptonote::generate_key_image_helper_precomp(keys, out_key, tx_scan_info.received->derivation, i, tx_scan_info.received->index, tx_scan_info.in_ephemeral, tx_scan_info.ki);
   THROW_WALLET_EXCEPTION_IF(tx_scan_info.in_ephemeral.pub != boost::get<cryptonote::txout_to_key>(tx.vout[i].target).key,
     error::wallet_internal_error, "key_image generated ephemeral public key not matched with output_key");
 
   outs.push_back(i);
   if (!tx_scan_info.money_transfered)
-    amount = decodeRct(tx.rct_signatures, tx_scan_info.received->derivation, i, mask);
-  tx_money_got_in_outs += amount;
+    tx_scan_info.amount = decodeRct(tx.rct_signatures, tx_scan_info.received->derivation, i, tx_scan_info.mask);
+  tx_money_got_in_outs += tx_scan_info.amount;
   ++num_vouts_received;
 }
 
@@ -743,7 +743,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
       if (pk_index > 1)
         break;
       LOG_PRINT_L0("Public key wasn't found in the transaction extra. Skipping transaction " << txid);
-      if (0 != m_callback)
+      if (m_callback)
         m_callback->on_skip_transaction(height, txid, tx);
       return;
     }
@@ -751,10 +751,8 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
     int num_vouts_received = 0;
     tx_pub_key = pub_key_field.pub_key;
     bool r = true;
-    std::deque<crypto::key_image> ki(tx.vout.size());
-    std::deque<uint64_t> amount(tx.vout.size());
-    std::deque<rct::key> mask(tx.vout.size());
     int threads = tools::get_max_concurrency();
+    std::unique_ptr<tx_scan_info_t[]> tx_scan_info{new tx_scan_info_t[tx.vout.size()]};
     const cryptonote::account_keys& keys = m_account.get_keys();
     crypto::key_derivation derivation;
     if (!generate_key_derivation(tx_pub_key, keys.m_view_secret_key, derivation)) {
@@ -786,7 +784,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
         r = false;
       else if (tx_scan_info[0].received) { // this assumes that the miner tx pays a single address
         const crypto::public_key& out_key = boost::get<cryptonote::txout_to_key>(tx.vout[0].target).key;
-        scan_output(keys, tx, out_key, tx_scan_info[0], 0, ki[0], amount[0], num_vouts_received, tx_money_got_in_outs[tx_scan_info[0].received->index], mask[0], outs);
+        scan_output(keys, tx, out_key, 0, tx_scan_info[0], num_vouts_received, tx_money_got_in_outs[tx_scan_info[0].received->index], outs);
 
         // process the other outs from that tx
         boost::asio::io_service ioservice;
@@ -807,7 +805,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
           }
           if (tx_scan_info[i].received) {
             const crypto::public_key& out_key = boost::get<cryptonote::txout_to_key>(tx.vout[i].target).key;
-            scan_output(keys, tx, out_key, tx_scan_info[i], i, ki[i], amount[i], num_vouts_received, tx_money_got_in_outs[tx_scan_info[i].received->index], mask[i], outs);
+            scan_output(keys, tx, out_key, i, tx_scan_info[i], num_vouts_received, tx_money_got_in_outs[tx_scan_info[i].received->index], outs);
           }
         }
       }
@@ -831,7 +829,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
         }
         if (tx_scan_info[i].received) {
           const crypto::public_key& out_key = boost::get<cryptonote::txout_to_key>(tx.vout[i].target).key;
-          scan_output(keys, tx, out_key, tx_scan_info[i], i, ki[i], amount[i], num_vouts_received, tx_money_got_in_outs[tx_scan_info[i].received->index], mask[i], outs);
+          scan_output(keys, tx, out_key, i, tx_scan_info[i], num_vouts_received, tx_money_got_in_outs[tx_scan_info[i].received->index], outs);
         }
       }
     }
@@ -844,7 +842,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
         }
         else if (tx_scan_info[i].received) {
           const crypto::public_key& out_key = boost::get<cryptonote::txout_to_key>(tx.vout[i].target).key;
-          scan_output(keys, tx, out_key, tx_scan_info[i], i, ki[i], amount[i], num_vouts_received, tx_money_got_in_outs[tx_scan_info[i].received->index], mask[i], outs);
+          scan_output(keys, tx, out_key, i, tx_scan_info[i], num_vouts_received, tx_money_got_in_outs[tx_scan_info[i].received->index], outs);
         }
       }
     }
@@ -861,8 +859,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
           " not match with daemon response size=" + std::to_string(o_indices.size()));
       }
 
-      BOOST_FOREACH(size_t o, outs)
-      {
+      for (size_t o : outs) {
         THROW_WALLET_EXCEPTION_IF(tx.vout.size() <= o, error::wallet_internal_error, "wrong out in transaction: internal index=" +
           std::to_string(o) + ", total_outs=" + std::to_string(tx.vout.size()));
 
@@ -882,7 +879,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
             td.m_global_output_index = o_indices[o];
             td.m_tx = (const cryptonote::transaction_prefix&)tx;
             td.m_txid = txid;
-            td.m_key_image = ki[o];
+            td.m_key_image = tx_scan_info[o].ki;
             td.m_key_image_known = !m_watch_only;
             td.m_amount = tx.vout[o].amount;
             td.m_pk_index = pk_index - 1;
@@ -890,8 +887,8 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
             expand_subaddresses(tx_scan_info[o].received->index);
             if (td.m_amount == 0)
             {
-              td.m_mask = mask[o];
-              td.m_amount = amount[o];
+              td.m_mask = tx_scan_info[o].mask;
+              td.m_amount = tx_scan_info[o].amount;
               td.m_rct = true;
             }
             else if (miner_tx && tx.version == 2)
@@ -908,7 +905,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
             m_key_images[td.m_key_image] = m_transfers.size() - 1;
             m_pub_keys[tx_scan_info[o].in_ephemeral.pub] = m_transfers.size() - 1;
             LOG_PRINT_L0("Received money: " << print_money(td.amount()) << ", with tx: " << txid);
-            if (0 != m_callback)
+            if (m_callback)
               m_callback->on_money_received(height, txid, tx, td.m_amount, td.m_subaddr_index);
           }
         }
@@ -941,8 +938,8 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
             expand_subaddresses(tx_scan_info[o].received->index);
             if (td.m_amount == 0)
             {
-              td.m_mask = mask[o];
-              td.m_amount = amount[o];
+              td.m_mask = tx_scan_info[o].mask;
+              td.m_amount = tx_scan_info[o].amount;
               td.m_rct = true;
             }
             else if (miner_tx && tx.version == 2)
