@@ -1010,8 +1010,8 @@ bool t_rpc_command_executor::get_limit()
 {
     int limit_down = epee::net_utils::connection_basic::get_rate_down_limit( );
     int limit_up = epee::net_utils::connection_basic::get_rate_up_limit( );
-    std::cout << "limit-down is " << limit_down/1024 << " kB/s" << std::endl;
-    std::cout << "limit-up is " << limit_up/1024 << " kB/s" << std::endl;
+    std::cout << "limit-down is " << limit_down << " kB/s" << std::endl;
+    std::cout << "limit-up is " << limit_up << " kB/s" << std::endl;
     return true;
 }
 
@@ -1019,36 +1019,36 @@ bool t_rpc_command_executor::set_limit(int limit)
 {
     epee::net_utils::connection_basic::set_rate_down_limit( limit );
     epee::net_utils::connection_basic::set_rate_up_limit( limit );
-    std::cout << "Set limit-down to " << limit/1024 << " kB/s" << std::endl;
-    std::cout << "Set limit-up to " << limit/1024 << " kB/s" << std::endl;
+    std::cout << "Set limit-down to " << limit << " kB/s" << std::endl;
+    std::cout << "Set limit-up to " << limit << " kB/s" << std::endl;
     return true;
 }
 
 bool t_rpc_command_executor::get_limit_up()
 {
     int limit_up = epee::net_utils::connection_basic::get_rate_up_limit( );
-    std::cout << "limit-up is " << limit_up/1024 << " kB/s" << std::endl;
+    std::cout << "limit-up is " << limit_up << " kB/s" << std::endl;
     return true;
 }
 
 bool t_rpc_command_executor::set_limit_up(int limit)
 {
     epee::net_utils::connection_basic::set_rate_up_limit( limit );
-    std::cout << "Set limit-up to " << limit/1024 << " kB/s" << std::endl;
+    std::cout << "Set limit-up to " << limit << " kB/s" << std::endl;
     return true;
 }
 
 bool t_rpc_command_executor::get_limit_down()
 {
     int limit_down = epee::net_utils::connection_basic::get_rate_down_limit( );
-    std::cout << "limit-down is " << limit_down/1024 << " kB/s" << std::endl;
+    std::cout << "limit-down is " << limit_down << " kB/s" << std::endl;
     return true;
 }
 
 bool t_rpc_command_executor::set_limit_down(int limit)
 {
     epee::net_utils::connection_basic::set_rate_down_limit( limit );
-    std::cout << "Set limit-down to " << limit/1024 << " kB/s" << std::endl;
+    std::cout << "Set limit-down to " << limit << " kB/s" << std::endl;
     return true;
 }
 

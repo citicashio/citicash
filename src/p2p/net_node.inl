@@ -68,8 +68,8 @@ namespace nodetool
 {
   namespace
   {
-    const int64_t default_limit_up = 2048;
-    const int64_t default_limit_down = 8192;
+    const int64_t default_limit_up = 2048;   // kB/s
+    const int64_t default_limit_down = 8192; // kB/s
     const command_line::arg_descriptor<std::string> arg_p2p_bind_ip        = {"p2p-bind-ip", "Interface for p2p network protocol", "0.0.0.0"};
     const command_line::arg_descriptor<std::string> arg_p2p_bind_port = {
         "p2p-bind-port"
@@ -1626,9 +1626,8 @@ namespace nodetool
       this->islimitup=false;
     }
 
-    limit *= 1024;
     epee::net_utils::connection<epee::levin::async_protocol_handler<p2p_connection_context> >::set_rate_up_limit( limit );
-    LOG_PRINT_L0("Set limit-up to " << limit/1024 << " kB/s");
+    LOG_PRINT_L0("Set limit-up to " << limit << " kB/s");
     return true;
   }
 
@@ -1640,9 +1639,8 @@ namespace nodetool
       limit=default_limit_down;
       this->islimitdown=false;
     }
-    limit *= 1024;
     epee::net_utils::connection<epee::levin::async_protocol_handler<p2p_connection_context> >::set_rate_down_limit( limit );
-    LOG_PRINT_L0("Set limit-down to " << limit/1024 << " kB/s");
+    LOG_PRINT_L0("Set limit-down to " << limit << " kB/s");
     return true;
   }
 
@@ -1654,21 +1652,21 @@ namespace nodetool
 
     if(limit == -1)
     {
-      limit_up = default_limit_up * 1024;
-      limit_down = default_limit_down * 1024;
+      limit_up = default_limit_up;
+      limit_down = default_limit_down;
     }
     else
     {
-      limit_up = limit * 1024;
-      limit_down = limit * 1024;
+      limit_up = limit;
+      limit_down = limit;
     }
     if(!this->islimitup) {
       epee::net_utils::connection<epee::levin::async_protocol_handler<p2p_connection_context> >::set_rate_up_limit(limit_up);
-      LOG_PRINT_L0("Set limit-up to " << limit_up/1024 << " kB/s");
+      LOG_PRINT_L0("Set limit-up to " << limit_up << " kB/s");
     }
     if(!this->islimitdown) {
       epee::net_utils::connection<epee::levin::async_protocol_handler<p2p_connection_context> >::set_rate_down_limit(limit_down);
-      LOG_PRINT_L0("Set limit-down to " << limit_down/1024 << " kB/s");
+      LOG_PRINT_L0("Set limit-down to " << limit_down << " kB/s");
     }
 
     return true;

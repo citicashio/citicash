@@ -341,7 +341,6 @@ bool t_command_parser_executor::set_limit_up(const std::vector<std::string>& arg
       return false;
   }
   if (limit==-1)  limit=128;
-  limit *= 1024;
 
   return m_executor.set_limit_up(limit);
 }
@@ -360,7 +359,6 @@ bool t_command_parser_executor::set_limit_down(const std::vector<std::string>& a
       return false;
   }
   if (limit==-1)  limit=128;
-  limit *= 1024;
 
   return m_executor.set_limit_down(limit);
 }

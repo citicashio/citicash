@@ -163,17 +163,11 @@ void network_throttle::set_target_speed( network_speed_kbps target )
 {
     m_target_speed = target * 1024;
 	_note_c("net/"+m_nameshort, "Setting LIMIT: " << target << " kbps");
-	set_real_target_speed(target);
-}
-
-void network_throttle::set_real_target_speed( network_speed_kbps real_target )
-{
-	m_real_target_speed = real_target * 1024;
 }
 
 network_speed_kbps network_throttle::get_target_speed()
 {
-	return m_real_target_speed / 1024;
+	return m_target_speed / 1024;
 }
 			
 void network_throttle::tick()
