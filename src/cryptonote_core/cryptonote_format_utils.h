@@ -147,6 +147,7 @@ namespace cryptonote
   bool get_transaction_hash(const transaction& t, crypto::hash& res, size_t* blob_size);
   blobdata get_block_hashing_blob(const block& b);
   bool get_block_hash(const block& b, crypto::hash& res);
+  std::string get_genesis_tx_hex();
   crypto::hash get_block_hash(const block& b);
   bool get_block_longhash(const block& b, crypto::hash& res, uint64_t height);
   crypto::hash get_block_longhash(const block& b, uint64_t height);

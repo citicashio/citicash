@@ -50,6 +50,15 @@
 namespace po = boost::program_options;
 namespace bf = boost::filesystem;
 
+void print_genesis_tx_hex() {
+	std::string tx_hex = cryptonote::get_genesis_tx_hex();
+
+	std::cout << "Insert this line into your coin configuration file as is: " << std::endl;
+	std::cout << "#define GENESIS_COINBASE_TX_HEX  \"" << tx_hex << "\"" << std::endl;
+
+	return;
+}
+
 int main(int argc, char const * argv[])
 {
   try {
@@ -122,6 +131,11 @@ int main(int argc, char const * argv[])
       std::cout << visible_options << std::endl;
       return 0;
     }
+
+	if (command_line::get_arg(vm, command_line::arg_print_genesis_tx)) {
+		print_genesis_tx_hex();
+		return false;
+	}
 
     // Sumokoin Version
     if (command_line::get_arg(vm, command_line::arg_version))

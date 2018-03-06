@@ -143,6 +143,7 @@ namespace cryptonote
     command_line::add_arg(desc, command_line::arg_show_time_stats);
     command_line::add_arg(desc, command_line::arg_db_auto_remove_logs);
     command_line::add_arg(desc, command_line::arg_block_sync_size);
+	command_line::add_arg(desc, command_line::arg_print_genesis_tx);
   }
   //-----------------------------------------------------------------------------------------------
   bool core::handle_command_line(const boost::program_options::variables_map& vm)

@@ -123,4 +123,8 @@ namespace command_line
   , "How many blocks to sync at once during chain synchronization."
   , BLOCKS_SYNCHRONIZING_DEFAULT_COUNT
   };
+  const command_line::arg_descriptor<bool> arg_print_genesis_tx = { 
+	  "print-genesis-tx"
+	  , "Prints genesis' block tx hex to insert it to config and exits" 
+  };
 }

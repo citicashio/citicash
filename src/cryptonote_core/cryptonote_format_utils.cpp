@@ -1158,6 +1158,22 @@ namespace cryptonote
     return p;
   }
   //---------------------------------------------------------------
+  void generate_genesis_tx(transaction& tx) {
+	  account_public_address ac = boost::value_initialized<account_public_address>();
+	  std::vector<size_t> sz;
+	  construct_miner_tx(0, 0, 0, 0, 0, ac, tx); // zero fee in genesis
+	  blobdata txb = tx_to_blob(tx);
+	  
+  }
+  //---------------------------------------------------------------
+  std::string get_genesis_tx_hex() {
+	transaction tx;
+	generate_genesis_tx(tx);
+	blobdata txb = tx_to_blob(tx);
+	std::string hex_tx_represent = string_tools::buff_to_hex_nodelimer(txb);
+
+	return hex_tx_represent;
+  }
 
   bool generate_genesis_block(
       block& bl
