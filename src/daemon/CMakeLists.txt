@@ -104,5 +104,5 @@ target_link_libraries(daemon
 add_dependencies(daemon version)
 set_property(TARGET daemon
   PROPERTY
-    OUTPUT_NAME "sumokoind")
+    OUTPUT_NAME "citicashd")
 install(TARGETS daemon DESTINATION bin)
