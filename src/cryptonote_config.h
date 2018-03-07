@@ -42,7 +42,7 @@
 #define CRYPTONOTE_GETBLOCKTEMPLATE_MAX_BLOCK_SIZE	    196608 //size of block (bytes) that is the maximum that miners will produce
 #define CRYPTONOTE_MAX_TX_SIZE                          1000000000
 #define CRYPTONOTE_PUBLIC_ADDRESS_TEXTBLOB_VER          0
-#define CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW            60
+#define CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW            10
 #define CURRENT_TRANSACTION_VERSION                     2
 #define MIN_TRANSACTION_VERSION							            2
 #define CURRENT_BLOCK_MAJOR_VERSION                     1
@@ -136,7 +136,7 @@
 #define PEAK_COIN_EMISSION_YEAR                         4
 #define PEAK_COIN_EMISSION_HEIGHT                       ((uint64_t) (((12 * 30.4375 * 24 * 3600)/DIFFICULTY_TARGET) * PEAK_COIN_EMISSION_YEAR)) // = (# of heights emmitted per year) * PEAK_COIN_EMISSION_YEAR
 
-#define DEFAULT_MIXIN                                   12     // default & minimum mixin allowed
+#define DEFAULT_MIXIN                                   2     // default & minimum mixin allowed
 #define MAX_MIXIN                                       240    
 
 #define TRANSACTION_SIZE_LIMIT                          ((uint64_t) ((CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE * 110 / 100) - CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE))
@@ -161,7 +161,7 @@ namespace config
   boost::uuids::uuid const NETWORK_ID = { {
       0xdf, 0xce, 0xfc, 0x7c, 0x27, 0x4a, 0x24, 0xd4, 0xf3, 0x8d, 0x42, 0x44, 0x60, 0xa8, 0x04, 0x06
     } }; // Bender's nightmare
-  std::string const GENESIS_TX = "023c01ff00018080a8ec85afd1b101029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807121012945ff064a12e005b996c951e7f1864f5c55675d316ab52ae35b978b3c710a3a00";
+  std::string const GENESIS_TX = "020a01ff00018080a8ec85afd1b101029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd0880712101398eb8bb0af23ea7e29c2cd4813dc534a0fe87a8715d19c1bee0384408b40a1200";
   uint32_t const GENESIS_NONCE = 10000;
 
   namespace testnet
@@ -175,7 +175,7 @@ namespace config
     boost::uuids::uuid const NETWORK_ID = { {
         0x06, 0xdf, 0xce, 0xfc, 0x7c, 0x27, 0x4a, 0x24, 0xd4, 0xf3, 0x8d, 0x42, 0x44, 0x60, 0x12, 0x04
       } }; // Bender's daydream
-    std::string const GENESIS_TX = "023c01ff00018080a8ec85afd1b101029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd0880712101580cb3776b92521ca3fe6cb6df5de64478e3e8ab60d6ef99409f1ca106dd14c500";
+    std::string const GENESIS_TX = "020a01ff00018080a8ec85afd1b101029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd0880712101e4c250c8d7b19bfcd0951012415b03f6579ab77fca72c2393efd0f1a0a2ead0200";
     uint32_t const GENESIS_NONCE = 10001;
   }
 }
