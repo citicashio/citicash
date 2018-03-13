@@ -107,4 +107,6 @@ local.properties
 .texlipse
 .idea/
 
+# Visual Studio
+.vs
 /testnet
