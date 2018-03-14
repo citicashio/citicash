@@ -394,13 +394,11 @@ namespace nodetool
     if (testnet)
     {
       memcpy(&m_network_id, &::config::testnet::NETWORK_ID, 16);
-	  full_addrs.insert("192.168.25.242:29833");
-	  full_addrs.insert("192.168.25.153:29833");
-	  full_addrs.insert("192.168.25.129:29833");
-	  full_addrs.insert("192.168.25.226:29833");
-	  full_addrs.insert("192.168.25.231:29833");
-	  full_addrs.insert("192.168.25.172:29833");
-	  full_addrs.insert("192.168.25.150:29833");
+	  full_addrs.insert("192.168.25.121:29833");
+	  full_addrs.insert("192.168.25.111:29833");
+	  full_addrs.insert("192.168.25.154:29833");
+	  full_addrs.insert("192.168.25.193:29833");
+	  full_addrs.insert("192.168.25.244:29833");
     }
     else
     {
@@ -476,13 +474,11 @@ namespace nodetool
       if (!full_addrs.size())
       {
         LOG_PRINT_L0("DNS seed node lookup either timed out or failed, falling back to defaults");
-		full_addrs.insert("192.168.25.242:19833");
-		full_addrs.insert("192.168.25.153:19833");
-		full_addrs.insert("192.168.25.129:19833");
-		full_addrs.insert("192.168.25.226:19833");
-		full_addrs.insert("192.168.25.231:19833");
-		full_addrs.insert("192.168.25.172:19833");
-		full_addrs.insert("192.168.25.150:19833");
+		full_addrs.insert("192.168.25.121:19833");
+		full_addrs.insert("192.168.25.111:19833");
+		full_addrs.insert("192.168.25.154:19833");
+		full_addrs.insert("192.168.25.193:19833");
+		full_addrs.insert("192.168.25.244:19833");
       }
     }
 
