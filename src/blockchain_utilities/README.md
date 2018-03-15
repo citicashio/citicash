@@ -14,13 +14,13 @@ See also each utility's "--help" option.
 
 `$ citicash-blockchain-export`
 
-This loads the existing blockchain and exports it to `$SUMOKOIN_DATA_DIR/export/blockchain.raw`
+This loads the existing blockchain and exports it to `$CITICASH_DATA_DIR/export/blockchain.raw`
 
 ### Import the exported file
 
 `$ citicash-blockchain-import`
 
-This imports blocks from `$SUMOKOIN_DATA_DIR/export/blockchain.raw` (exported using the
+This imports blocks from `$CITICASH_DATA_DIR/export/blockchain.raw` (exported using the
 `citicash-blockchain-export` tool as described above) into the current database.
 
 Defaults: `--batch on`, `--batch size 20000`, `--verify on`
