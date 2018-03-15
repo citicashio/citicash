@@ -109,4 +109,5 @@ local.properties
 
 # Visual Studio
 .vs
+
 /testnet
