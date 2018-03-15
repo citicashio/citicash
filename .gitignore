@@ -110,4 +110,7 @@ local.properties
 # Visual Studio
 .vs
 
+# Visual Studio Code
+.vscode
+
 /testnet
