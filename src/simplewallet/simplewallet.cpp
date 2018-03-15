@@ -1589,7 +1589,7 @@ void simple_wallet::on_money_received(uint64_t height, const crypto::hash &txid,
   message_writer(epee::log_space::console_color_green, false) << "\r" <<
     tr("Height ") << height << ", " <<
     tr("txid ") << txid << ", " <<
-    print_money(amount) << tr(" SUMO, ") <<
+    print_money(amount) << tr(" CITICASH, ") <<
     tr("idx ") << subaddr_index;
   if (m_auto_refresh_refreshing)
     m_cmd_binder.print_prompt();
