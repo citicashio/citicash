@@ -95,6 +95,9 @@ namespace cryptonote {
     {
       base_reward = GENESIS_BLOCK_REWARD;
     }
+	if (height == 1) {
+		base_reward = GENESIS_BLOCK_REWARD;
+	}
     
     if (base_reward < FINAL_SUBSIDY){
       if (MONEY_SUPPLY > already_generated_coins){

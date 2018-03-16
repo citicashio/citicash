@@ -1,5 +1,6 @@
 # Copyright (c) 2014-2016, The Monero Project
 #
+# Copyright (c) 2018, The Citicash Project
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification, are
@@ -87,7 +88,7 @@ add_dependencies(blockchain_import
 	version)
 set_property(TARGET blockchain_import
 	PROPERTY
-	OUTPUT_NAME "sumo-blockchain-import")
+	OUTPUT_NAME "citicash-blockchain-import")
 
 sumokoin_add_executable(blockchain_export
   ${blockchain_export_sources}
@@ -108,7 +109,7 @@ add_dependencies(blockchain_export
 	version)
 set_property(TARGET blockchain_export
 	PROPERTY
-	OUTPUT_NAME "sumo-blockchain-export")
+	OUTPUT_NAME "citicash-blockchain-export")
 
 sumokoin_add_executable(cn_deserialize
   ${cn_deserialize_sources}
