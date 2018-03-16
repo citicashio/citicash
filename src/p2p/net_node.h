@@ -125,7 +125,11 @@ namespace nodetool
   private:
     const std::vector<std::string> m_seed_nodes_list =
     { 
-	// TODO: update urls with A record IPs of seednodes
+      "node1.citicash.io",
+      "node2.citicash.io",
+      "node3.citicash.io",
+      "node4.citicash.io",
+      "node5.citicash.io"
 	};
 
     bool islimitup=false;
