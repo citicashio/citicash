@@ -98,7 +98,7 @@ namespace nodetool
     const command_line::arg_descriptor<int64_t> arg_limit_rate_down = {"limit-rate-down", "set limit-rate-down [kB/s]", -1};
     const command_line::arg_descriptor<int64_t> arg_limit_rate = {"limit-rate", "set limit-rate [kB/s]", -1};
 
-    const command_line::arg_descriptor<bool> arg_save_graph = {"save-graph", "Save data for dr sumokoin", false};
+    const command_line::arg_descriptor<bool> arg_save_graph = {"save-graph", "Save data for dr citicash", false};
   }
   //-----------------------------------------------------------------------------------
   template<class t_payload_net_handler>
@@ -1212,7 +1212,7 @@ namespace nodetool
     }
     rsp.connections_count = m_net_server.get_config_object().get_connections_count();
     rsp.incoming_connections_count = rsp.connections_count - get_outgoing_connections_count();
-    rsp.version = SUMOKOIN_VERSION_FULL;
+    rsp.version = CITICASH_VERSION_FULL;
     rsp.os_version = tools::get_os_version_string();
     m_payload_handler.get_stat_info(rsp.payload_info);
     return 1;

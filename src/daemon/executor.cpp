@@ -38,7 +38,7 @@
 
 namespace daemonize
 {
-  std::string const t_executor::NAME = "Sumokoin Daemon";
+  std::string const t_executor::NAME = "Citicash Daemon";
 
   void t_executor::init_options(
       boost::program_options::options_description & configurable_options
@@ -56,7 +56,7 @@ namespace daemonize
       boost::program_options::variables_map const & vm
     )
   {
-    LOG_PRINT_L0("Sumokoin '" << SUMOKOIN_RELEASE_NAME << "' (v" << SUMOKOIN_VERSION_FULL << ") Daemonised");
+    LOG_PRINT_L0("Citicash '" << CITICASH_RELEASE_NAME << "' (v" << CITICASH_VERSION_FULL << ") Daemonised");
     return t_daemon{vm};
   }
 
