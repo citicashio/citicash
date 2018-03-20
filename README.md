@@ -1,4 +1,6 @@
-# Sumokoin
+# CitiCash
+
+Copyright (c) 2018, CitiCash.io
 
 Copyright (c) 2017, Sumokoin.org
 
@@ -8,27 +10,27 @@ Portions Copyright (c) 2012-2013, The Cryptonote developers
 
 ## Development Resources
 
-- Web: [www.sumokoin.org](https://www.sumokoin.org)
-- Mail: [contact@sumokoin.org](mailto:contact@sumokoin.org)
+- Web: [www.citicash.io](https://www.citicash.io)
+- Mail: [contact@citicash.io](mailto:contact@citicash.io)
 
 ## Introduction
 
-Sumokoin (スモコイン in Japanese) is a fork from Monero, one of the most respectable cryptocurrency well-known for **security, privacy, untraceability** and **active development**. Starting as an educational project, we found that it would be great to create a new coin with high level of privacy by (1) moving forward right away to **Ring Confidential Transactions (RingCT)**, (2) setting **minimum transaction _mixin_ to 12** that would greatly reduce chance of being attacked, traced or identified by (blockchain) statistical analysis.
+CitiCash is a fork from Sumokoin, one of the most respectable cryptocurrency well-known for **security, privacy, untraceability** and **active development**. Starting as an educational project, we found that it would be great to create a new coin with high level of privacy by (1) moving forward right away to **Ring Confidential Transactions (RingCT)**, (2) setting **minimum transaction _mixin_ to 12** that would greatly reduce chance of being attacked, traced or identified by (blockchain) statistical analysis.
 
-Sumokoin, therefore, is a new Monero without its legacy, a _truely fungible_ cryptocurrency among just a few ones in the market.
+CitiCash, therefore, is a new Sumokoin without its legacy, a _truely fungible_ cryptocurrency among just a few ones in the market.
 
 ## Coin Supply & Emission
 
-- **Total supply**: **88,888,888** coins in first 20 years, then **263,000** coins each year for inflation. 
-About 10% (~8.8 million) was premined to reserve for future development, i.e. **80 million coins available** for community mining.
-- **Coin symbol**: **SUMO**
+- **Total supply**: **1,000,000,000** coins in first 20 years, then **XXX,XXX** coins each year for inflation. 
+About 13.5% (~135 million) was premined to reserve for future development, i.e. **865 million coins available** for community mining.
+- **Coin symbol**: **CCH**
 - **Coin Units**:
-  + 1 Sumoshi &nbsp;= 0.000000001 **SUMO** (10<sup>-9</sup> - _the smallest coin unit_)
-  + 1 Sumokun = 0.000001 **SUMO** (10<sup>-6</sup>)
-  + 1 Sumosan = 0.001 **SUMO** (10<sup>-3</sup>)
+  + 1 CityCashi &nbsp;= 0.000000001 **CCH** (10<sup>-9</sup> - _the smallest coin unit_)
+  + 1 CityCashun = 0.000001 **CCH** (10<sup>-6</sup>)
+  + 1 CityCashan = 0.001 **CCH** (10<sup>-3</sup>)
 - **Hash algorithm**: CryptoNight (Proof-Of-Work)
-- **Emission scheme**: Sumokoin's block reward changes _every 6-months_ as the following "Camel" distribution* (inspired by _real-world mining production_ like of crude oil, coal etc. that is often slow at first, 
-accelerated in the next few years before declined and depleted). However, the emission path of Sumokoin is generally not far apart from what of Bitcoin (view charts below).
+- **Emission scheme**: CitiCash's block reward changes _every 6-months_ as the following "Camel" distribution* (inspired by _real-world mining production_ like of crude oil, coal etc. that is often slow at first, 
+accelerated in the next few years before declined and depleted). However, the emission path of CitiCash is generally not far apart from what of Bitcoin (view charts below).
 
 ![](http://www.sumokoin.org/images/block_reward_by_calendar_year.png)
 

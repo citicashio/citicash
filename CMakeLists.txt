@@ -30,7 +30,7 @@
 
 cmake_minimum_required(VERSION 2.8.7)
 
-project(sumokoin)
+project(citicash)
 
 function (die msg)
   if (NOT WIN32)
