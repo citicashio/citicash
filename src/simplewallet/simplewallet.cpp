@@ -2260,14 +2260,14 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
     // actually commit the transactions
     if (m_wallet->watch_only())
     {
-      bool r = m_wallet->save_tx(ptx_vector, "unsigned_sumokoin_tx");
+      bool r = m_wallet->save_tx(ptx_vector, "unsigned_citicash_tx");
       if (!r)
       {
         fail_msg_writer() << tr("Failed to write transaction(s) to file");
       }
       else
       {
-        success_msg_writer(true) << tr("Unsigned transaction(s) successfully written to file: ") << "unsigned_sumokoin_tx";
+        success_msg_writer(true) << tr("Unsigned transaction(s) successfully written to file: ") << "unsigned_citicash_tx";
       }
     }
     else while (!ptx_vector.empty())
@@ -2812,7 +2812,7 @@ bool simple_wallet::sign_transfer(const std::vector<std::string> &args_)
   std::vector<tools::wallet2::pending_tx> ptx;
   try
   {
-    bool r = m_wallet->sign_tx("unsigned_sumokoin_tx", "signed_sumokoin_tx", ptx, [&](const tools::wallet2::unsigned_tx_set &tx){ return accept_loaded_tx(tx); });
+    bool r = m_wallet->sign_tx("unsigned_citicash_tx", "signed_citicash_tx", ptx, [&](const tools::wallet2::unsigned_tx_set &tx){ return accept_loaded_tx(tx); });
     if (!r)
     {
       fail_msg_writer() << tr("Failed to sign transaction");

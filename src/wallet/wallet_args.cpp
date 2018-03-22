@@ -116,7 +116,7 @@ namespace wallet_args
     command_line::add_arg(desc_params, arg_log_level);
     command_line::add_arg(desc_params, arg_max_concurrency);
 
-    i18n_set_language("translations", "sumokoin", lang);
+    i18n_set_language("translations", "citicash", lang);
 
     po::options_description desc_all;
     desc_all.add(desc_general).add(desc_params);
@@ -127,14 +127,14 @@ namespace wallet_args
 
       if (command_line::get_arg(vm, command_line::arg_help))
       {
-        tools::msg_writer() << "Sumokoin '" << SUMOKOIN_RELEASE_NAME << "' (v" << SUMOKOIN_VERSION_FULL << ")";
+        tools::msg_writer() << "Citicash '" << CITICASH_RELEASE_NAME << "' (v" << CITICASH_VERSION_FULL << ")";
         tools::msg_writer() << wallet_args::tr("Usage:") << ' ' << usage;
         tools::msg_writer() << desc_all;
         return false;
       }
       else if (command_line::get_arg(vm, command_line::arg_version))
       {
-        tools::msg_writer() << "Sumokoin '" << SUMOKOIN_RELEASE_NAME << "' (v" << SUMOKOIN_VERSION_FULL << ")";
+        tools::msg_writer() << "Citicash '" << CITICASH_RELEASE_NAME << "' (v" << CITICASH_VERSION_FULL << ")";
         return false;
       }
 
@@ -170,7 +170,7 @@ namespace wallet_args
     if(command_line::has_arg(vm, arg_max_concurrency))
       tools::set_max_concurrency(command_line::get_arg(vm, arg_max_concurrency));
 
-    tools::scoped_message_writer(epee::log_space::console_color_white, true) << "Sumokoin '" << SUMOKOIN_RELEASE_NAME << "' (v" << SUMOKOIN_VERSION_FULL << ")";
+    tools::scoped_message_writer(epee::log_space::console_color_white, true) << "Sumokoin '" << CITICASH_RELEASE_NAME << "' (v" << CITICASH_VERSION_FULL << ")";
 
     if(command_line::has_arg(vm, arg_log_level))
       log_level = command_line::get_arg(vm, arg_log_level);

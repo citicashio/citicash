@@ -361,7 +361,7 @@ namespace dns_utils
     return{};
   }
   /**
-  * @brief gets a sumokoin address from the TXT record of a DNS entry
+  * @brief gets a citicash address from the TXT record of a DNS entry
   *
   * gets the monero address from the TXT record of the DNS entry associated
   * with <url>.  If this lookup fails, or the TXT record does not contain an
@@ -413,7 +413,7 @@ namespace dns_utils
     // for now, move on only if one address found
     if (addresses.size() > 1)
     {
-      LOG_ERROR("not yet supported: Multiple Sumokoin addresses found for given URL: " << url);
+      LOG_ERROR("not yet supported: Multiple Citicash addresses found for given URL: " << url);
       return{};
     }
     if (!cli_confirm)
@@ -524,7 +524,7 @@ namespace dns_utils
 
     if (num_valid_records < 2)
     {
-      LOG_PRINT_L0("WARNING: no two valid Sumokoin DNS checkpoint records were received");
+      LOG_PRINT_L0("WARNING: no two valid Citicash DNS checkpoint records were received");
       return false;
     }
 
@@ -546,7 +546,7 @@ namespace dns_utils
 
     if (good_records_index < 0)
     {
-      LOG_PRINT_L0("WARNING: no two Sumokoin DNS checkpoint records matched");
+      LOG_PRINT_L0("WARNING: no two Citicash DNS checkpoint records matched");
       return false;
     }
 
