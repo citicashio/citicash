@@ -125,5 +125,5 @@ add_dependencies(cn_deserialize
 	version)
 set_property(TARGET cn_deserialize
 	PROPERTY
-	OUTPUT_NAME "sumo-utils-deserialize")
+	OUTPUT_NAME "citicash-utils-deserialize")
 
