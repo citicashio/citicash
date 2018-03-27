@@ -107,7 +107,7 @@ namespace wallet_args
         return boost::none;
       }
       // epee didn't find path to executable from argv[0], so use this default file name.
-      log_file_name = "sumo-wallet-cli.log";
+      log_file_name = "citicash-wallet-cli.log";
       // The full path will use cwd because epee also returned an empty default log folder.
     }
     default_log /= log_file_name;
@@ -147,8 +147,8 @@ namespace wallet_args
       return boost::none;
 
     // log_file_path
-    //   default: < argv[0] directory >/sumo-wallet-cli.log
-    //     so if ran as "sumo-wallet-cli" (no path), log file will be in cwd
+    //   default: < argv[0] directory >/citicash-wallet-cli.log
+    //     so if ran as "citicash-wallet-cli" (no path), log file will be in cwd
     //
     //   if log-file argument given:
     //     absolute path
