@@ -295,7 +295,7 @@ and its home is the data directory specified in the [example
 config](utils/conf/sumokoind.conf).
 
 If you're on Mac, you may need to add the `--max-concurrency 1` option to
-sumo-wallet-cli, and possibly sumokoind, if you get crashes refreshing.
+citicash-wallet-cli, and possibly sumokoind, if you get crashes refreshing.
 
 ## Internationalization
 
@@ -317,13 +317,13 @@ TAILS ships with a very restrictive set of firewall rules. Therefore, you need t
 
 `DNS_PUBLIC=tcp torsocks ./sumokoind --p2p-bind-ip 127.0.0.1 --no-igd --rpc-bind-ip 127.0.0.1 --data-dir /home/your/directory/to/the/blockchain`
 
-`./sumo-wallet-cli`
+`./citicash-wallet-cli`
 
 ## Using readline
 
-While `sumokoind` and `sumo-wallet-cli` do not use readline directly, most of the functionality can be obtained by running them via `rlwrap`. This allows command recall, edit capabilities, etc. It does not give autocompletion without an extra completion file, however. To use rlwrap, simply prepend `rlwrap` to the command line, eg:
+While `sumokoind` and `citicash-wallet-cli` do not use readline directly, most of the functionality can be obtained by running them via `rlwrap`. This allows command recall, edit capabilities, etc. It does not give autocompletion without an extra completion file, however. To use rlwrap, simply prepend `rlwrap` to the command line, eg:
 
-`rlwrap bin/sumo-wallet-cli --wallet-file /path/to/wallet`
+`rlwrap bin/citicash-wallet-cli --wallet-file /path/to/wallet`
 
 Note: rlwrap will save things like your seed and private keys, if you supply them on prompt. You may want to not use rlwrap when you use simplewallet to restore from seed, etc.
 
