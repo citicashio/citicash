@@ -170,7 +170,7 @@ namespace wallet_args
     if(command_line::has_arg(vm, arg_max_concurrency))
       tools::set_max_concurrency(command_line::get_arg(vm, arg_max_concurrency));
 
-    tools::scoped_message_writer(epee::log_space::console_color_white, true) << "Sumokoin '" << CITICASH_RELEASE_NAME << "' (v" << CITICASH_VERSION_FULL << ")";
+    tools::scoped_message_writer(epee::log_space::console_color_white, true) << "Citicash '" << CITICASH_RELEASE_NAME << "' (v" << CITICASH_VERSION_FULL << ")";
 
     if(command_line::has_arg(vm, arg_log_level))
       log_level = command_line::get_arg(vm, arg_log_level);
