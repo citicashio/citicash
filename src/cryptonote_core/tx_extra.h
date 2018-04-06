@@ -43,6 +43,7 @@
 
 #define TX_EXTRA_NONCE_PAYMENT_ID           0x00
 #define TX_EXTRA_NONCE_ENCRYPTED_PAYMENT_ID 0x01
+#define TX_EXTRA_NONCE_ALIAS                0x02
 
 namespace cryptonote
 {

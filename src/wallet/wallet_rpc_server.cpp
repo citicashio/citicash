@@ -379,7 +379,39 @@ namespace tools
     }
     return true;
   }
-  //------------------------------------------------------------------------------------------------------------------------------
+
+  bool wallet_rpc_server::validate_alias_address(const wallet_rpc::transfer_destination& destination, const std::string& alias, cryptonote::tx_destination_entry& dst, std::vector<uint8_t>& extra, epee::json_rpc::error& er)
+  {
+    cryptonote::address_parse_info info;
+    if (!get_account_address_from_str_or_url(info, m_wallet.testnet(), destination.address, false))
+    {
+      er.code = WALLET_RPC_ERROR_CODE_WRONG_ADDRESS;
+      er.message = std::string("WALLET_RPC_ERROR_CODE_WRONG_ADDRESS: ") + destination.address;
+      return false;
+    }
+    dst.addr = info.address;
+    dst.is_subaddress = info.is_subaddress;
+    dst.amount = 0; // LUKAS TODO add check before that amount is 0
+
+    if (alias.empty())
+      return false; // LUKAS TODO add error
+
+    /* Parse alias */
+    crypto::hash alias_hash;
+    wallet2::parse_alias_into_hash(alias, alias_hash);
+    std::string alias_nonce;
+    cryptonote::set_alias_to_tx_extra_nonce(alias_nonce, alias_hash);
+    
+    /* Append alias into extra */
+    if (!cryptonote::add_extra_nonce_to_tx_extra(extra, alias_nonce)) {
+      er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
+      er.message = "Something went wrong with alias. Please check its format: \"" + alias + "\", expected up to 64-character string";
+      return false;
+    }
+
+    return true;
+  }
+
   bool wallet_rpc_server::validate_transfer(const std::list<wallet_rpc::transfer_destination>& destinations, const std::string& payment_id, std::vector<cryptonote::tx_destination_entry>& dsts, std::vector<uint8_t>& extra, epee::json_rpc::error& er)
   {
     crypto::hash8 integrated_payment_id = cryptonote::null_hash8;
@@ -453,7 +485,57 @@ namespace tools
     return true;
   }
 
-  //------------------------------------------------------------------------------------------------------------------------------
+  bool wallet_rpc_server::on_alias_address(const wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::response& res, epee::json_rpc::error& er)
+  {
+    //std::vector<cryptonote::tx_destination_entry> dsts;
+    cryptonote::tx_destination_entry dst;
+    std::vector<uint8_t> extra;
+
+    if (m_wallet.restricted())
+    {
+      er.code = WALLET_RPC_ERROR_CODE_DENIED;
+      er.message = "Command unavailable in restricted mode.";
+      return false;
+    }
+
+    // validate the transfer requested and populate dst & extra
+    if (!validate_alias_address(req.destination, req.alias, dst, extra, er))
+    {
+      return false;
+    }
+
+    try
+    {  
+      std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions_2({dst}, 1, req.unlock_time, req.priority, extra, 0/*req.account_index*/, req.subaddr_indices, false);
+
+      m_wallet.commit_tx(ptx_vector);
+
+      // populate response with tx hash
+      res.tx_hash = epee::string_tools::pod_to_hex(cryptonote::get_transaction_hash(ptx_vector.back().tx));
+      res.fee = ptx_vector.back().fee;
+      return true;
+    }
+    catch (const tools::error::daemon_busy& e)
+    {
+      er.code = WALLET_RPC_ERROR_CODE_DAEMON_IS_BUSY;
+      er.message = e.what();
+      return false;
+    }
+    catch (const std::exception& e)
+    {
+      er.code = WALLET_RPC_ERROR_CODE_GENERIC_TRANSFER_ERROR;
+      er.message = e.what();
+      return false;
+    }
+    catch (...)
+    {
+      er.code = WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR;
+      er.message = "WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR";
+      return false;
+    }
+    return true;
+  }
+
   bool wallet_rpc_server::on_transfer(const wallet_rpc::COMMAND_RPC_TRANSFER::request& req, wallet_rpc::COMMAND_RPC_TRANSFER::response& res, epee::json_rpc::error& er)
   {
 

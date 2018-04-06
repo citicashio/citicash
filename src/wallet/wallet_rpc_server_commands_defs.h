@@ -273,6 +273,42 @@ namespace wallet_rpc
     END_KV_SERIALIZE_MAP()
   };
 
+  struct COMMAND_RPC_ALIAS_ADDRESS
+  {
+    struct request
+    {
+      std::string alias;
+      transfer_destination destination;
+      // std::list<transfer_destination> destinations;
+      // uint32_t account_index;
+      std::set<uint32_t> subaddr_indices;
+      uint32_t priority;
+      uint64_t unlock_time;
+      //bool trusted_daemon;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(alias)
+        KV_SERIALIZE(destination)
+        //KV_SERIALIZE(destinations)
+        //KV_SERIALIZE(account_index)
+        KV_SERIALIZE(priority)
+        KV_SERIALIZE(unlock_time)
+        //KV_SERIALIZE(trusted_daemon)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::string tx_hash;
+      uint64_t fee;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tx_hash)
+        KV_SERIALIZE(fee)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
   struct COMMAND_RPC_TRANSFER
   {
     struct request

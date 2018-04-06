@@ -2432,7 +2432,16 @@ bool wallet2::parse_payment_id(const std::string& payment_id_str, crypto::hash& 
   }
   return false;
 }
-//----------------------------------------------------------------------------------------------------
+
+void wallet2::parse_alias_into_hash(const std::string& alias_str, crypto::hash& alias_hash)
+{
+  cryptonote::blobdata alias_data;
+  epee::string_tools::parse_string_to_binbuff(alias_str, alias_data);
+
+  alias_hash = *reinterpret_cast<const crypto::hash*>(alias_data.data());
+  memset(alias_hash.data + alias_data.size(), 0, sizeof(crypto::hash) - alias_data.size());
+}
+
 bool wallet2::prepare_file_names(const std::string& file_path)
 {
   do_prepare_file_names(file_path, m_keys_file, m_wallet_file);

@@ -168,7 +168,16 @@ namespace string_tools
       return false;
     }
   }
-  //----------------------------------------------------------------------------
+  
+	template<class CharT>
+  void parse_string_to_binbuff(const std::string& string, std::basic_string<CharT>& res)
+  {
+    res.clear();
+    
+    for (const unsigned char c : string)
+      res.push_back(static_cast<unsigned char>(c));
+  }
+
   template<class t_pod_type>
   bool parse_tpod_from_hex_string(const std::string& str_hash, t_pod_type& t_pod)
   {
