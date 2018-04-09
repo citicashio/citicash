@@ -505,10 +505,10 @@ namespace tools
     }
 
     try
-    {  
-      std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions_2({dst}, 1, req.unlock_time, req.priority, extra, 0/*req.account_index*/, req.subaddr_indices, false);
+    {
+      std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions_2({dst}, 1, req.unlock_time, req.priority, extra, 0/*req.account_index*/, std::set<uint32_t>(), false);
 
-      m_wallet.commit_tx(ptx_vector);
+      m_wallet.commit_tx(ptx_vector.back());
 
       // populate response with tx hash
       res.tx_hash = epee::string_tools::pod_to_hex(cryptonote::get_transaction_hash(ptx_vector.back().tx));

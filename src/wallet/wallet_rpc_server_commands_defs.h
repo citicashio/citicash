@@ -281,7 +281,6 @@ namespace wallet_rpc
       transfer_destination destination;
       // std::list<transfer_destination> destinations;
       // uint32_t account_index;
-      std::set<uint32_t> subaddr_indices;
       uint32_t priority;
       uint64_t unlock_time;
       //bool trusted_daemon;
