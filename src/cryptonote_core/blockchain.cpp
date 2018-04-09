@@ -76,6 +76,7 @@ DISABLE_VS_WARNINGS(4267)
 
 // used to overestimate the block reward when estimating a per kB to use
 #define BLOCK_REWARD_OVERESTIMATE   ((uint64_t)(16000000000))
+#define MAINNET_HARDFORK_V3_HEIGHT  ((uint64_t)(116520))
 
 static const struct {
   uint8_t version;
@@ -93,7 +94,9 @@ static const struct {
   uint8_t threshold;
   time_t time;
 } testnet_hard_forks[] = {
-  { 1, 1, 0, 1482806500 }
+  { 1, 1, 0, 1482806500 },
+  { 2, 5150, 0, 1497181713 },
+  { 3, 103580, 0, 1522540800 } // April 01, 2018
 };
 static const uint64_t testnet_hard_fork_version_1_till = (uint64_t)-1;
 
@@ -674,7 +677,12 @@ difficulty_type Blockchain::get_difficulty_for_next_block()
   std::vector<uint64_t> timestamps;
   std::vector<difficulty_type> difficulties;
   auto height = m_db->height();
-  size_t difficult_block_count = DIFFICULTY_BLOCKS_COUNT;
+  // Reset network hashrate to 2.0 MHz when hardfork v3 comes
+  if (!m_testnet && (uint64_t)height >= MAINNET_HARDFORK_V3_HEIGHT && (uint64_t)height <= MAINNET_HARDFORK_V3_HEIGHT + (uint64_t)DIFFICULTY_BLOCKS_COUNT_V2){
+    return (difficulty_type) 480000000;
+  }
+
+  size_t difficult_block_count = get_current_hard_fork_version() < 2 ? DIFFICULTY_BLOCKS_COUNT : DIFFICULTY_BLOCKS_COUNT_V2;
 
   // ND: Speedup
   // 1. Keep a list of the last 735 (or less) blocks that is used to compute difficulty,
@@ -715,7 +723,9 @@ difficulty_type Blockchain::get_difficulty_for_next_block()
     m_difficulties = difficulties;
   }
   size_t target = DIFFICULTY_TARGET;
-  return next_difficulty(timestamps, difficulties, target);
+  return get_current_hard_fork_version() < 2 ?
+    next_difficulty(timestamps, difficulties, target) :
+    next_difficulty_v2(timestamps, difficulties, target);
 }
 //------------------------------------------------------------------
 // This function removes blocks from the blockchain until it gets to the
@@ -863,7 +873,7 @@ difficulty_type Blockchain::get_next_difficulty_for_alternative_chain(const std:
   LOG_PRINT_L3("Blockchain::" << __func__);
   std::vector<uint64_t> timestamps;
   std::vector<difficulty_type> cumulative_difficulties;
-  size_t difficult_block_count = DIFFICULTY_BLOCKS_COUNT;
+  size_t difficult_block_count = get_current_hard_fork_version() < 2 ? DIFFICULTY_BLOCKS_COUNT : DIFFICULTY_BLOCKS_COUNT_V2;
 
   // if the alt chain isn't long enough to calculate the difficulty target
   // based on its blocks alone, need to get more blocks from the main chain
@@ -919,7 +929,9 @@ difficulty_type Blockchain::get_next_difficulty_for_alternative_chain(const std:
   size_t target = DIFFICULTY_TARGET;
 
   // calculate the difficulty target for the block and return it
-  return next_difficulty(timestamps, cumulative_difficulties, target);
+  return get_current_hard_fork_version() < 2 ?
+    next_difficulty(timestamps, cumulative_difficulties, target) :
+    next_difficulty_v2(timestamps, cumulative_difficulties, target);
 }
 //------------------------------------------------------------------
 // This function does a sanity check on basic things that all miner
@@ -1181,8 +1193,9 @@ bool Blockchain::create_block_template(block& b, const account_public_address& m
 bool Blockchain::complete_timestamps_vector(uint64_t start_top_height, std::vector<uint64_t>& timestamps)
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
-  size_t blockchain_timestamp_check_window = BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW;
-
+  size_t blockchain_timestamp_check_window = get_current_hard_fork_version() < 2 ? 
+                                                BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW : 
+                                                BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW_V2;
   if (timestamps.size() >= blockchain_timestamp_check_window)
     return true;
 
@@ -1303,7 +1316,7 @@ bool Blockchain::handle_alternative_block(const block& b, const crypto::hash& id
     difficulty_type current_diff = get_next_difficulty_for_alternative_chain(alt_chain, bei);
     CHECK_AND_ASSERT_MES(current_diff, false, "!!!!!!! DIFFICULTY OVERHEAD !!!!!!!");
     crypto::hash proof_of_work = null_hash;
-    get_block_longhash(bei.bl, proof_of_work, bei.height);
+	get_block_longhash(bei.bl, m_pow_ctx, proof_of_work);
     if(!check_hash(proof_of_work, current_diff))
     {
       LOG_PRINT_RED_L1("Block with id: " << id << std::endl << " for alternative chain, does not have enough proof of work: " << proof_of_work << std::endl << " expected difficulty: " << current_diff);
@@ -2812,8 +2825,9 @@ bool Blockchain::check_block_timestamp(std::vector<uint64_t>& timestamps, const 
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
   uint64_t median_ts = epee::misc_utils::median(timestamps);
-  size_t blockchain_timestamp_check_window = BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW;
-
+  size_t blockchain_timestamp_check_window = get_current_hard_fork_version() < 2 ?
+                                                BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW :
+                                                BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW_V2;
   if(b.timestamp < median_ts)
   {
     LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << ", less than median of last " << blockchain_timestamp_check_window << " blocks, " << median_ts);
@@ -2833,13 +2847,16 @@ bool Blockchain::check_block_timestamp(std::vector<uint64_t>& timestamps, const 
 bool Blockchain::check_block_timestamp(const block& b) const
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
-  uint64_t block_future_time_limit = CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT;
-  size_t blockchain_timestamp_check_window = BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW;
-
+  uint64_t block_future_time_limit = get_current_hard_fork_version() < 2 ? 
+                                          CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT : 
+                                          CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT_V2;
+  size_t blockchain_timestamp_check_window = get_current_hard_fork_version() < 2 ?
+                                                  BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW :
+                                                  BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW_V2;
   if (b.timestamp > get_adjusted_time() + block_future_time_limit)
   {
     LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << 
-      ", bigger than adjusted time + " << "30 minutes");
+      ", bigger than adjusted time + " << (get_current_hard_fork_version() < 2 ? "2 hours" : "30 minutes"));
     return false;
   }
 
@@ -2992,7 +3009,9 @@ leave:
       proof_of_work = it->second;
     }
     else
-      proof_of_work = get_block_longhash(bl, m_db->height());
+	{
+		get_block_longhash(bl, m_pow_ctx, proof_of_work);
+	}
 
     // validate proof_of_work versus difficulty target
     if(!check_hash(proof_of_work, current_diffic))
@@ -3357,10 +3376,9 @@ void Blockchain::set_enforce_dns_checkpoints(bool enforce_checkpoints)
 }
 
 //------------------------------------------------------------------
-void Blockchain::block_longhash_worker(const uint64_t height, const std::vector<block> &blocks, std::unordered_map<crypto::hash, crypto::hash> &map) const
+void Blockchain::block_longhash_worker(cn_pow_hash_v2& hash_ctx, const std::vector<block> &blocks, std::unordered_map<crypto::hash, crypto::hash> &map)
 {
   TIME_MEASURE_START(t);
-  slow_hash_allocate_state();
 
   //FIXME: height should be changing here, as get_block_longhash expects
   //       the height of the block passed to it
@@ -3369,11 +3387,11 @@ void Blockchain::block_longhash_worker(const uint64_t height, const std::vector<
     if (m_cancel)
        return;
     crypto::hash id = get_block_hash(block);
-    crypto::hash pow = get_block_longhash(block, height);
+    crypto::hash pow;
+	get_block_longhash(block, hash_ctx, pow);
     map.emplace(id, pow);
   }
 
-  slow_hash_free_state();
   TIME_MEASURE_FINISH(t);
 }
 
@@ -3530,9 +3548,13 @@ bool Blockchain::prepare_handle_incoming_blocks(const std::list<block_complete_e
     if (!blocks_exist)
     {
       m_blocks_longhash_table.clear();
+
+	  if(m_hash_ctxes_multi.size() < threads)
+		m_hash_ctxes_multi.resize(threads);
+
       for (uint64_t i = 0; i < threads; i++)
       {
-        thread_list.push_back(new boost::thread(&Blockchain::block_longhash_worker, this, height + (i * batches), std::cref(blocks[i]), std::ref(maps[i])));
+        thread_list.push_back(new boost::thread(&Blockchain::block_longhash_worker, this, std::ref(m_hash_ctxes_multi[i]), std::cref(blocks[i]), std::ref(maps[i])));
       }
 
       for (size_t j = 0; j < thread_list.size(); j++)

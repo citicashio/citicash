@@ -568,6 +568,8 @@ else()
         set(CMAKE_AR "gcc-ar")
         set(CMAKE_RANLIB "gcc-ranlib")
       endif()
+      # Default ubuntu 16.04 LTS ld.bfd refuses to cooperate with LTO'ed ar libs for some reason, gold linker works, go figure
+      set(RELEASE_FLAGS "${RELEASE_FLAGS} -fuse-ld=gold")
     endif()
   endif()
 
@@ -615,6 +617,7 @@ endif()
 
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 if(MINGW)
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wa,-mbig-obj")
   set(EXTRA_LIBRARIES mswsock;ws2_32;iphlpapi)
 elseif(APPLE OR FREEBSD OR OPENBSD OR ANDROID)
   set(EXTRA_LIBRARIES "")
