@@ -279,7 +279,6 @@ namespace wallet_rpc
     {
       std::string alias;
       transfer_destination destination;
-      // std::list<transfer_destination> destinations;
       // uint32_t account_index;
       uint32_t priority;
       uint64_t unlock_time;
@@ -288,7 +287,6 @@ namespace wallet_rpc
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(alias)
         KV_SERIALIZE(destination)
-        //KV_SERIALIZE(destinations)
         //KV_SERIALIZE(account_index)
         KV_SERIALIZE(priority)
         KV_SERIALIZE(unlock_time)

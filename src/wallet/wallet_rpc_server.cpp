@@ -391,10 +391,13 @@ namespace tools
     }
     dst.addr = info.address;
     dst.is_subaddress = info.is_subaddress;
-    dst.amount = 0; // LUKAS TODO add check before that amount is 0
+    dst.amount = 1;
 
-    if (alias.empty())
-      return false; // LUKAS TODO add error
+    if (alias.empty()) {
+      er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
+      er.message = "Missing alias.";
+      return false;
+    }
 
     /* Parse alias */
     crypto::hash alias_hash;
@@ -403,7 +406,7 @@ namespace tools
     cryptonote::set_alias_to_tx_extra_nonce(alias_nonce, alias_hash);
     
     /* Append alias into extra */
-    if (!cryptonote::add_extra_nonce_to_tx_extra(extra, alias_nonce)) {
+    if (!cryptonote::add_extra_nonce_to_tx_extra(extra, alias_nonce)) { // LUKAS TODO consider dynamic alias size
       er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
       er.message = "Something went wrong with alias. Please check its format: \"" + alias + "\", expected up to 64-character string";
       return false;
@@ -487,7 +490,6 @@ namespace tools
 
   bool wallet_rpc_server::on_alias_address(const wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::response& res, epee::json_rpc::error& er)
   {
-    //std::vector<cryptonote::tx_destination_entry> dsts;
     cryptonote::tx_destination_entry dst;
     std::vector<uint8_t> extra;
 
@@ -506,7 +508,7 @@ namespace tools
 
     try
     {
-      std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions_2({dst}, 1, req.unlock_time, req.priority, extra, 0/*req.account_index*/, std::set<uint32_t>(), false);
+      std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions_2({dst}, DEFAULT_MIXIN, req.unlock_time, req.priority, extra, 0/*req.account_index, LUKAS TODO should be somehow handled*/, std::set<uint32_t>(), false);
 
       m_wallet.commit_tx(ptx_vector.back());
 
