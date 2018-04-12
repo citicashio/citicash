@@ -3117,7 +3117,7 @@ uint64_t wallet2::select_transfers(uint64_t needed_money, std::vector<size_t> un
   return found_money;
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::add_unconfirmed_tx(const cryptonote::transaction& tx, uint64_t amount_in, const std::vector<cryptonote::tx_destination_entry> &dests, const crypto::hash &payment_id, uint64_t change_amount, uint32_t subaddr_account, const std::set<uint32_t>& subaddr_indices)
+void wallet2::add_unconfirmed_tx(const cryptonote::transaction& tx, uint64_t amount_in, const std::vector<cryptonote::tx_destination_entry> &dests, const crypto::hash &payment_id, const crypto::hash &alias, uint64_t change_amount, uint32_t subaddr_account, const std::set<uint32_t>& subaddr_indices)
 {
 	unconfirmed_transfer_details& utd = m_unconfirmed_txs[cryptonote::get_transaction_hash(tx)];
 	utd.m_amount_in = amount_in;
@@ -3130,7 +3130,8 @@ void wallet2::add_unconfirmed_tx(const cryptonote::transaction& tx, uint64_t amo
 	utd.m_tx = (const cryptonote::transaction_prefix&)tx;
 	utd.m_dests = dests;
 	utd.m_payment_id = payment_id;
-	utd.m_state = wallet2::unconfirmed_transfer_details::pending;
+  utd.m_alias = alias;
+  utd.m_state = wallet2::unconfirmed_transfer_details::pending;
 	utd.m_timestamp = time(NULL);
 	utd.m_subaddr_account = subaddr_account;
 	utd.m_subaddr_indices = subaddr_indices;
@@ -3291,7 +3292,20 @@ crypto::hash wallet2::get_payment_id(const pending_tx &ptx) const
   }
   return payment_id;
 }
-//----------------------------------------------------------------------------------------------------
+
+crypto::hash wallet2::get_alias(const pending_tx &ptx) const
+{
+  std::vector<tx_extra_field> tx_extra_fields;
+  if(!parse_tx_extra(ptx.tx.extra, tx_extra_fields))
+    return cryptonote::null_hash;
+  tx_extra_nonce extra_nonce;
+  crypto::hash alias = null_hash;
+  if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce))
+    if (!get_alias_from_tx_extra_nonce(extra_nonce.nonce, alias))
+      alias = cryptonote::null_hash;
+  return alias;
+}
+
 // take a pending tx and actually send it to the daemon
 void wallet2::commit_tx(pending_tx& ptx)
 {
@@ -3318,16 +3332,18 @@ void wallet2::commit_tx(pending_tx& ptx)
 
   txid = get_transaction_hash(ptx.tx);
   crypto::hash payment_id = cryptonote::null_hash;
+  crypto::hash alias = cryptonote::null_hash;
   std::vector<cryptonote::tx_destination_entry> dests;
   uint64_t amount_in = 0;
   if (store_tx_info())
   {
     payment_id = get_payment_id(ptx);
+    alias = get_alias(ptx);
     dests = ptx.dests;
     BOOST_FOREACH(size_t idx, ptx.selected_transfers)
       amount_in += m_transfers[idx].amount();
   }
-  add_unconfirmed_tx(ptx.tx, amount_in, dests, payment_id, ptx.change_dts.amount, ptx.construction_data.subaddr_account, ptx.construction_data.subaddr_indices);
+  add_unconfirmed_tx(ptx.tx, amount_in, dests, payment_id, alias, ptx.change_dts.amount, ptx.construction_data.subaddr_account, ptx.construction_data.subaddr_indices);
   if (store_tx_info())
   {
     m_tx_keys.insert(std::make_pair(txid, ptx.tx_key));

@@ -491,6 +491,16 @@ namespace cryptonote
     std::copy(alias_ptr, alias_ptr + sizeof(alias), std::back_inserter(extra_nonce));
   }
 
+  bool get_alias_from_tx_extra_nonce(const blobdata& extra_nonce, crypto::hash& alias)
+  {
+    if (sizeof(crypto::hash) + 1 != extra_nonce.size()) // LUKAS TODO consider removing this condition
+      return false;
+    if (TX_EXTRA_NONCE_ALIAS != extra_nonce[0])
+      return false;
+    alias = *reinterpret_cast<const crypto::hash*>(extra_nonce.data() + 1);
+    return true;
+  }
+
   crypto::public_key get_destination_view_key_pub(const std::vector<tx_destination_entry> &destinations, const account_keys &sender_keys)
   {
     if (destinations.empty()) {

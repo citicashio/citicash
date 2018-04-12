@@ -134,6 +134,7 @@ namespace tools
     entry.payment_id = string_tools::pod_to_hex(payment_id);
     if (entry.payment_id.substr(16).find_first_not_of('0') == std::string::npos)
       entry.payment_id = entry.payment_id.substr(0, 16);
+    //entry.alias = string_tools::pod_to_str(pd.m_alias); // LUKAS TODO check where payment_id comes from
     entry.height = pd.m_block_height;
     entry.timestamp = pd.m_timestamp;
     entry.amount = pd.m_amount;
@@ -149,6 +150,7 @@ namespace tools
     entry.payment_id = string_tools::pod_to_hex(pd.m_payment_id);
     if (entry.payment_id.substr(16).find_first_not_of('0') == std::string::npos)
       entry.payment_id = entry.payment_id.substr(0, 16);
+    entry.alias = string_tools::pod_to_str(pd.m_alias);
     entry.height = pd.m_block_height;
     entry.timestamp = pd.m_timestamp;
     entry.fee = pd.m_amount_in - pd.m_amount_out;
@@ -175,6 +177,7 @@ namespace tools
     entry.payment_id = string_tools::pod_to_hex(pd.m_payment_id);
     if (entry.payment_id.substr(16).find_first_not_of('0') == std::string::npos)
       entry.payment_id = entry.payment_id.substr(0, 16);
+    entry.alias = string_tools::pod_to_str(pd.m_alias);
     entry.height = 0;
     entry.timestamp = pd.m_timestamp;
     entry.fee = pd.m_amount_in - pd.m_amount_out;
@@ -190,6 +193,7 @@ namespace tools
     entry.payment_id = string_tools::pod_to_hex(payment_id);
     if (entry.payment_id.substr(16).find_first_not_of('0') == std::string::npos)
       entry.payment_id = entry.payment_id.substr(0, 16);
+    //entry.alias = string_tools::pod_to_str(pd.m_alias); // LUKAS TODO check where payment_id comes from
     entry.height = 0;
     entry.timestamp = pd.m_timestamp;
     entry.amount = pd.m_amount;
@@ -383,12 +387,15 @@ namespace tools
   bool wallet_rpc_server::validate_alias_address(const wallet_rpc::transfer_destination& destination, const std::string& alias, cryptonote::tx_destination_entry& dst, std::vector<uint8_t>& extra, epee::json_rpc::error& er)
   {
     cryptonote::address_parse_info info;
-    if (!get_account_address_from_str_or_url(info, m_wallet.testnet(), destination.address, false))
+    if (!get_account_address_from_str(info, m_wallet.testnet(), destination.address))
     {
       er.code = WALLET_RPC_ERROR_CODE_WRONG_ADDRESS;
       er.message = std::string("WALLET_RPC_ERROR_CODE_WRONG_ADDRESS: ") + destination.address;
       return false;
     }
+
+    // LUKAS TODO add check if the entered address is mine so the user can't change foreign address
+
     dst.addr = info.address;
     dst.is_subaddress = info.is_subaddress;
     dst.amount = 1;
