@@ -49,7 +49,10 @@
 #define CURRENT_BLOCK_MINOR_VERSION                     1
 #define CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT              60*24
 #define CRYPTONOTE_DEFAULT_TX_SPENDABLE_AGE             10
-#define BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW               12
+#define BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW               60
+#define CRYPTONOTE_V2_POW_BLOCK_VERSION                 1
+#define CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT_V2           60*24
+#define BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW_V2            12
 
 // MONEY_SUPPLY - total number coins to be generated
 #define MONEY_SUPPLY                                    ((uint64_t)1000000000000000000)
@@ -73,8 +76,13 @@
 #define DIFFICULTY_TARGET                               120  // seconds
 #define DIFFICULTY_WINDOW                               17  // blocks
 #define DIFFICULTY_LAG                                  15   // !!!
-#define DIFFICULTY_CUT                                  6   // timestamps to cut after sorting
-#define DIFFICULTY_BLOCKS_COUNT                         DIFFICULTY_WINDOW + DIFFICULTY_CUT*2
+#define DIFFICULTY_CUT                                  6   // timestamps to cut after sorting // todo !!! was 60
+#define DIFFICULTY_BLOCKS_COUNT                         DIFFICULTY_WINDOW + DIFFICULTY_LAG
+
+#define DIFFICULTY_WINDOW_V2							              17
+#define DIFFICULTY_CUT_V2                               6
+#define DIFFICULTY_BLOCKS_COUNT_V2                      DIFFICULTY_WINDOW_V2 + DIFFICULTY_CUT_V2*2
+static_assert(2 * DIFFICULTY_CUT <= DIFFICULTY_BLOCKS_COUNT - 2, "Cut length is too large");
 
 #define CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_BLOCKS       1
 #define CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_SECONDS      DIFFICULTY_TARGET * CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_BLOCKS
@@ -129,7 +137,7 @@
 #define PEAK_COIN_EMISSION_YEAR                         4
 #define PEAK_COIN_EMISSION_HEIGHT                       ((uint64_t) (((12 * 30.4375 * 24 * 3600)/DIFFICULTY_TARGET) * PEAK_COIN_EMISSION_YEAR)) // = (# of heights emmitted per year) * PEAK_COIN_EMISSION_YEAR
 
-#define DEFAULT_MIXIN                                   2     // default & minimum mixin allowed
+#define DEFAULT_MIXIN                                   16     // default & minimum mixin allowed
 #define MAX_MIXIN                                       240    
 
 #define TRANSACTION_SIZE_LIMIT                          ((uint64_t) ((CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE * 110 / 100) - CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE))

@@ -27,6 +27,7 @@
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 set(crypto_sources
+
   aesb.c
   blake256.c
   chacha8.c
@@ -44,12 +45,14 @@ set(crypto_sources
   oaes_lib.c
   random.c
   skein.c
-  slow-hash.c
-  tree-hash.c)
+  tree-hash.c
+  cn_slow_hash_soft.cpp
+  cn_slow_hash_hard_intel.cpp)
 
 set(crypto_headers)
 
 set(crypto_private_headers
+  cn_slow_hash.hpp
   blake256.h
   chacha8.h
   crypto-ops.h
@@ -66,7 +69,8 @@ set(crypto_private_headers
   oaes_lib.h
   random.h
   skein.h
-  skein_port.h)
+  skein_port.h
+  cn_slow_hash.hpp)
 
 sumokoin_private_headers(crypto
   ${crypto_private_headers})
