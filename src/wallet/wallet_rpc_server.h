@@ -109,7 +109,6 @@ namespace tools
       bool on_create_account(const wallet_rpc::COMMAND_RPC_CREATE_ACCOUNT::request& req, wallet_rpc::COMMAND_RPC_CREATE_ACCOUNT::response& res, epee::json_rpc::error& er);
       bool on_label_account(const wallet_rpc::COMMAND_RPC_LABEL_ACCOUNT::request& req, wallet_rpc::COMMAND_RPC_LABEL_ACCOUNT::response& res, epee::json_rpc::error& er);
       bool on_getheight(const wallet_rpc::COMMAND_RPC_GET_HEIGHT::request& req, wallet_rpc::COMMAND_RPC_GET_HEIGHT::response& res, epee::json_rpc::error& er);
-      bool validate_alias_address(const wallet_rpc::transfer_destination& destination, const std::string& alias, cryptonote::tx_destination_entry& dst, std::vector<uint8_t>& extra, epee::json_rpc::error& er);
       bool on_alias_address(const wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::response& res, epee::json_rpc::error& er);
       bool validate_transfer(const std::list<wallet_rpc::transfer_destination>& destinations, const std::string& payment_id, std::vector<cryptonote::tx_destination_entry>& dsts, std::vector<uint8_t>& extra, epee::json_rpc::error& er);
       bool on_transfer(const wallet_rpc::COMMAND_RPC_TRANSFER::request& req, wallet_rpc::COMMAND_RPC_TRANSFER::response& res, epee::json_rpc::error& er);
