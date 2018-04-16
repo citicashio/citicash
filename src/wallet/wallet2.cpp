@@ -5049,27 +5049,8 @@ std::string wallet2::sign(const std::string &data) const
   return std::string("SigV1") + tools::base58::encode(std::string((const char *)&signature, sizeof(signature)));
 }
 
-bool wallet2::verify(const std::string &data, const cryptonote::account_public_address &address, const std::string &signature) const
-{
-  const size_t header_len = strlen("SigV1");
-  if (signature.size() < header_len || signature.substr(0, header_len) != "SigV1") {
-    LOG_PRINT_L0("Signature header check error");
-    return false;
-  }
-  crypto::hash hash;
-  crypto::cn_fast_hash(data.data(), data.size(), hash);
-  std::string decoded;
-  if (!tools::base58::decode(signature.substr(header_len), decoded)) {
-    LOG_PRINT_L0("Signature decoding error");
-    return false;
-  }
-  crypto::signature s;
-  if (sizeof(s) != decoded.size()) {
-    LOG_PRINT_L0("Signature decoding error");
-    return false;
-  }
-  memcpy(&s, decoded.data(), sizeof(s));
-  return crypto::check_signature(hash, address.m_spend_public_key, s);
+bool wallet2::verify(const std::string &data, const cryptonote::account_public_address &address, const std::string &signature) const {
+  return tools::wallet2::verifyHelper(data, address, signature);
 }
 //----------------------------------------------------------------------------------------------------
 crypto::public_key wallet2::get_tx_pub_key_from_received_outs(const tools::wallet2::transfer_details &td) const
