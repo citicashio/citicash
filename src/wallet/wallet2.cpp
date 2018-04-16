@@ -3572,7 +3572,7 @@ uint64_t wallet2::get_fee_multiplier(uint32_t priority, bool use_new_fee) const
   THROW_WALLET_EXCEPTION_IF (false, error::invalid_priority);
   return 1;
 }
-//----------------------------------------------------------------------------------------------------
+
 uint64_t wallet2::get_dynamic_per_kb_fee_estimate()
 {
   epee::json_rpc::request<cryptonote::COMMAND_RPC_GET_PER_KB_FEE_ESTIMATE::request> req_t = AUTO_VAL_INIT(req_t);
@@ -3590,7 +3590,7 @@ uint64_t wallet2::get_dynamic_per_kb_fee_estimate()
   CHECK_AND_ASSERT_THROW_MES(resp_t.result.status == CORE_RPC_STATUS_OK, "Failed to get fee estimate");
   return resp_t.result.fee;
 }
-//----------------------------------------------------------------------------------------------------
+
 uint64_t wallet2::get_per_kb_fee()
 {
   try
@@ -3603,6 +3603,24 @@ uint64_t wallet2::get_per_kb_fee()
     return FEE_PER_KB;
   }
 }
+
+std::string wallet2::get_alias_address(const std::string& alias) {
+  epee::json_rpc::request<cryptonote::COMMAND_RPC_GETALIASADDRESS::request> req_t = AUTO_VAL_INIT(req_t);
+  epee::json_rpc::response<cryptonote::COMMAND_RPC_GETALIASADDRESS::response, std::string> resp_t = AUTO_VAL_INIT(resp_t);
+
+  m_daemon_rpc_mutex.lock();
+  req_t.jsonrpc = "2.0";
+  req_t.id = epee::serialization::storage_entry(0);
+  req_t.method = "get_alias_address";
+  req_t.params.alias = alias;
+  bool r = net_utils::invoke_http_json_remote_command2(m_daemon_address + "/json_rpc", req_t, resp_t, m_http_client);
+  m_daemon_rpc_mutex.unlock();
+  CHECK_AND_ASSERT_THROW_MES(r, "Failed to connect to daemon");
+  CHECK_AND_ASSERT_THROW_MES(resp_t.result.status != CORE_RPC_STATUS_BUSY, "Failed to connect to daemon");
+  CHECK_AND_ASSERT_THROW_MES(resp_t.result.status == CORE_RPC_STATUS_OK, "Failed to get alias address");
+  return resp_t.result.address;
+}
+
 //----------------------------------------------------------------------------------------------------
 // separated the call(s) to wallet2::transfer into their own function
 //

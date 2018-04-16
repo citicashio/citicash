@@ -634,6 +634,26 @@ namespace cryptonote
     typedef std::string response;
   };
 
+  struct COMMAND_RPC_GETALIASADDRESS
+  {
+    struct request {
+      std::string alias;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(alias)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response {
+      std::string address;
+      std::string status;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(address)
+        KV_SERIALIZE(status)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
 
   struct COMMAND_RPC_GETBLOCKTEMPLATE
   {

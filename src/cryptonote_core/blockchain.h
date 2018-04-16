@@ -845,8 +845,15 @@ namespace cryptonote
         std::unordered_map<crypto::hash, crypto::hash> &map) const;
 
     void cancel();
+    
+    std::string get_alias_address(const std::string alias) const { 
+      auto it = m_aliases.find(alias);
+      if (it != m_aliases.end())
+        return it->second;
+      return std::string();
+    }
 
-  private:
+   private:
 
     // TODO: evaluate whether or not each of these typedefs are left over from blockchain_storage
     typedef std::unordered_map<crypto::hash, size_t> blocks_by_id_index;
