@@ -198,11 +198,6 @@ namespace cryptonote {
 
   difficulty_type next_difficulty_v2(std::vector<std::uint64_t> timestamps, std::vector<difficulty_type> cumulative_difficulties, size_t target_seconds) {
 
-      if (timestamps.size() > DIFFICULTY_BLOCKS_COUNT_V2)
-      {
-        timestamps.resize(DIFFICULTY_BLOCKS_COUNT_V2);
-        cumulative_difficulties.resize(DIFFICULTY_BLOCKS_COUNT_V2);
-      }
 
       size_t length = timestamps.size();
       assert(length == cumulative_difficulties.size());
@@ -212,14 +207,14 @@ namespace cryptonote {
 
       sort(timestamps.begin(), timestamps.end());
       size_t cut_begin, cut_end;
-      static_assert(2 * DIFFICULTY_CUT_V2 <= DIFFICULTY_BLOCKS_COUNT_V2 - 2, "Cut length is too large");
-      if (length <= DIFFICULTY_BLOCKS_COUNT_V2 - 2 * DIFFICULTY_CUT_V2) {
-        cut_begin = 0;
-        cut_end = length;
+     static_assert(2 * DIFFICULTY_CUT <= DIFFICULTY_BLOCKS_COUNT - 2, "Cut length is too large");
+      if (length <= DIFFICULTY_BLOCKS_COUNT - 2 * DIFFICULTY_CUT) {
+      cut_begin = 0;
+      cut_end = length;
       }
       else {
-        cut_begin = (length - (DIFFICULTY_BLOCKS_COUNT_V2 - 2 * DIFFICULTY_CUT_V2) + 1) / 2;
-        cut_end = cut_begin + (DIFFICULTY_BLOCKS_COUNT_V2 - 2 * DIFFICULTY_CUT_V2);
+        cut_begin = (length - (DIFFICULTY_BLOCKS_COUNT - 2 * DIFFICULTY_CUT) + 1) / 2;
+        cut_end = cut_begin + (DIFFICULTY_BLOCKS_COUNT - 2 * DIFFICULTY_CUT);
       }
       assert(/*cut_begin >= 0 &&*/ cut_begin + 2 <= cut_end && cut_end <= length);
       uint64_t total_timespan = timestamps[cut_end - 1] - timestamps[cut_begin];
