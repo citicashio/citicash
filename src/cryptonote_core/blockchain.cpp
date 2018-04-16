@@ -55,6 +55,7 @@
 #include "cryptonote_core/cryptonote_core.h"
 #include "ringct/rctSigs.h"
 #include "common/perf_timer.h"
+#include "wallet/wallet2.h"
 #if defined(PER_BLOCK_CHECKPOINT)
 #include "blocks/blocks.h"
 #endif
@@ -3187,6 +3188,21 @@ leave:
     try
     {
       new_height = m_db->add_block(bl, block_size, cumulative_difficulty, already_generated_coins, txs);
+
+      for (auto transaction : txs) {
+        std::vector<tx_extra_field> tx_extra_fields;
+        if(!parse_tx_extra(transaction.extra, tx_extra_fields))
+          continue;
+        tx_extra_nonce extra_nonce;
+        if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce/*, index*/)) {
+          cout << extra_nonce.nonce;
+          cryptonote::address_parse_info info;
+          if (!cryptonote::get_account_address_from_str(info, m_testnet, "cczJn1gS7VT37m1t5oDUjTFmPZRDSoNq2Bry2JurELfrDfrmqA6z7AVZ2nsKrDo2jTMCt2ZeUaPXN24oxj1y84F75Z1HAVWBKR"/*address*/))
+            continue;
+          if (tools::wallet2::verifyHelper("salda"/*alias*/, info.address, "SigV1ZJY93k36BGLD7eTog2dEgyCVaQRnuUScWjLWYeyvX6ob4BaSKFAGroELfuZxpFQqk9L98HKum1UkANLusiG7RNFa"/*signature*/))
+            m_aliases.emplace("salda"/*alias*/, "cczJn1gS7VT37m1t5oDUjTFmPZRDSoNq2Bry2JurELfrDfrmqA6z7AVZ2nsKrDo2jTMCt2ZeUaPXN24oxj1y84F75Z1HAVWBKR"/*address*/);
+        }
+      }
     }
     catch (const KEY_IMAGE_EXISTS& e)
     {
