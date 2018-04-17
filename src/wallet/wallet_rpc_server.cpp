@@ -459,10 +459,14 @@ namespace tools
     return true;
   }
 
-  bool wallet_rpc_server::on_alias_address(const wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::response& res, epee::json_rpc::error& er)
-  {
-    if (m_wallet.restricted())
-    {
+  bool wallet_rpc_server::on_alias_address(const wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::response& res, epee::json_rpc::error& er) {
+    if (!m_wallet.get_alias_address(req.alias).empty()) {
+      er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
+      er.message = "Alias already exists.";
+      return false;
+    }
+
+    if (m_wallet.restricted()) {
       er.code = WALLET_RPC_ERROR_CODE_DENIED;
       er.message = "Command unavailable in restricted mode.";
       return false;
@@ -486,15 +490,15 @@ namespace tools
     if (!cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ALIAS + req.alias)
       || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ADDRESS + wallet_address)
       || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_SIGNATURE + m_wallet.sign(req.alias))) 
-    { // LUKAS TODO consider encrypting dst.addr and signature to chars and use them instead, because aliases can have only 63 characters like this, then decrypt via get_account_address_as_str (or get_subaddress_as_str)
+    { // LUKAS TODO consider encrypting dst.addr and signature to chars and use them instead, then decrypt via get_account_address_as_str (or get_subaddress_as_str)
       er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
-      er.message = "Something went wrong with alias. Please check its format: \"" + req.alias + "\", expected up to 64-character string";
+      er.message = "Something went wrong with alias. Please check its format: \"" + req.alias + "\", expected up to 63-character string";
       return false;
     }
 
     try
     {
-      std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions_2({dst}, DEFAULT_MIXIN, req.unlock_time, req.priority, extra, 0/*req.account_index, LUKAS TODO prolly subaddress index*/, std::set<uint32_t>()/*LUKAS TODO didn't check at all*/, false);
+      std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions_2({dst}, DEFAULT_MIXIN, req.unlock_time, req.priority, extra, 0/*req.account_index, LUKAS TODO prolly subaddress index*/, std::set<uint32_t>()/*LUKAS TODO didn't check this parameter at all*/, false);
 
       m_wallet.commit_tx(ptx_vector.back());
 
