@@ -3195,14 +3195,28 @@ leave:
         std::vector<tx_extra_field> tx_extra_fields;
         if(!parse_tx_extra(transaction.extra, tx_extra_fields))
           continue;
-        tx_extra_nonce extra_nonce;
-        if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce/*, index*/)) {
-          cout << extra_nonce.nonce;
+        tx_extra_nonce alias, address, signature;
+        if (find_tx_extra_field_by_type(tx_extra_fields, alias, 0)
+          && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS
+          && find_tx_extra_field_by_type(tx_extra_fields, address, 1)
+          && address.nonce.front() == (char)TX_EXTRA_NONCE_ADDRESS
+          && find_tx_extra_field_by_type(tx_extra_fields, signature, 2)
+          && signature.nonce.front() == (char)TX_EXTRA_NONCE_SIGNATURE)
+        {
+          address.nonce.erase(address.nonce.begin());
           cryptonote::address_parse_info info;
-          if (!cryptonote::get_account_address_from_str(info, m_testnet, "cczJn1gS7VT37m1t5oDUjTFmPZRDSoNq2Bry2JurELfrDfrmqA6z7AVZ2nsKrDo2jTMCt2ZeUaPXN24oxj1y84F75Z1HAVWBKR"/*address*/))
+          if (!cryptonote::get_account_address_from_str(info, m_testnet, address.nonce)) {
+            LOG_PRINT_L2("Aliased address " + address.nonce + " not found.");
             continue;
-          if (tools::wallet2::verifyHelper("salda"/*alias*/, info.address, "SigV1ZJY93k36BGLD7eTog2dEgyCVaQRnuUScWjLWYeyvX6ob4BaSKFAGroELfuZxpFQqk9L98HKum1UkANLusiG7RNFa"/*signature*/))
-            m_aliases.emplace("salda"/*alias*/, "cczJn1gS7VT37m1t5oDUjTFmPZRDSoNq2Bry2JurELfrDfrmqA6z7AVZ2nsKrDo2jTMCt2ZeUaPXN24oxj1y84F75Z1HAVWBKR"/*address*/);
+          }
+          alias.nonce.erase(alias.nonce.begin());
+          signature.nonce.erase(signature.nonce.begin());
+          if (tools::wallet2::verifyHelper(alias.nonce, info.address, signature.nonce)) {
+            if (!m_aliases.emplace(alias.nonce, address.nonce).second)
+              LOG_PRINT_L2("Alias " + alias.nonce + " already exists.");
+          }
+          else
+            LOG_PRINT_L2("Alias " + alias.nonce + " is not signed with keys for address " + address.nonce + ", signature was " + signature.nonce + ".");
         }
       }
     }

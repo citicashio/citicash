@@ -483,10 +483,10 @@ namespace tools
     
     /* Append alias, wallet_address and signature into extra */
     std::vector<uint8_t> extra;
-    if (!cryptonote::add_extra_nonce_to_tx_extra(extra, '\2' + req.alias)
-      || !cryptonote::add_extra_nonce_to_tx_extra(extra, '\3' + wallet_address)
-      || !cryptonote::add_extra_nonce_to_tx_extra(extra, '\4' + m_wallet.sign(req.alias))) { // LUKAS TODO consider encrypting dst.addr and signature to chars and use them instead, because aliases can have only 63 characters like this, then decrypt via get_account_address_as_str (or get_subaddress_as_str)
-    //if (!cryptonote::add_extra_nonce_to_tx_extra(extra, '\2' + req.alias + wallet_address + m_wallet.sign(req.alias))) {
+    if (!cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ALIAS + req.alias)
+      || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ADDRESS + wallet_address)
+      || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_SIGNATURE + m_wallet.sign(req.alias))) 
+    { // LUKAS TODO consider encrypting dst.addr and signature to chars and use them instead, because aliases can have only 63 characters like this, then decrypt via get_account_address_as_str (or get_subaddress_as_str)
       er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
       er.message = "Something went wrong with alias. Please check its format: \"" + req.alias + "\", expected up to 64-character string";
       return false;
