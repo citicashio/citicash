@@ -3611,7 +3611,7 @@ std::string wallet2::get_alias_address(const std::string& alias) {
   m_daemon_rpc_mutex.lock();
   req_t.jsonrpc = "2.0";
   req_t.id = epee::serialization::storage_entry(0);
-  req_t.method = "get_alias_address";
+  req_t.method = "on_get_alias_address";
   req_t.params.alias = alias;
   bool r = net_utils::invoke_http_json_remote_command2(m_daemon_address + "/json_rpc", req_t, resp_t, m_http_client);
   m_daemon_rpc_mutex.unlock();
