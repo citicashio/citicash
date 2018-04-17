@@ -196,4 +196,5 @@ namespace cryptonote {
     return next_diff;
   }
 
+
 }
