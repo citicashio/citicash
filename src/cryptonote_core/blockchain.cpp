@@ -76,7 +76,6 @@ DISABLE_VS_WARNINGS(4267)
 
 // used to overestimate the block reward when estimating a per kB to use
 #define BLOCK_REWARD_OVERESTIMATE   ((uint64_t)(16000000000))
-#define MAINNET_HARDFORK_V3_HEIGHT  ((uint64_t)(116520))
 
 static const struct {
   uint8_t version;
