@@ -845,6 +845,13 @@ namespace cryptonote
 
         void cancel();
 
+        std::string get_alias_address(const std::string alias) const { 
+            auto it = m_aliases.find(alias);
+            if (it != m_aliases.end())
+                return it->second;
+            return std::string();
+        }
+
     private:
 
         // TODO: evaluate whether or not each of these typedefs are left over from blockchain_storage
@@ -877,6 +884,9 @@ namespace cryptonote
         std::unordered_map<crypto::hash, std::unordered_map<crypto::key_image, std::vector<output_data_t>>> m_scan_table;
         std::unordered_map<crypto::hash, crypto::hash> m_blocks_longhash_table;
         std::unordered_map<crypto::hash, std::unordered_map<crypto::key_image, bool>> m_check_txin_table;
+
+        // aliases
+        std::map<std::string, std::string> m_aliases;
 
         // SHA-3 hashes for each block and for fast pow checking
         std::vector<crypto::hash> m_blocks_hash_check;
@@ -1257,7 +1267,7 @@ namespace cryptonote
          * @brief loads block hashes from compiled-in data set
          *
          * A (possibly empty) set of block hashes can be compiled into the
-         * sumokoin daemon binary.  This function loads those hashes into
+         * citicash daemon binary.  This function loads those hashes into
          * a useful state.
          */
         void load_compiled_in_block_hashes();

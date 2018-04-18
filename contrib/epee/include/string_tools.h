@@ -168,7 +168,16 @@ namespace string_tools
       return false;
     }
   }
-  //----------------------------------------------------------------------------
+  
+	template<class CharT>
+  void parse_string_to_binbuff(const std::string& string, std::basic_string<CharT>& res)
+  {
+    res.clear();
+    
+    for (const unsigned char c : string)
+      res.push_back(static_cast<unsigned char>(c));
+  }
+
   template<class t_pod_type>
   bool parse_tpod_from_hex_string(const std::string& str_hash, t_pod_type& t_pod)
   {
@@ -568,16 +577,23 @@ POP_WARNINGS
     trim_right(str);
     return str;
   }
-  //----------------------------------------------------------------------------
+
   template<class t_pod_type>
-  std::string pod_to_hex(const t_pod_type& s)
-  {
+  std::string pod_to_str(const t_pod_type& s) {
+    static_assert(std::is_pod<t_pod_type>::value, "expected pod type");
+    std::string buff;
+    buff.assign(reinterpret_cast<const char*>(&s), sizeof(s));
+    return buff;
+  }
+
+  template<class t_pod_type>
+  std::string pod_to_hex(const t_pod_type& s) {
     static_assert(std::is_pod<t_pod_type>::value, "expected pod type");
     std::string buff;
     buff.assign(reinterpret_cast<const char*>(&s), sizeof(s));
     return buff_to_hex_nodelimer(buff);
   }
-  //----------------------------------------------------------------------------
+
   template<class t_pod_type>
   bool hex_to_pod(const std::string& hex_str, t_pod_type& s)
   {

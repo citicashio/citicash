@@ -2432,7 +2432,16 @@ bool wallet2::parse_payment_id(const std::string& payment_id_str, crypto::hash& 
   }
   return false;
 }
-//----------------------------------------------------------------------------------------------------
+
+void wallet2::parse_alias_into_hash(const std::string& alias_str, crypto::hash& alias_hash)
+{
+  cryptonote::blobdata alias_data;
+  epee::string_tools::parse_string_to_binbuff(alias_str, alias_data);
+
+  alias_hash = *reinterpret_cast<const crypto::hash*>(alias_data.data());
+  memset(alias_hash.data + alias_data.size(), 0, sizeof(crypto::hash) - alias_data.size());
+}
+
 bool wallet2::prepare_file_names(const std::string& file_path)
 {
   do_prepare_file_names(file_path, m_keys_file, m_wallet_file);
@@ -3108,7 +3117,7 @@ uint64_t wallet2::select_transfers(uint64_t needed_money, std::vector<size_t> un
   return found_money;
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::add_unconfirmed_tx(const cryptonote::transaction& tx, uint64_t amount_in, const std::vector<cryptonote::tx_destination_entry> &dests, const crypto::hash &payment_id, uint64_t change_amount, uint32_t subaddr_account, const std::set<uint32_t>& subaddr_indices)
+void wallet2::add_unconfirmed_tx(const cryptonote::transaction& tx, uint64_t amount_in, const std::vector<cryptonote::tx_destination_entry> &dests, const crypto::hash &payment_id, const crypto::hash &alias, uint64_t change_amount, uint32_t subaddr_account, const std::set<uint32_t>& subaddr_indices)
 {
 	unconfirmed_transfer_details& utd = m_unconfirmed_txs[cryptonote::get_transaction_hash(tx)];
 	utd.m_amount_in = amount_in;
@@ -3121,7 +3130,8 @@ void wallet2::add_unconfirmed_tx(const cryptonote::transaction& tx, uint64_t amo
 	utd.m_tx = (const cryptonote::transaction_prefix&)tx;
 	utd.m_dests = dests;
 	utd.m_payment_id = payment_id;
-	utd.m_state = wallet2::unconfirmed_transfer_details::pending;
+  utd.m_alias = alias;
+  utd.m_state = wallet2::unconfirmed_transfer_details::pending;
 	utd.m_timestamp = time(NULL);
 	utd.m_subaddr_account = subaddr_account;
 	utd.m_subaddr_indices = subaddr_indices;
@@ -3282,7 +3292,20 @@ crypto::hash wallet2::get_payment_id(const pending_tx &ptx) const
   }
   return payment_id;
 }
-//----------------------------------------------------------------------------------------------------
+
+crypto::hash wallet2::get_alias(const pending_tx &ptx) const
+{
+  std::vector<tx_extra_field> tx_extra_fields;
+  if(!parse_tx_extra(ptx.tx.extra, tx_extra_fields))
+    return cryptonote::null_hash;
+  tx_extra_nonce extra_nonce;
+  crypto::hash alias = null_hash;
+  if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce))
+    if (!get_alias_from_tx_extra_nonce(extra_nonce.nonce, alias))
+      alias = cryptonote::null_hash;
+  return alias;
+}
+
 // take a pending tx and actually send it to the daemon
 void wallet2::commit_tx(pending_tx& ptx)
 {
@@ -3309,16 +3332,18 @@ void wallet2::commit_tx(pending_tx& ptx)
 
   txid = get_transaction_hash(ptx.tx);
   crypto::hash payment_id = cryptonote::null_hash;
+  crypto::hash alias = cryptonote::null_hash;
   std::vector<cryptonote::tx_destination_entry> dests;
   uint64_t amount_in = 0;
   if (store_tx_info())
   {
     payment_id = get_payment_id(ptx);
+    alias = get_alias(ptx);
     dests = ptx.dests;
     BOOST_FOREACH(size_t idx, ptx.selected_transfers)
       amount_in += m_transfers[idx].amount();
   }
-  add_unconfirmed_tx(ptx.tx, amount_in, dests, payment_id, ptx.change_dts.amount, ptx.construction_data.subaddr_account, ptx.construction_data.subaddr_indices);
+  add_unconfirmed_tx(ptx.tx, amount_in, dests, payment_id, alias, ptx.change_dts.amount, ptx.construction_data.subaddr_account, ptx.construction_data.subaddr_indices);
   if (store_tx_info())
   {
     m_tx_keys.insert(std::make_pair(txid, ptx.tx_key));
@@ -3547,7 +3572,7 @@ uint64_t wallet2::get_fee_multiplier(uint32_t priority, bool use_new_fee) const
   THROW_WALLET_EXCEPTION_IF (false, error::invalid_priority);
   return 1;
 }
-//----------------------------------------------------------------------------------------------------
+
 uint64_t wallet2::get_dynamic_per_kb_fee_estimate()
 {
   epee::json_rpc::request<cryptonote::COMMAND_RPC_GET_PER_KB_FEE_ESTIMATE::request> req_t = AUTO_VAL_INIT(req_t);
@@ -3565,7 +3590,7 @@ uint64_t wallet2::get_dynamic_per_kb_fee_estimate()
   CHECK_AND_ASSERT_THROW_MES(resp_t.result.status == CORE_RPC_STATUS_OK, "Failed to get fee estimate");
   return resp_t.result.fee;
 }
-//----------------------------------------------------------------------------------------------------
+
 uint64_t wallet2::get_per_kb_fee()
 {
   try
@@ -3578,6 +3603,24 @@ uint64_t wallet2::get_per_kb_fee()
     return FEE_PER_KB;
   }
 }
+
+std::string wallet2::get_alias_address(const std::string& alias) {
+  epee::json_rpc::request<cryptonote::COMMAND_RPC_GETALIASADDRESS::request> req_t = AUTO_VAL_INIT(req_t);
+  epee::json_rpc::response<cryptonote::COMMAND_RPC_GETALIASADDRESS::response, std::string> resp_t = AUTO_VAL_INIT(resp_t);
+
+  m_daemon_rpc_mutex.lock();
+  req_t.jsonrpc = "2.0";
+  req_t.id = epee::serialization::storage_entry(0);
+  req_t.method = "on_get_alias_address";
+  req_t.params.alias = alias;
+  bool r = net_utils::invoke_http_json_remote_command2(m_daemon_address + "/json_rpc", req_t, resp_t, m_http_client);
+  m_daemon_rpc_mutex.unlock();
+  CHECK_AND_ASSERT_THROW_MES(r, "Failed to connect to daemon");
+  CHECK_AND_ASSERT_THROW_MES(resp_t.result.status != CORE_RPC_STATUS_BUSY, "Failed to connect to daemon");
+  CHECK_AND_ASSERT_THROW_MES(resp_t.result.status == CORE_RPC_STATUS_OK, "Failed to get alias address");
+  return resp_t.result.address;
+}
+
 //----------------------------------------------------------------------------------------------------
 // separated the call(s) to wallet2::transfer into their own function
 //
@@ -4260,20 +4303,19 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions_2(std::vector<cryp
   // calculate total amount being sent to all destinations
   // throw if total amount overflows uint64_t
   needed_money = 0;
-  BOOST_FOREACH(auto& dt, dsts)
-  {
-    THROW_WALLET_EXCEPTION_IF(0 == dt.amount, error::zero_destination);
+  for (auto& dt : dsts) {
+    THROW_WALLET_EXCEPTION_IF(!dt.amount, error::zero_destination);
     needed_money += dt.amount;
     LOG_PRINT_L2("transfer: adding " << print_money(dt.amount) << ", for a total of " << print_money (needed_money));
 	  THROW_WALLET_EXCEPTION_IF(needed_money < dt.amount, error::tx_sum_overflow, dsts, 0, m_testnet);
   }
 
   // throw if attempting a transaction with no money
-  THROW_WALLET_EXCEPTION_IF(needed_money == 0, error::zero_destination);
+  THROW_WALLET_EXCEPTION_IF(!needed_money, error::zero_destination);
 
   std::map<uint32_t, uint64_t> balance_per_subaddr = unlocked_balance_per_subaddress(subaddr_account);
 
-  if (subaddr_indices.empty()) // "index=<N1>[,<N2>,...]" wasn't specified -> use all the indices with non-zero unlocked bakance
+  if (subaddr_indices.empty()) // "index=<N1>[,<N2>,...]" wasn't specified -> use all the indices with non-zero unlocked balance
   {
 	  for (const auto& i : balance_per_subaddr)
 		  subaddr_indices.insert(i.first);
@@ -5025,27 +5067,8 @@ std::string wallet2::sign(const std::string &data) const
   return std::string("SigV1") + tools::base58::encode(std::string((const char *)&signature, sizeof(signature)));
 }
 
-bool wallet2::verify(const std::string &data, const cryptonote::account_public_address &address, const std::string &signature) const
-{
-  const size_t header_len = strlen("SigV1");
-  if (signature.size() < header_len || signature.substr(0, header_len) != "SigV1") {
-    LOG_PRINT_L0("Signature header check error");
-    return false;
-  }
-  crypto::hash hash;
-  crypto::cn_fast_hash(data.data(), data.size(), hash);
-  std::string decoded;
-  if (!tools::base58::decode(signature.substr(header_len), decoded)) {
-    LOG_PRINT_L0("Signature decoding error");
-    return false;
-  }
-  crypto::signature s;
-  if (sizeof(s) != decoded.size()) {
-    LOG_PRINT_L0("Signature decoding error");
-    return false;
-  }
-  memcpy(&s, decoded.data(), sizeof(s));
-  return crypto::check_signature(hash, address.m_spend_public_key, s);
+bool wallet2::verify(const std::string &data, const cryptonote::account_public_address &address, const std::string &signature) const {
+  return tools::wallet2::verifyHelper(data, address, signature);
 }
 //----------------------------------------------------------------------------------------------------
 crypto::public_key wallet2::get_tx_pub_key_from_received_outs(const tools::wallet2::transfer_details &td) const

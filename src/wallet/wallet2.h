@@ -53,6 +53,7 @@
 #include "crypto/hash.h"
 #include "ringct/rctTypes.h"
 #include "ringct/rctOps.h"
+#include "common/base58.h"
 
 #include "wallet_errors.h"
 #include "common/password.h"
@@ -196,6 +197,7 @@ namespace tools
       time_t m_sent_time;
       std::vector<cryptonote::tx_destination_entry> m_dests;
       crypto::hash m_payment_id;
+      crypto::hash m_alias;
       enum { pending, pending_not_in_pool, failed } m_state;
       uint64_t m_timestamp;
       bool m_dest_subaddr;          // true if this is a transfer to a subaddress
@@ -211,14 +213,15 @@ namespace tools
       uint64_t m_block_height;
       std::vector<cryptonote::tx_destination_entry> m_dests;
       crypto::hash m_payment_id;
+      crypto::hash m_alias;
       uint64_t m_timestamp;
       bool m_dest_subaddr;          // true if this is a transfer to a subaddress
       uint32_t m_subaddr_account;   // subaddress account of your wallet to be used in this transfer
       std::set<uint32_t> m_subaddr_indices;  // set of address indices used as inputs in this transfer
 
-      confirmed_transfer_details() : m_amount_in(0), m_amount_out(0), m_change((uint64_t)-1), m_block_height(0), m_payment_id(cryptonote::null_hash), m_dest_subaddr(false), m_subaddr_account((uint32_t)-1) {}
+      confirmed_transfer_details() : m_amount_in(0), m_amount_out(0), m_change((uint64_t)-1), m_block_height(0), m_payment_id(cryptonote::null_hash), m_alias(cryptonote::null_hash), m_dest_subaddr(false), m_subaddr_account((uint32_t)-1) {}
       confirmed_transfer_details(const unconfirmed_transfer_details &utd, uint64_t height):
-        m_amount_in(utd.m_amount_in), m_amount_out(utd.m_amount_out), m_change(utd.m_change), m_block_height(height), m_dests(utd.m_dests), m_payment_id(utd.m_payment_id), m_timestamp(utd.m_timestamp), m_dest_subaddr(utd.m_dest_subaddr), m_subaddr_account(utd.m_subaddr_account), m_subaddr_indices(utd.m_subaddr_indices) {}
+        m_amount_in(utd.m_amount_in), m_amount_out(utd.m_amount_out), m_change(utd.m_change), m_block_height(height), m_dests(utd.m_dests), m_payment_id(utd.m_payment_id), m_alias(utd.m_alias), m_timestamp(utd.m_timestamp), m_dest_subaddr(utd.m_dest_subaddr), m_subaddr_account(utd.m_subaddr_account), m_subaddr_indices(utd.m_subaddr_indices) {}
     };
 
     struct tx_construction_data
@@ -570,6 +573,8 @@ namespace tools
     static bool parse_long_payment_id(const std::string& payment_id_str, crypto::hash& payment_id);
     static bool parse_short_payment_id(const std::string& payment_id_str, crypto::hash8& payment_id);
     static bool parse_payment_id(const std::string& payment_id_str, crypto::hash& payment_id);
+    static void parse_alias_into_hash(const std::string& alias_str, crypto::hash& alias_hash);
+
 
     static std::vector<std::string> addresses_from_url(const std::string& url, bool& dnssec_valid);
 
@@ -624,6 +629,28 @@ namespace tools
     std::string get_tx_note(const crypto::hash &txid) const;
 
     std::string sign(const std::string &data) const;
+    static bool verifyHelper(const std::string &data, const cryptonote::account_public_address &address, const std::string &signature) {
+      const size_t header_len = strlen("SigV1");
+      if (signature.size() < header_len || signature.substr(0, header_len) != "SigV1") {
+        LOG_PRINT_L0("Signature header check error");
+        return false;
+      }
+      crypto::hash hash;
+      crypto::cn_fast_hash(data.data(), data.size(), hash);
+      std::string decoded;
+      if (!tools::base58::decode(signature.substr(header_len), decoded)) {
+        LOG_PRINT_L0("Signature decoding error");
+        return false;
+      }
+      crypto::signature s;
+      if (sizeof(s) != decoded.size()) {
+        LOG_PRINT_L0("Signature decoding error");
+        return false;
+      }
+      memcpy(&s, decoded.data(), sizeof(s));
+      return crypto::check_signature(hash, address.m_spend_public_key, s);
+    }
+
     bool verify(const std::string &data, const cryptonote::account_public_address &address, const std::string &signature) const;
 
     std::vector<tools::wallet2::transfer_details> export_outputs() const;
@@ -641,6 +668,8 @@ namespace tools
 
     std::string make_uri(const std::string &address, const std::string &payment_id, uint64_t amount, const std::string &tx_description, const std::string &recipient_name, std::string &error);
     bool parse_uri(const std::string &uri, std::string &address, std::string &payment_id, uint64_t &amount, std::string &tx_description, std::string &recipient_name, std::vector<std::string> &unknown_parameters, std::string &error);
+
+    std::string get_alias_address(const std::string& alias);
 
   private:
     /*!
@@ -672,11 +701,12 @@ namespace tools
     bool prepare_file_names(const std::string& file_path);
     void process_unconfirmed(const cryptonote::transaction& tx, uint64_t height);
     void process_outgoing(const crypto::hash &txid, const cryptonote::transaction& tx, uint64_t height, uint64_t ts, uint64_t spent, uint64_t received, uint32_t subaddr_account, const std::set<uint32_t>& subaddr_indices);
-    void add_unconfirmed_tx(const cryptonote::transaction& tx, uint64_t amount_in, const std::vector<cryptonote::tx_destination_entry> &dests, const crypto::hash &payment_id, uint64_t change_amount, uint32_t subaddr_account, const std::set<uint32_t>& subaddr_indices);
+    void add_unconfirmed_tx(const cryptonote::transaction& tx, uint64_t amount_in, const std::vector<cryptonote::tx_destination_entry> &dests, const crypto::hash &payment_id, const crypto::hash &alias, uint64_t change_amount, uint32_t subaddr_account, const std::set<uint32_t>& subaddr_indices);
     void generate_genesis(cryptonote::block& b);
     void check_genesis(const crypto::hash& genesis_hash) const; //throws
     bool generate_chacha8_key_from_secret_keys(crypto::chacha8_key &key) const;
     crypto::hash get_payment_id(const pending_tx &ptx) const;
+    crypto::hash get_alias(const pending_tx &ptx) const;
     void check_acc_out_precomp(const cryptonote::tx_out &o, const crypto::key_derivation &derivation, const std::vector<crypto::key_derivation> &additional_derivations, size_t i, tx_scan_info_t &tx_scan_info) const;
     void parse_block_round(const cryptonote::blobdata &blob, cryptonote::block &bl, crypto::hash &bl_id, bool &error) const;
     uint64_t get_upper_transaction_size_limit();

@@ -55,6 +55,7 @@
 #include "cryptonote_core/cryptonote_core.h"
 #include "ringct/rctSigs.h"
 #include "common/perf_timer.h"
+#include "wallet/wallet2.h"
 #if defined(PER_BLOCK_CHECKPOINT)
 #include "blocks/blocks.h"
 #endif
@@ -3189,6 +3190,35 @@ leave:
     try
     {
       new_height = m_db->add_block(bl, block_size, cumulative_difficulty, already_generated_coins, txs);
+
+      for (auto transaction : txs) {
+        std::vector<tx_extra_field> tx_extra_fields;
+        if(!parse_tx_extra(transaction.extra, tx_extra_fields))
+          continue;
+        tx_extra_nonce alias, address, signature;
+        if (find_tx_extra_field_by_type(tx_extra_fields, alias, 0)
+          && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS
+          && find_tx_extra_field_by_type(tx_extra_fields, address, 1)
+          && address.nonce.front() == (char)TX_EXTRA_NONCE_ADDRESS
+          && find_tx_extra_field_by_type(tx_extra_fields, signature, 2)
+          && signature.nonce.front() == (char)TX_EXTRA_NONCE_SIGNATURE)
+        {
+          address.nonce.erase(address.nonce.begin());
+          cryptonote::address_parse_info info;
+          if (!cryptonote::get_account_address_from_str(info, m_testnet, address.nonce)) {
+            LOG_PRINT_L2("Aliased address " + address.nonce + " not found.");
+            continue;
+          }
+          alias.nonce.erase(alias.nonce.begin());
+          signature.nonce.erase(signature.nonce.begin());
+          if (tools::wallet2::verifyHelper(alias.nonce, info.address, signature.nonce)) {
+            if (!m_aliases.emplace(alias.nonce, address.nonce).second)
+              LOG_PRINT_L2("Alias " + alias.nonce + " already exists.");
+          }
+          else
+            LOG_PRINT_L2("Alias " + alias.nonce + " is not signed with keys for address " + address.nonce + ", signature was " + signature.nonce + ".");
+        }
+      }
     }
     catch (const KEY_IMAGE_EXISTS& e)
     {
