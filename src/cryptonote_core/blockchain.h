@@ -885,7 +885,7 @@ namespace cryptonote
         std::unordered_map<crypto::hash, crypto::hash> m_blocks_longhash_table;
         std::unordered_map<crypto::hash, std::unordered_map<crypto::key_image, bool>> m_check_txin_table;
 
-        // aliases
+        // aliases (<alias, address>)
         std::map<std::string, std::string> m_aliases;
 
         // SHA-3 hashes for each block and for fast pow checking

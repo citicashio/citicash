@@ -459,7 +459,20 @@ namespace tools
     return true;
   }
 
-  bool wallet_rpc_server::on_alias_address(const wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::response& res, epee::json_rpc::error& er) {
+  bool wallet_rpc_server::on_alias_address(wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::response& res, epee::json_rpc::error& er) {    
+    if (req.alias.empty()) {
+      er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
+      er.message = "Missing alias.";
+      return false;
+    }
+
+    cryptonote::convert_alias(req.alias);
+    if (req.alias.empty()) {
+      er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
+      er.message = "Alias can contain only a-z (conveting A-Z), 0-9, \'-\', \'_\', \'.\' and \'@\'.";
+      return false;
+    }
+
     if (!m_wallet.get_alias_address(req.alias).empty()) {
       er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
       er.message = "Alias already exists.";
@@ -469,12 +482,6 @@ namespace tools
     if (m_wallet.restricted()) {
       er.code = WALLET_RPC_ERROR_CODE_DENIED;
       er.message = "Command unavailable in restricted mode.";
-      return false;
-    }
-
-    if (req.alias.empty()) {
-      er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
-      er.message = "Missing alias.";
       return false;
     }
 
