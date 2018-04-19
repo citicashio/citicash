@@ -3210,7 +3210,8 @@ leave:
             continue;
           }
           alias.nonce.erase(alias.nonce.begin());
-          if (cryptonote::convert_alias(alias.nonce).empty())
+          cryptonote::convert_alias(alias.nonce);
+          if (alias.nonce.empty())
             continue;
           signature.nonce.erase(signature.nonce.begin());
           if (tools::wallet2::verifyHelper(alias.nonce, info.address, signature.nonce)) {
