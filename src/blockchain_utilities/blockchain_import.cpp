@@ -38,7 +38,6 @@
 #include "serialization/binary_utils.h" // dump_binary(), parse_binary()
 #include "serialization/json_utils.h" // dump_json()
 #include "include_base_utils.h"
-#include "blockchain_db/db_types.h"
 
 #include <lmdb.h> // for db flag arguments
 
@@ -75,97 +74,63 @@ namespace po = boost::program_options;
 using namespace cryptonote;
 using namespace epee;
 
-
-std::string join_set_strings(const std::unordered_set<std::string>& db_types_all, const char* delim)
-{
-  std::string result;
-  std::ostringstream s;
-  std::copy(db_types_all.begin(), db_types_all.end(), std::ostream_iterator<std::string>(s, delim));
-  result = s.str();
-  if (result.length() > 0)
-    result.erase(result.end()-strlen(delim), result.end());
-  return result;
-}
-
-// db_type: lmdb
 // db_mode: safe, fast, fastest
-int get_db_flags_from_mode(const std::string& db_type, const std::string& db_mode)
+int get_db_flags_from_mode(const std::string& db_mode)
 {
-  uint64_t BDB_FAST_MODE = 0;
-  uint64_t BDB_FASTEST_MODE = 0;
-  uint64_t BDB_SAFE_MODE = 0;
-
   int db_flags = 0;
-  bool islmdb = db_type == "lmdb";
   if (db_mode == "safe")
-    db_flags = islmdb ? MDB_NORDAHEAD : BDB_SAFE_MODE;
+    db_flags = MDB_NORDAHEAD;
   else if (db_mode == "fast")
-    db_flags = islmdb ? MDB_NOMETASYNC | MDB_NOSYNC | MDB_NORDAHEAD : BDB_FAST_MODE;
+    db_flags = MDB_NOMETASYNC | MDB_NOSYNC | MDB_NORDAHEAD;
   else if (db_mode == "fastest")
-    db_flags = islmdb ? MDB_WRITEMAP | MDB_MAPASYNC | MDB_NORDAHEAD | MDB_NOMETASYNC | MDB_NOSYNC : BDB_FASTEST_MODE;
+    db_flags = MDB_WRITEMAP | MDB_MAPASYNC | MDB_NORDAHEAD | MDB_NOMETASYNC | MDB_NOSYNC;
   return db_flags;
 }
 
-int parse_db_arguments(const std::string& db_arg_str, std::string& db_type, int& db_flags)
+int parse_db_arguments(const std::string& db_arg_str, int& db_flags)
 {
   std::vector<std::string> db_args;
   boost::split(db_args, db_arg_str, boost::is_any_of("#"));
-  db_type = db_args.front();
-  boost::algorithm::trim(db_type);
 
-  if (db_args.size() == 1)
-  {
+  if (!db_args.size())
     return 0;
-  }
-  else if (db_args.size() > 2)
+  else if (db_args.size() > 1)
   {
     std::cerr << "unrecognized database argument format: " << db_arg_str << ENDL;
     return 1;
   }
 
-  std::string db_arg_str2 = db_args[1];
+  std::string db_arg_str2 = db_args[0];
   boost::split(db_args, db_arg_str2, boost::is_any_of(","));
 
   // optionally use a composite mode instead of individual flags
   const std::unordered_set<std::string> db_modes {"safe", "fast", "fastest"};
   std::string db_mode;
-  if (db_args.size() == 1)
-  {
-    if (db_modes.count(db_args[0]) > 0)
-    {
-      db_mode = db_args[0];
-    }
-  }
+  if (db_args.size() == 1 && db_modes.count(db_args[0]) > 0)
+    db_mode = db_args[0];
   if (! db_mode.empty())
-  {
-    db_flags = get_db_flags_from_mode(db_type, db_mode);
-  }
+    db_flags = get_db_flags_from_mode(db_mode);
   else
-  {
-    for (auto& it : db_args)
-    {
+    for (auto& it : db_args) {
       boost::algorithm::trim(it);
       if (it.empty())
-	continue;
-      if (db_type == "lmdb") {
-        LOG_PRINT_L1("LMDB flag: " << it);
-        if (it == "nosync")
-          db_flags |= MDB_NOSYNC;
-        else if (it == "nometasync")
-          db_flags |= MDB_NOMETASYNC;
-        else if (it == "writemap")
-          db_flags |= MDB_WRITEMAP;
-        else if (it == "mapasync")
-          db_flags |= MDB_MAPASYNC;
-        else if (it == "nordahead")
-          db_flags |= MDB_NORDAHEAD;
-        else {
-          std::cerr << "unrecognized database flag: " << it << ENDL;
-          return 1;
-        }
+	      continue;
+      LOG_PRINT_L1("LMDB flag: " << it);
+      if (it == "nosync")
+        db_flags |= MDB_NOSYNC;
+      else if (it == "nometasync")
+        db_flags |= MDB_NOMETASYNC;
+      else if (it == "writemap")
+        db_flags |= MDB_WRITEMAP;
+      else if (it == "mapasync")
+        db_flags |= MDB_MAPASYNC;
+      else if (it == "nordahead")
+        db_flags |= MDB_NORDAHEAD;
+      else {
+        std::cerr << "unrecognized database flag: " << it << ENDL;
+        return 1;
       }
     }
-  }
   return 0;
 }
 
@@ -559,22 +524,11 @@ int import_from_file(FakeCore& simple_core, const std::string& import_file_path,
   return 0;
 }
 
-int main(int argc, char* argv[])
-{
-  std::string default_db_type = "lmdb";
-  std::string default_db_engine_compiled = "blockchain_db";
-
-  std::unordered_set<std::string> db_types_all = cryptonote::blockchain_db_types;
-  db_types_all.insert("memory");
-
-  std::string available_dbs = join_set_strings(db_types_all, ", ");
-  available_dbs = "available: " + available_dbs;
-
+int main(int argc, char* argv[]) {
   uint32_t log_level = LOG_LEVEL_0;
   uint64_t num_blocks = 0;
   uint64_t block_stop = 0;
   std::string m_config_folder;
-  std::string db_arg_str;
 
   tools::sanitize_locale();
 
@@ -600,9 +554,8 @@ int main(int argc, char* argv[])
       , "Count blocks in bootstrap file and exit"
       , false
   };
-  const command_line::arg_descriptor<std::string> arg_database = {
-    "database", available_dbs.c_str(), default_db_type
-  };
+  const command_line::arg_descriptor<std::string> arg_flags = {
+    "flags", "database flags", "" };
   const command_line::arg_descriptor<bool> arg_verify =  {"verify",
     "Verify blocks and transactions during import", true};
   const command_line::arg_descriptor<bool> arg_batch  =  {"batch",
@@ -615,7 +568,7 @@ int main(int argc, char* argv[])
   command_line::add_arg(desc_cmd_sett, arg_input_file);
   command_line::add_arg(desc_cmd_sett, arg_testnet_on);
   command_line::add_arg(desc_cmd_sett, arg_log_level);
-  command_line::add_arg(desc_cmd_sett, arg_database);
+  command_line::add_arg(desc_cmd_sett, arg_flags);
   command_line::add_arg(desc_cmd_sett, arg_batch_size);
   command_line::add_arg(desc_cmd_sett, arg_block_stop);
 
@@ -685,7 +638,7 @@ int main(int argc, char* argv[])
   opt_testnet = command_line::get_arg(vm, arg_testnet_on);
   auto data_dir_arg = opt_testnet ? command_line::arg_testnet_data_dir : command_line::arg_data_dir;
   m_config_folder = command_line::get_arg(vm, data_dir_arg);
-  db_arg_str = command_line::get_arg(vm, arg_database);
+  std::string flags_arg_str = command_line::get_arg(vm, arg_flags);
 
   log_space::get_set_log_detalisation_level(true, log_level);
   log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL);
@@ -708,34 +661,15 @@ int main(int argc, char* argv[])
     return 0;
   }
 
-
-  std::string db_type;
-  std::string db_engine_compiled;
   int db_flags = 0;
   int res = 0;
-  res = parse_db_arguments(db_arg_str, db_type, db_flags);
+  res = parse_db_arguments(flags_arg_str, db_flags);
   if (res)
   {
     std::cerr << "Error parsing database argument(s)" << ENDL;
     return 1;
   }
-
-  if (db_types_all.count(db_type) == 0)
-  {
-    std::cerr << "Invalid database type: " << db_type << std::endl;
-    return 1;
-  }
-
-  if (db_type == "lmdb")
-  {
-    db_engine_compiled = "blockchain_db";
-  }
-  else
-  {
-    db_engine_compiled = "memory";
-  }
-
-  LOG_PRINT_L0("database: " << db_type);
+  
   LOG_PRINT_L0("database flags: " << db_flags);
   LOG_PRINT_L0("verify:  " << std::boolalpha << opt_verify << std::noboolalpha);
   if (opt_batch)
@@ -763,20 +697,8 @@ int main(int argc, char* argv[])
   // properties to do so. Both ways work, but fake core isn't necessary in that
   // circumstance.
 
-  // for multi_db_runtime:
-  if (db_type == "lmdb")
-  {
-    fake_core_db simple_core(m_config_folder, opt_testnet, opt_batch, db_type, db_flags);
-    import_from_file(simple_core, import_file_path, block_stop);
-  }
-  else
-  {
-    std::cerr << "database type unrecognized" << ENDL;
-    return 1;
-  }
-
-  // for multi_db_compile:
-  fake_core_db simple_core(m_config_folder, opt_testnet, opt_batch, db_type, db_flags);
+  fake_core_db simple_core(m_config_folder, opt_testnet, opt_batch, db_flags);
+  import_from_file(simple_core, import_file_path, block_stop);
 
   if (! vm["pop-blocks"].defaulted())
   {

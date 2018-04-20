@@ -54,18 +54,12 @@ struct fake_core_db
   bool support_add_block;
 
   // for multi_db_runtime:
-  fake_core_db(const boost::filesystem::path &path, const bool use_testnet=false, const bool do_batch=true, const std::string& db_type="lmdb", const int db_flags=0) : m_pool(m_storage), m_storage(m_pool)
+  fake_core_db(const boost::filesystem::path &path, const bool use_testnet=false, const bool do_batch=true, const int db_flags=0) : m_pool(m_storage), m_storage(m_pool)
   {
     m_pool.init(path.string());
 
     BlockchainDB* db = nullptr;
-    if (db_type == "lmdb")
-      db = new BlockchainLMDB();
-    else
-    {
-      LOG_ERROR("Attempted to use non-existent database type: " << db_type);
-      throw std::runtime_error("Attempting to use non-existent database type");
-    }
+    db = new BlockchainLMDB();
 
     boost::filesystem::path folder(path);
 

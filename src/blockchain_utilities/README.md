@@ -60,11 +60,9 @@ stop at block number
 
 `--database <database type>#<flag(s)>`
 
-database type: `lmdb, memory`
-
 flags:
 
-The flag after the # is interpreted as a composite mode/flag if there's only
+The flag is interpreted as a composite mode/flag if there's only
 one (no comma separated arguments).
 
 The composite mode represents multiple DB flags and support different database types:

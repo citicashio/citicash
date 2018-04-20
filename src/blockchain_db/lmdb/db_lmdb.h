@@ -358,6 +358,7 @@ private:
   MDB_dbi m_output_amounts;
 
   MDB_dbi m_spent_keys;
+  MDB_dbi m_aliases;
 
   MDB_dbi m_hf_starting_heights;
   MDB_dbi m_hf_versions;

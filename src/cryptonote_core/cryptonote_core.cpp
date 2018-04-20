@@ -253,7 +253,6 @@ namespace cryptonote
     r = m_mempool.init(m_fakechain ? std::string() : m_config_folder);
     CHECK_AND_ASSERT_MES(r, false, "Failed to initialize memory pool");
 
-    std::string db_type = command_line::get_arg(vm, command_line::arg_db_type);
     std::string db_sync_mode = command_line::get_arg(vm, command_line::arg_db_sync_mode);
     bool fast_sync = command_line::get_arg(vm, command_line::arg_fast_block_sync) != 0;
     uint64_t blocks_threads = command_line::get_arg(vm, command_line::arg_prep_blocks_threads);
@@ -291,18 +290,10 @@ namespace cryptonote
     uint64_t DBS_FAST_MODE = 0;
     uint64_t DBS_FASTEST_MODE = 0;
     uint64_t DBS_SAFE_MODE = 0;
-    if (db_type == "lmdb")
-    {
-      db = new BlockchainLMDB();
-      DBS_SAFE_MODE = MDB_NORDAHEAD;
-      DBS_FAST_MODE = MDB_NORDAHEAD | MDB_NOSYNC;
-      DBS_FASTEST_MODE = MDB_NORDAHEAD | MDB_NOSYNC | MDB_WRITEMAP | MDB_MAPASYNC;
-    }
-    else
-    {
-      LOG_ERROR("Attempted to use non-existent database type");
-      return false;
-    }
+    db = new BlockchainLMDB();
+    DBS_SAFE_MODE = MDB_NORDAHEAD;
+    DBS_FAST_MODE = MDB_NORDAHEAD | MDB_NOSYNC;
+    DBS_FASTEST_MODE = MDB_NORDAHEAD | MDB_NOSYNC | MDB_WRITEMAP | MDB_MAPASYNC;
 
     folder /= db->get_db_name();
     LOG_PRINT_L0("Loading blockchain from folder " << folder.string() << " ...");
