@@ -87,19 +87,13 @@ std::string join_set_strings(const std::unordered_set<std::string>& db_types_all
   return result;
 }
 
-// db_type: lmdb, berkeley
+// db_type: lmdb
 // db_mode: safe, fast, fastest
 int get_db_flags_from_mode(const std::string& db_type, const std::string& db_mode)
 {
   uint64_t BDB_FAST_MODE = 0;
   uint64_t BDB_FASTEST_MODE = 0;
   uint64_t BDB_SAFE_MODE = 0;
-
-#if defined(BERKELEY_DB)
-  BDB_FAST_MODE = DB_TXN_WRITE_NOSYNC;
-  BDB_FASTEST_MODE = DB_TXN_NOSYNC;
-  BDB_SAFE_MODE = DB_TXN_SYNC;
-#endif
 
   int db_flags = 0;
   bool islmdb = db_type == "lmdb";
@@ -129,14 +123,6 @@ int parse_db_arguments(const std::string& db_arg_str, std::string& db_type, int&
     return 1;
   }
 
-#if !defined(BERKELEY_DB)
-  if (db_type == "berkeley")
-  {
-    LOG_ERROR("BerkeleyDB support disabled.");
-    return false;
-  }
-#endif
-
   std::string db_arg_str2 = db_args[1];
   boost::split(db_args, db_arg_str2, boost::is_any_of(","));
 
@@ -161,41 +147,23 @@ int parse_db_arguments(const std::string& db_arg_str, std::string& db_type, int&
       boost::algorithm::trim(it);
       if (it.empty())
 	continue;
-      if (db_type == "lmdb")
-      {
-	LOG_PRINT_L1("LMDB flag: " << it);
-	if (it == "nosync")
-	  db_flags |= MDB_NOSYNC;
-	else if (it == "nometasync")
-	  db_flags |= MDB_NOMETASYNC;
-	else if (it == "writemap")
-	  db_flags |= MDB_WRITEMAP;
-	else if (it == "mapasync")
-	  db_flags |= MDB_MAPASYNC;
-	else if (it == "nordahead")
-	  db_flags |= MDB_NORDAHEAD;
-	else
-	{
-	  std::cerr << "unrecognized database flag: " << it << ENDL;
-	  return 1;
-	}
+      if (db_type == "lmdb") {
+        LOG_PRINT_L1("LMDB flag: " << it);
+        if (it == "nosync")
+          db_flags |= MDB_NOSYNC;
+        else if (it == "nometasync")
+          db_flags |= MDB_NOMETASYNC;
+        else if (it == "writemap")
+          db_flags |= MDB_WRITEMAP;
+        else if (it == "mapasync")
+          db_flags |= MDB_MAPASYNC;
+        else if (it == "nordahead")
+          db_flags |= MDB_NORDAHEAD;
+        else {
+          std::cerr << "unrecognized database flag: " << it << ENDL;
+          return 1;
+        }
       }
-#if defined(BERKELEY_DB)
-      else if (db_type == "berkeley")
-      {
-	if (it == "txn_write_nosync")
-	  db_flags = DB_TXN_WRITE_NOSYNC;
-	else if (it == "txn_nosync")
-	  db_flags = DB_TXN_NOSYNC;
-	else if (it == "txn_sync")
-	  db_flags = DB_TXN_SYNC;
-	else
-	{
-	  std::cerr << "unrecognized database flag: " << it << ENDL;
-	  return 1;
-	}
-      }
-#endif
     }
   }
   return 0;
@@ -758,7 +726,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  if ((db_type == "lmdb") || (db_type == "berkeley"))
+  if (db_type == "lmdb")
   {
     db_engine_compiled = "blockchain_db";
   }
@@ -796,7 +764,7 @@ int main(int argc, char* argv[])
   // circumstance.
 
   // for multi_db_runtime:
-  if (db_type == "lmdb" || db_type == "berkeley")
+  if (db_type == "lmdb")
   {
     fake_core_db simple_core(m_config_folder, opt_testnet, opt_batch, db_type, db_flags);
     import_from_file(simple_core, import_file_path, block_stop);

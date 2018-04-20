@@ -29,12 +29,6 @@
 // Parts of this file are originally copyright (c) 2012-2013 The Cryptonote developers
 #pragma once
 
-namespace cryptonote
-{
-
-  const std::unordered_set<std::string> blockchain_db_types = 
-  { "lmdb"
-  , "berkeley"
-  };
-
-} // namespace cryptonote
+namespace cryptonote {
+  const std::unordered_set<std::string> blockchain_db_types = { "lmdb" };
+}

@@ -33,9 +33,6 @@
 #include "cryptonote_core/tx_pool.h"
 #include "blockchain_db/blockchain_db.h"
 #include "blockchain_db/lmdb/db_lmdb.h"
-#if defined(BERKELEY_DB)
-#include "blockchain_db/berkeleydb/db_bdb.h"
-#endif
 
 using namespace cryptonote;
 
@@ -64,10 +61,6 @@ struct fake_core_db
     BlockchainDB* db = nullptr;
     if (db_type == "lmdb")
       db = new BlockchainLMDB();
-#if defined(BERKELEY_DB)
-    else if (db_type == "berkeley")
-      db = new BlockchainBDB();
-#endif
     else
     {
       LOG_ERROR("Attempted to use non-existent database type: " << db_type);
