@@ -134,7 +134,7 @@ namespace tools
     entry.payment_id = string_tools::pod_to_hex(payment_id);
     if (entry.payment_id.substr(16).find_first_not_of('0') == std::string::npos)
       entry.payment_id = entry.payment_id.substr(0, 16);
-    //entry.alias = string_tools::pod_to_str(pd.m_alias); // LUKAS TODO check where payment_id comes from
+    entry.alias = pd.m_alias;
     entry.height = pd.m_block_height;
     entry.timestamp = pd.m_timestamp;
     entry.amount = pd.m_amount;
@@ -150,7 +150,7 @@ namespace tools
     entry.payment_id = string_tools::pod_to_hex(pd.m_payment_id);
     if (entry.payment_id.substr(16).find_first_not_of('0') == std::string::npos)
       entry.payment_id = entry.payment_id.substr(0, 16);
-    //entry.alias = string_tools::pod_to_str(pd.m_alias);
+    entry.alias = pd.m_alias;
     entry.height = pd.m_block_height;
     entry.timestamp = pd.m_timestamp;
     entry.fee = pd.m_amount_in - pd.m_amount_out;
@@ -174,10 +174,9 @@ namespace tools
     bool is_failed = pd.m_state == tools::wallet2::unconfirmed_transfer_details::failed;
     entry.txid = string_tools::pod_to_hex(txid);
     entry.payment_id = string_tools::pod_to_hex(pd.m_payment_id);
-    entry.payment_id = string_tools::pod_to_hex(pd.m_payment_id);
     if (entry.payment_id.substr(16).find_first_not_of('0') == std::string::npos)
       entry.payment_id = entry.payment_id.substr(0, 16);
-    //entry.alias = string_tools::pod_to_str(pd.m_alias);
+    entry.alias = pd.m_alias;
     entry.height = 0;
     entry.timestamp = pd.m_timestamp;
     entry.fee = pd.m_amount_in - pd.m_amount_out;
@@ -193,7 +192,7 @@ namespace tools
     entry.payment_id = string_tools::pod_to_hex(payment_id);
     if (entry.payment_id.substr(16).find_first_not_of('0') == std::string::npos)
       entry.payment_id = entry.payment_id.substr(0, 16);
-    //entry.alias = string_tools::pod_to_str(pd.m_alias); // LUKAS TODO check where payment_id comes from
+    entry.alias = pd.m_alias;
     entry.height = 0;
     entry.timestamp = pd.m_timestamp;
     entry.amount = pd.m_amount;
@@ -577,7 +576,6 @@ namespace tools
 
       m_wallet.commit_tx(ptx_vector);
 
-      // populate response with tx hash
       res.tx_hash = epee::string_tools::pod_to_hex(cryptonote::get_transaction_hash(ptx_vector.back().tx));
       if (req.get_tx_key)
       {

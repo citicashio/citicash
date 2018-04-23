@@ -501,7 +501,7 @@ namespace wallet_rpc
   struct payment_details
   {
     std::string payment_id;
-    std::string alias; // LUKAS TODO check, if it's needed here
+    std::string alias;
     std::string tx_hash;
     uint64_t amount;
     uint64_t block_height;
@@ -511,7 +511,7 @@ namespace wallet_rpc
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(payment_id)
       if (!this_ref.alias.empty())
-        KV_SERIALIZE(alias) // LUKAS TODO check, if it's needed here
+        KV_SERIALIZE(alias)
       KV_SERIALIZE(tx_hash)
       KV_SERIALIZE(amount)
       KV_SERIALIZE(block_height)
