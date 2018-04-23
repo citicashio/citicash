@@ -150,7 +150,7 @@ namespace tools
     entry.payment_id = string_tools::pod_to_hex(pd.m_payment_id);
     if (entry.payment_id.substr(16).find_first_not_of('0') == std::string::npos)
       entry.payment_id = entry.payment_id.substr(0, 16);
-    entry.alias = string_tools::pod_to_str(pd.m_alias);
+    //entry.alias = string_tools::pod_to_str(pd.m_alias);
     entry.height = pd.m_block_height;
     entry.timestamp = pd.m_timestamp;
     entry.fee = pd.m_amount_in - pd.m_amount_out;
@@ -177,7 +177,7 @@ namespace tools
     entry.payment_id = string_tools::pod_to_hex(pd.m_payment_id);
     if (entry.payment_id.substr(16).find_first_not_of('0') == std::string::npos)
       entry.payment_id = entry.payment_id.substr(0, 16);
-    entry.alias = string_tools::pod_to_str(pd.m_alias);
+    //entry.alias = string_tools::pod_to_str(pd.m_alias);
     entry.height = 0;
     entry.timestamp = pd.m_timestamp;
     entry.fee = pd.m_amount_in - pd.m_amount_out;

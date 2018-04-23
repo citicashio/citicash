@@ -510,7 +510,8 @@ namespace wallet_rpc
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(payment_id)
-      KV_SERIALIZE(alias) // LUKAS TODO check, if it's needed here
+      if (!this_ref.alias.empty())
+        KV_SERIALIZE(alias) // LUKAS TODO check, if it's needed here
       KV_SERIALIZE(tx_hash)
       KV_SERIALIZE(amount)
       KV_SERIALIZE(block_height)
@@ -771,7 +772,8 @@ namespace wallet_rpc
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(txid);
       KV_SERIALIZE(payment_id);
-      KV_SERIALIZE(alias); // LUKAS TODO add something like "if (alias)" not to handle alias when empty
+      if (!this_ref.alias.empty())
+        KV_SERIALIZE(alias);
       KV_SERIALIZE(height);
       KV_SERIALIZE(timestamp);
       KV_SERIALIZE(amount);
