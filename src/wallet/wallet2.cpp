@@ -3301,11 +3301,10 @@ crypto::hash wallet2::get_payment_id(const pending_tx &ptx) const
 std::string wallet2::get_alias(const pending_tx &ptx) const {
   std::vector<tx_extra_field> tx_extra_fields;
   tx_extra_nonce alias;
-  if (parse_tx_extra(ptx.tx.extra, tx_extra_fields)
-    && find_tx_extra_field_by_type(tx_extra_fields, alias, 0)
+  if (parse_tx_extra(ptx.tx.extra, tx_extra_fields) && find_tx_extra_field_by_type(tx_extra_fields, alias, 0)
     && !alias.nonce.empty() && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS)
   {
-      return alias.nonce;
+      return alias.nonce.substr(1);
   }
   return "";
 }
