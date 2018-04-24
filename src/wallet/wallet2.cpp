@@ -1138,8 +1138,10 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
     }
 
     tx_extra_nonce alias;
-    if (find_tx_extra_field_by_type(tx_extra_fields, alias, 0) && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS)
-      LOG_PRINT_L2("Found alias: " << alias.nonce.substr(1));
+    if (find_tx_extra_field_by_type(tx_extra_fields, alias, 0) && !alias.nonce.empty() && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS) {
+      alias.nonce.erase(alias.nonce.begin());
+      LOG_PRINT_L2("Found alias: " << alias.nonce);
+    }
 
 	  for (const auto& i : tx_money_got_in_outs) {   
 		  payment_details payment;
@@ -1149,7 +1151,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
   		payment.m_unlock_time = tx.unlock_time;
 	  	payment.m_timestamp = ts;
 		  payment.m_subaddr_index = i.first;
-      payment.m_alias = alias.nonce.substr(1);
+      payment.m_alias = alias.nonce;
 
 	  	if (pool) {
 		  	m_unconfirmed_payments.emplace(payment_id, payment);
@@ -3301,7 +3303,7 @@ std::string wallet2::get_alias(const pending_tx &ptx) const {
   tx_extra_nonce alias;
   if (parse_tx_extra(ptx.tx.extra, tx_extra_fields)
     && find_tx_extra_field_by_type(tx_extra_fields, alias, 0)
-    && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS)
+    && !alias.nonce.empty() && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS)
   {
       return alias.nonce;
   }

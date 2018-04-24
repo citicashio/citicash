@@ -3197,11 +3197,11 @@ leave:
           continue;
         tx_extra_nonce alias, address, signature;
         if (find_tx_extra_field_by_type(tx_extra_fields, alias, 0)
-          && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS
+          && !alias.nonce.empty() && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS
           && find_tx_extra_field_by_type(tx_extra_fields, address, 1)
-          && address.nonce.front() == (char)TX_EXTRA_NONCE_ADDRESS
+          && !address.nonce.empty() && address.nonce.front() == (char)TX_EXTRA_NONCE_ADDRESS
           && find_tx_extra_field_by_type(tx_extra_fields, signature, 2)
-          && signature.nonce.front() == (char)TX_EXTRA_NONCE_SIGNATURE)
+          && !signature.nonce.empty() && signature.nonce.front() == (char)TX_EXTRA_NONCE_SIGNATURE)
         {
           address.nonce.erase(address.nonce.begin());
           cryptonote::address_parse_info info;
