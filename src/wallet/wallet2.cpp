@@ -1190,8 +1190,7 @@ void wallet2::process_outgoing(const crypto::hash &txid, const cryptonote::trans
 {
   std::pair<std::unordered_map<crypto::hash, confirmed_transfer_details>::iterator, bool> entry = m_confirmed_txs.insert(std::make_pair(txid, confirmed_transfer_details()));
   // fill with the info we know, some info might already be there
-  if (entry.second)
-  {
+  if (entry.second) {
     // this case will happen if the tx is from our outputs, but was sent by another
     // wallet (eg, we're a cold wallet and the hot wallet sent it). For RCT transactions,
     // we only see 0 input amounts, so have to deduce amount out from other parameters.
@@ -1203,17 +1202,15 @@ void wallet2::process_outgoing(const crypto::hash &txid, const cryptonote::trans
     entry.first->second.m_change = received;
 
     std::vector<tx_extra_field> tx_extra_fields;
-    if(parse_tx_extra(tx.extra, tx_extra_fields))
-    {
+    if(parse_tx_extra(tx.extra, tx_extra_fields)) {
       tx_extra_nonce extra_nonce;
-      if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce))
-      {
-        // we do not care about failure here
-        get_payment_id_from_tx_extra_nonce(extra_nonce.nonce, entry.first->second.m_payment_id);
-      }
+      if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce)) // we do not care about failure here
+        get_payment_id_from_tx_extra_nonce(extra_nonce.nonce, entry.first->second.m_payment_id);        
+      if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 0) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS)
+        entry.first->second.m_alias = extra_nonce.nonce.substr(1);
     }
-	entry.first->second.m_subaddr_account = subaddr_account;
-	entry.first->second.m_subaddr_indices = subaddr_indices;
+    entry.first->second.m_subaddr_account = subaddr_account;
+    entry.first->second.m_subaddr_indices = subaddr_indices;
   }
   entry.first->second.m_block_height = height;
   entry.first->second.m_timestamp = ts;
