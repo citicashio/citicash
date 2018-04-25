@@ -458,7 +458,7 @@ namespace tools
     return true;
   }
 
-  bool wallet_rpc_server::on_alias_address(wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::response& res, epee::json_rpc::error& er) {    
+  bool wallet_rpc_server::on_alias_address(wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::response& res, epee::json_rpc::error& er) {
     if (req.alias.empty()) {
       er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
       er.message = "Missing alias.";
@@ -511,7 +511,6 @@ namespace tools
       // populate response with tx hash
       res.tx_hash = epee::string_tools::pod_to_hex(cryptonote::get_transaction_hash(ptx_vector.back().tx));
       res.fee = ptx_vector.back().fee;
-      return true;
     }
     catch (const tools::error::daemon_busy& e)
     {
@@ -531,6 +530,12 @@ namespace tools
       er.message = "WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR";
       return false;
     }
+    return true;
+  }
+
+  bool wallet_rpc_server::on_get_aliases(wallet_rpc::COMMAND_RPC_GET_ALIASES::request& req, wallet_rpc::COMMAND_RPC_GET_ALIASES::response& res, epee::json_rpc::error& er) {
+    const std::string wallet_address = m_wallet.get_account().get_public_address_str(m_wallet.testnet()); // LUKAS TODO consider extending to subaddresses via get_subaddress_as_str(const cryptonote::subaddress_index& index)
+    res.aliases = m_wallet.get_address_aliases(wallet_address);
     return true;
   }
 
@@ -582,7 +587,6 @@ namespace tools
         res.tx_key = epee::string_tools::pod_to_hex(ptx_vector.back().tx_key);
       }
       res.fee = ptx_vector.back().fee;
-      return true;
     }
     catch (const tools::error::daemon_busy& e)
     {

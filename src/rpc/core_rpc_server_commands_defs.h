@@ -634,8 +634,7 @@ namespace cryptonote
     typedef std::string response;
   };
 
-  struct COMMAND_RPC_GETALIASADDRESS
-  {
+  struct COMMAND_RPC_GETALIASADDRESS {
     struct request {
       std::string alias;
 
@@ -650,6 +649,26 @@ namespace cryptonote
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(address)
+        KV_SERIALIZE(status)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+  struct COMMAND_RPC_GETADDRESSALIASES {
+    struct request {
+      std::string address;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(address)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response {
+      std::vector<std::string> aliases;
+      std::string status;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(aliases)
         KV_SERIALIZE(status)
       END_KV_SERIALIZE_MAP()
     };

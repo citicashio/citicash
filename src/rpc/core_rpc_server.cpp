@@ -755,6 +755,18 @@ namespace cryptonote
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }
+
+  bool core_rpc_server::on_get_address_aliases(const COMMAND_RPC_GETADDRESSALIASES::request& req, COMMAND_RPC_GETADDRESSALIASES::response& res, epee::json_rpc::error& error_resp) {
+    if(!check_core_busy()) {
+      error_resp.code = CORE_RPC_ERROR_CODE_CORE_BUSY;
+      error_resp.message = "Core is busy";
+      return false;
+    }
+    res.aliases = m_core.get_blockchain_storage().get_address_aliases(req.address);
+    res.status = CORE_RPC_STATUS_OK;
+    return true;
+  }
+
   //------------------------------------------------------------------------------------------------------------------------------
   // equivalent of strstr, but with arbitrary bytes (ie, NULs)
   // This does not differentiate between "not found" and "found at offset 0"

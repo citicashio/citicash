@@ -3214,12 +3214,10 @@ leave:
           if (alias.nonce.empty())
             continue;
           signature.nonce.erase(signature.nonce.begin());
-          if (tools::wallet2::verifyHelper(alias.nonce, info.address, signature.nonce)) {
-            if (!m_aliases.emplace(alias.nonce, address.nonce).second)
-              LOG_PRINT_L2("Alias " + alias.nonce + " already exists.");
-          }
-          else
+          if (!tools::wallet2::verifyHelper(alias.nonce, info.address, signature.nonce))
             LOG_PRINT_L2("Alias " + alias.nonce + " is not signed with keys for address " + address.nonce + ", signature was " + signature.nonce + ".");
+          else if (!m_aliases.insert(alias_bimap::value_type(alias.nonce, address.nonce)).second)
+            LOG_PRINT_L2("Alias " + alias.nonce + " already exists.");
         }
       }
     }
