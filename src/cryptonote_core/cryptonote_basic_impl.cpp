@@ -338,7 +338,6 @@ namespace cryptonote {
   }
 }
 
-//--------------------------------------------------------------------------------
 bool parse_hash256(const std::string str_hash, crypto::hash& hash)
 {
   std::string buf;
@@ -353,4 +352,26 @@ bool parse_hash256(const std::string str_hash, crypto::hash& hash)
     buf.copy(reinterpret_cast<char *>(&hash), sizeof(crypto::hash));
     return true;
   }
+}
+
+bool verifyHelper(const std::string &data, const cryptonote::account_public_address &address, const std::string &signature) {
+  const size_t header_len = strlen("SigV1");
+  if (signature.size() < header_len || signature.substr(0, header_len) != "SigV1") {
+    LOG_PRINT_L0("Signature header check error");
+    return false;
+  }
+  crypto::hash hash;
+  crypto::cn_fast_hash(data.data(), data.size(), hash);
+  std::string decoded;
+  if (!tools::base58::decode(signature.substr(header_len), decoded)) {
+    LOG_PRINT_L0("Signature decoding error");
+    return false;
+  }
+  crypto::signature s;
+  if (sizeof(s) != decoded.size()) {
+    LOG_PRINT_L0("Signature decoding error");
+    return false;
+  }
+  memcpy(&s, decoded.data(), sizeof(s));
+  return crypto::check_signature(hash, address.m_spend_public_key, s);
 }

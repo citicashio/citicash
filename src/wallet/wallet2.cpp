@@ -5085,7 +5085,7 @@ std::string wallet2::sign(const std::string &data) const
 }
 
 bool wallet2::verify(const std::string &data, const cryptonote::account_public_address &address, const std::string &signature) const {
-  return tools::wallet2::verifyHelper(data, address, signature);
+  return verifyHelper(data, address, signature);
 }
 //----------------------------------------------------------------------------------------------------
 crypto::public_key wallet2::get_tx_pub_key_from_received_outs(const tools::wallet2::transfer_details &td) const

@@ -55,7 +55,6 @@
 #include "cryptonote_core/cryptonote_core.h"
 #include "ringct/rctSigs.h"
 #include "common/perf_timer.h"
-#include "wallet/wallet2.h"
 #if defined(PER_BLOCK_CHECKPOINT)
 #include "blocks/blocks.h"
 #endif
@@ -3214,7 +3213,7 @@ leave:
           if (alias.nonce.empty())
             continue;
           signature.nonce.erase(signature.nonce.begin());
-          if (!tools::wallet2::verifyHelper(alias.nonce, info.address, signature.nonce))
+          if (!verifyHelper(alias.nonce, info.address, signature.nonce))
             LOG_PRINT_L2("Alias " + alias.nonce + " is not signed with keys for address " + address.nonce + ", signature was " + signature.nonce + ".");
           else if (!m_aliases.insert(alias_bimap::value_type(alias.nonce, address.nonce)).second)
             LOG_PRINT_L2("Alias " + alias.nonce + " already exists.");
