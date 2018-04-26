@@ -134,6 +134,7 @@ std::ostream &print64(std::ostream &o, const T &v) {
 }
 
 bool parse_hash256(const std::string str_hash, crypto::hash& hash);
+bool verifyHelper(const std::string &data, const cryptonote::account_public_address &address, const std::string &signature);
 
 namespace crypto {
   inline std::ostream &operator <<(std::ostream &o, const crypto::public_key &v) { return print256(o, v); }

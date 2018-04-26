@@ -55,7 +55,6 @@
 #include "cryptonote_core/cryptonote_core.h"
 #include "ringct/rctSigs.h"
 #include "common/perf_timer.h"
-#include "wallet/wallet2.h"
 #if defined(PER_BLOCK_CHECKPOINT)
 #include "blocks/blocks.h"
 #endif
@@ -3211,7 +3210,7 @@ leave:
           }
           alias.nonce.erase(alias.nonce.begin());
           signature.nonce.erase(signature.nonce.begin());
-          if (tools::wallet2::verifyHelper(alias.nonce, info.address, signature.nonce)) {
+          if (verifyHelper(alias.nonce, info.address, signature.nonce)) {
             if (!m_aliases.emplace(alias.nonce, address.nonce).second)
               LOG_PRINT_L2("Alias " + alias.nonce + " already exists.");
           }
