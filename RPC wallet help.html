@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html data-cf-welcome-bar-visibility="visible"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>
+     Wallet RPC documentation
+    </title>
+	<meta name="description" content="Wallet RPC documentation">
+	<meta name="keywords" content="citicash, cryptocurrency">
+
+    <meta property="og:title" content="Wallet RPC documentation">
+    <meta property="og:description" content="Wallet RPC documentation">
+    <meta property="og:type" content="website">
+
+    <link href="./RPC wallet help.css" rel="stylesheet">
+
+    
+    <meta name="msapplication-config" content="/ietemplates/ieconfig.xml">
+
+  <style>
+        html {
+          position: relative;
+          top: 56px;
+        }
+      </style><style>
+      cloudflare-app[app="welcome-bar"] {
+        background-color: #0099ff;
+        color: #ffffff;
+      }
+
+      @media (max-width: 768px) {
+        cloudflare-app[app="welcome-bar"][data-style="prominent"] .alert-cta-button,
+        cloudflare-app[app="welcome-bar"][data-style="prominent"] .alert-cta-button:hover,
+        cloudflare-app[app="welcome-bar"][data-style="prominent"] .alert-cta-button:active {
+          color: #ffffff;
+        }
+      }
+
+      @media (min-width: 768px) {
+        cloudflare-app[app="welcome-bar"][data-style="prominent"] .alert-cta-button,
+        cloudflare-app[app="welcome-bar"][data-style="prominent"] .alert-cta-button:hover,
+        cloudflare-app[app="welcome-bar"][data-style="prominent"] .alert-cta-button:active {
+          background-color: #ffffff !important;
+          color: #0099ff !important;
+        }
+      }
+    </style><link rel="stylesheet" href="data:text/css;charset=utf-8;base64,LyoKICBTcGVjaWZpY2l0eSB0byBjb21iYXQgdGhpbmdzIGxpa2UgdGhpcyAoZnJvbSBDTk4uY29tIGFzIG9mIDYvNi8xNik6CgogIGJvZHkgPiA6bm90KC5uYXYpIHsKICAgIC13ZWJraXQtdHJhbnNmb3JtOiBub25lICFpbXBvcnRhbnQ7CiAgICB0cmFuc2Zvcm06IG5vbmUgIWltcG9ydGFudDsKICB9CiovCmh0bWwgPiBib2R5ID4gY2xvdWRmbGFyZS1hcHBbYXBwPSJ3ZWxjb21lLWJhciJdIHsKICBkaXNwbGF5OiBibG9jazsKICBkaXNwbGF5OiAtd2Via2l0LWJveDsKICBkaXNwbGF5OiAtbXMtZmxleGJveDsKICBkaXNwbGF5OiBmbGV4OwogIC13ZWJraXQtYm94LWFsaWduOiBjZW50ZXI7CiAgICAgIC1tcy1mbGV4LWFsaWduOiBjZW50ZXI7CiAgICAgICAgICBhbGlnbi1pdGVtczogY2VudGVyOwogIC13ZWJraXQtYm94LXBhY2s6IGp1c3RpZnk7CiAgICAgIC1tcy1mbGV4LXBhY2s6IGp1c3RpZnk7CiAgICAgICAgICBqdXN0aWZ5LWNvbnRlbnQ6IHNwYWNlLWJldHdlZW47CiAgZm9udC1zaXplOiAxNnB4OwogIG1pbi1oZWlnaHQ6IDIuNWVtOwogIGxpbmUtaGVpZ2h0OiAxOwogIG92ZXJmbG93OiBoaWRkZW47CiAgcG9zaXRpb246IGZpeGVkOwogIHRvcDogMDsKICBsZWZ0OiAwOwogIHJpZ2h0OiAwOwogIC13ZWJraXQtZm9udC1zbW9vdGhpbmc6IGFudGlhbGlhc2VkOwogIC1tb3otb3N4LWZvbnQtc21vb3RoaW5nOiBncmF5c2NhbGU7CiAgLXdlYmtpdC11c2VyLXNlbGVjdDogbm9uZTsKICAtd2Via2l0LXRyYW5zZm9ybTogdHJhbnNsYXRlM2QoMCwgLTMwMCUsIDApOwogICAgICAgICAgdHJhbnNmb3JtOiB0cmFuc2xhdGUzZCgwLCAtMzAwJSwgMCk7Cn0KCmh0bWwgPiBib2R5ID4gY2xvdWRmbGFyZS1hcHBbYXBwPSJ3ZWxjb21lLWJhciJdOjpiZWZvcmUgewogIGNvbnRlbnQ6ICIiOwogIHBvc2l0aW9uOiBhYnNvbHV0ZTsKICB0b3A6IDA7CiAgbGVmdDogMDsKICByaWdodDogMDsKICBib3R0b206IDA7CiAgYmFja2dyb3VuZDogcmdiYSgwLCAwLCAwLCAuMDUpOwogIC13ZWJraXQtdHJhbnNmb3JtOiB0cmFuc2xhdGUzZCgtMTAwJSwgMCwgMCk7CiAgICAgICAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZTNkKC0xMDAlLCAwLCAwKTsKfQoKaHRtbCA+IGJvZHkgPiBjbG91ZGZsYXJlLWFwcFthcHA9IndlbGNvbWUtYmFyIl1bZGF0YS1zbGlkZS1hbmltYXRpb25dOjpiZWZvcmUgewogIHRyYW5zaXRpb246IC13ZWJraXQtdHJhbnNmb3JtIGVhc2Utb3V0IDhzOwogIHRyYW5zaXRpb246IHRyYW5zZm9ybSBlYXNlLW91dCA4czsKICB0cmFuc2l0aW9uOiB0cmFuc2Zvcm0gZWFzZS1vdXQgOHMsIC13ZWJraXQtdHJhbnNmb3JtIGVhc2Utb3V0IDhzOwp9CgpodG1sID4gYm9keSA+IGNsb3VkZmxhcmUtYXBwW2FwcD0id2VsY29tZS1iYXIiXVtkYXRhLXNsaWRlLWFuaW1hdGlvbj0iY29tcGxldGUiXTo6YmVmb3JlIHsKICAtd2Via2l0LXRyYW5zZm9ybTogdHJhbnNsYXRlM2QoMCwgMCwgMCk7CiAgICAgICAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZTNkKDAsIDAsIDApOwp9CgpodG1sW2RhdGEtY2Ytd2VsY29tZS1iYXItdmlzaWJpbGl0eT0idmlzaWJsZSJdID4gYm9keSA+IGNsb3VkZmxhcmUtYXBwW2FwcD0id2VsY29tZS1iYXIiXSB7CiAgLXdlYmtpdC10cmFuc2Zvcm06IHRyYW5zbGF0ZTNkKDAsIDAsIDApICFpbXBvcnRhbnQ7CiAgICAgICAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZTNkKDAsIDAsIDApICFpbXBvcnRhbnQ7Cn0KCmNsb3VkZmxhcmUtYXBwW2FwcD0id2VsY29tZS1iYXIiXSBhbGVydC1tZXNzYWdlIHsKICBkaXNwbGF5OiAtd2Via2l0LWJveDsKICBkaXNwbGF5OiAtbXMtZmxleGJveDsKICBkaXNwbGF5OiBmbGV4OwogIC13ZWJraXQtYm94LWZsZXg6IDE7CiAgICAgIC1tcy1mbGV4OiAxIDEgYXV0bzsKICAgICAgICAgIGZsZXg6IDEgMSBhdXRvOwogIC13ZWJraXQtYm94LXBhY2s6IGNlbnRlcjsKICAgICAgLW1zLWZsZXgtcGFjazogY2VudGVyOwogICAgICAgICAganVzdGlmeS1jb250ZW50OiBjZW50ZXI7Cn0KCmNsb3VkZmxhcmUtYXBwW2FwcD0id2VsY29tZS1iYXIiXSBhbGVydC1tZXNzYWdlLWNvbnRlbnQgewogIGRpc3BsYXk6IC13ZWJraXQtYm94OwogIGRpc3BsYXk6IC1tcy1mbGV4Ym94OwogIGRpc3BsYXk6IGZsZXg7CiAgLXdlYmtpdC1ib3gtYWxpZ246IGNlbnRlcjsKICAgICAgLW1zLWZsZXgtYWxpZ246IGNlbnRlcjsKICAgICAgICAgIGFsaWduLWl0ZW1zOiBjZW50ZXI7CiAgZm9udC1zaXplOiAxLjFlbTsKICBsaW5lLWhlaWdodDogMS4yOwogIGZvbnQtd2VpZ2h0OiA1MDA7CiAgbWF4LXdpZHRoOiA3MDBweDsKfQoKQGZvbnQtZmFjZSB7CiAgZm9udC1mYW1pbHk6ICJjZmFwcHMtd2VsY29tZS1iYXItaWNvbnMiOwogIGZvbnQtc3R5bGU6IG5vcm1hbDsKICBmb250LXdlaWdodDogbm9ybWFsOwogIHNyYzogdXJsKGRhdGE6YXBwbGljYXRpb24veC1mb250LXdvZmY7Y2hhcnNldD11dGYtODtiYXNlNjQsZDA5R1JrOVVWRThBQUFPZ0FBb0FBQUFBQlh3QUFRQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUJEUmtZZ0FBQUE5QUFBQU1BQUFBRFJLamNwVDBaR1ZFMEFBQUcwQUFBQUdnQUFBQnh6Q2MyZVQxTXZNZ0FBQWRBQUFBQklBQUFBWUlES0JTbGpiV0Z3QUFBQ0dBQUFBRGNBQUFGQ0FBMGk0V2hsWVdRQUFBSlFBQUFBTHdBQUFEWUR0dFlXYUdobFlRQUFBb0FBQUFBZ0FBQUFKQWF0QWVob2JYUjRBQUFDb0FBQUFBZ0FBQUFJQS9vQUFHMWhlSEFBQUFLb0FBQUFCZ0FBQUFZQUFsQUFibUZ0WlFBQUFyQUFBQURZQUFBQnNFbkJCMXB3YjNOMEFBQURpQUFBQUJZQUFBQWcvNTBBWjNpY1kyUmdZV0ZnWkdUa1NVMU1UeTNTelV6T3p5dG1ZR1JpWUdSdy9DSEQ5RU9XK1ljRVN3OFBZd1FQODBjZUZqa3VCcFlPRGZudWJqaURoNzI3NU1la1h4MnNNZ3hkL0RJTURBSXlETDJDTWd3Y01nd25oUmlZUWNid01rZ3dLQmRscG1lVUpHZWtsaFhsNXlGWmhHd25Bd05qT3dNVEk2T0NlZmZIWHp3ZkdUOSsvUENSK2FQWTk2Ty9idncreXZieFg1SG9MNTRQLzNqWStYNU0rdEVpK2lmOHg0eUFpQjlhZjFML0FQR3hVRmErSHhORnVrVzdlYmdBT2taR28zaWNZMkJnWUdRQWdnc0ZEb2tnK3FMUHNYa3dHZ0JFWWdibEFBQjRuR05nWnZ6TE9JR0JsWUdEMVpoMUpnTURveHlFWnI3T2tNWWt4QUFFckF3UTBNQ0FDZ0xTWEZNWUhCU3NGS3pZMHY2bE1leGcvc0lnRGhSbWhDdFFBRUpHQUVROUMyOTRuR05nWUdCbWdHQVpCa1lHRUxBQjhoakJmQllHQlNETkFvUkF2b0xWLy84UTh2NXhxRW9HUmpZR0dITjRBaUk4QndDWTRnY05BSGljWTJCa1lHQUE0aTNQNzJySDg5dDhaZURtWUFDQml6N0g1aUhvL3k4Wi96Ri9BWEk1R0poQW9nQnFkdzFDQUhpY1kyQmtZR0QrOHY4bHd3N0d2d3dNLy84ei9tTUFpcUFBSmdEQWh3ZVhBZjBBQUFIOUFBQUFBRkFBQUFJQUFIaWNqWSs5RGNJd0VJVmZJRUhpUjVTSTBnVVNsU003QWdvR29LU2tSOGlLMHNTU3d3eU13QmlNd1FDTXdRRFVQSnNyS0Npd2RQWjNkKzkrREdDQ0t6TEVrMkdNdVhBUEJZeHdIMHRjaEhOcTdzSUYrU2s4d0RpYlVwbmxRMFptcVNweUR5TXNoUHZZWXlPY1UzTVRMc2dQNFFINUJZY2phdDRCR2cxTzhHalJBZTVZdTZDYmsyL3BmTVVsc2t2K09iMGgxU3RVS1BrUGhTM3RkOWRQemxLbHNhSlZKSXMxMi9uMnZQT2hkcW9xamRxcXIrbjByTkVyWFJsTDRUL2JIbEsrWXo1bTQ3eTRGdzR1ZEkxdmxTM05YMzNlRWhCRE1uaWNZMkJtQUlQL3N4alNnQlFqQXhvQUFDNnFBZ1FBQUE9PSkgZm9ybWF0KCJ3b2ZmIik7Cn0KCmNsb3VkZmxhcmUtYXBwW2FwcD0id2VsY29tZS1iYXIiXSAuYWxlcnQtY3RhLWJ1dHRvbiB7CiAgZGlzcGxheTogLXdlYmtpdC1ib3ggIWltcG9ydGFudDsKICBkaXNwbGF5OiAtbXMtZmxleGJveCAhaW1wb3J0YW50OwogIGRpc3BsYXk6IGZsZXggIWltcG9ydGFudDsKICAtd2Via2l0LWJveC1hbGlnbjogY2VudGVyICFpbXBvcnRhbnQ7CiAgICAgIC1tcy1mbGV4LWFsaWduOiBjZW50ZXIgIWltcG9ydGFudDsKICAgICAgICAgIGFsaWduLWl0ZW1zOiBjZW50ZXIgIWltcG9ydGFudDsKICBib3JkZXI6IDAgIWltcG9ydGFudDsKICBib3gtc2hhZG93OiBub25lICFpbXBvcnRhbnQ7CiAgY3Vyc29yOiBwb2ludGVyICFpbXBvcnRhbnQ7CiAgZGlzcGxheTogaW5saW5lLWJsb2NrICFpbXBvcnRhbnQ7CiAgLXdlYmtpdC1ib3gtZmxleDogMCAhaW1wb3J0YW50OwogICAgICAtbXMtZmxleDogMCAwIGF1dG8gIWltcG9ydGFudDsKICAgICAgICAgIGZsZXg6IDAgMCBhdXRvICFpbXBvcnRhbnQ7CiAgZm9udC1zaXplOiAuODVlbSAhaW1wb3J0YW50OwogIGZvbnQtd2VpZ2h0OiBib2xkICFpbXBvcnRhbnQ7CiAgaGVpZ2h0OiBhdXRvICFpbXBvcnRhbnQ7CiAgbGV0dGVyLXNwYWNpbmc6IC4wOGVtOwogIGxpbmUtaGVpZ2h0OiAuOTUgIWltcG9ydGFudDsKICBtYXgtd2lkdGg6IDE2ZW0gIWltcG9ydGFudDsKICBvcGFjaXR5OiAuODU7CiAgb3ZlcmZsb3c6IHZpc2libGUgIWltcG9ydGFudDsKICBwb3NpdGlvbjogcmVsYXRpdmUgIWltcG9ydGFudDsKICB0ZXh0LWRlY29yYXRpb246IG5vbmUgIWltcG9ydGFudDsKICB0ZXh0LWluZGVudDogLjA4ZW07CiAgdGV4dC1vdmVyZmxvdzogZWxsaXBzaXMgIWltcG9ydGFudDsKICB0ZXh0LXRyYW5zZm9ybTogdXBwZXJjYXNlICFpbXBvcnRhbnQ7CiAgd2hpdGUtc3BhY2U6IG5vd3JhcCAhaW1wb3J0YW50OwogIHdpZHRoOiBhdXRvICFpbXBvcnRhbnQ7Cn0KCmNsb3VkZmxhcmUtYXBwW2FwcD0id2VsY29tZS1iYXIiXSAuYWxlcnQtY3RhLWJ1dHRvbjo6YWZ0ZXIgewogIGNvbG9yOiBpbmhlcml0ICFpbXBvcnRhbnQ7CiAgY29udGVudDogIlwyMDNBIjsKICBkaXNwbGF5OiBpbmxpbmUtYmxvY2sgIWltcG9ydGFudDsKICBmb250LWZhbWlseTogImNmYXBwcy13ZWxjb21lLWJhci1pY29ucyI7CiAgZm9udC1zaXplOiAxLjNlbSAhaW1wb3J0YW50OwogIGZvbnQtc3R5bGU6IG5vcm1hbDsKICBmb250LXdlaWdodDogaW5oZXJpdDsKICBsaW5lLWhlaWdodDogLjggIWltcG9ydGFudDsKICBtYXJnaW4tdG9wOiAtMXB4ICFpbXBvcnRhbnQ7CiAgbWFyZ2luLXRvcDogYXV0byAhaW1wb3J0YW50OwogIHBhZGRpbmctbGVmdDogLjNlbSAhaW1wb3J0YW50OwogIHBvc2l0aW9uOiBhYnNvbHV0ZTsKICBsZWZ0OiAxMDAlOwp9CgpjbG91ZGZsYXJlLWFwcFthcHA9IndlbGNvbWUtYmFyIl0gYWxlcnQtZGlzbWlzcyB7CiAgY3Vyc29yOiBwb2ludGVyOwogIGNvbG9yOiByZ2JhKDEwLCAxMCwgMTAsIC4yNSk7CiAgZGlzcGxheTogaW5saW5lLWJsb2NrOwogIC13ZWJraXQtYm94LWZsZXg6IDA7CiAgICAgIC1tcy1mbGV4OiAwIDAgYXV0bzsKICAgICAgICAgIGZsZXg6IDAgMCBhdXRvOwogIGZvbnQtZmFtaWx5OiAiSGVsdmV0aWNhIE5ldWUiLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmOwogIGZvbnQtc2l6ZTogMmVtOwogIGZvbnQtd2VpZ2h0OiAzMDA7CiAgaGVpZ2h0OiAxZW07CiAgbGluZS1oZWlnaHQ6IC43NWVtOwogIG1hcmdpbjogMCAuMmVtOwogIC13ZWJraXQtdXNlci1zZWxlY3Q6IG5vbmU7CiAgICAgLW1vei11c2VyLXNlbGVjdDogbm9uZTsKICAgICAgLW1zLXVzZXItc2VsZWN0OiBub25lOwogICAgICAgICAgdXNlci1zZWxlY3Q6IG5vbmU7CiAgd2lkdGg6IC45ZW07Cn0KCmNsb3VkZmxhcmUtYXBwW2FwcD0id2VsY29tZS1iYXIiXSBhbGVydC1kaXNtaXNzOmhvdmVyIHsKICBjb2xvcjogcmdiYSgxMCwgMTAsIDEwLCAuNSk7Cn0KCmh0bWwgPiBib2R5ID4gY2xvdWRmbGFyZS1hcHBbYXBwPSJ3ZWxjb21lLWJhciJdW2RhdGEtc3R5bGU9InNsaW0iXSB7CiAgZm9udC1zaXplOiAuOTJlbTsKICBtaW4taGVpZ2h0OiAyLjJlbTsKfQoKaHRtbCA+IGJvZHkgPiBjbG91ZGZsYXJlLWFwcFthcHA9IndlbGNvbWUtYmFyIl1bZGF0YS1zdHlsZT0icHJvbWluZW50Il0gLmFsZXJ0LWN0YS1idXR0b24gewogIGJvcmRlci1yYWRpdXM6IC4xNWVtOwp9CgpAbWVkaWEgKG1pbi13aWR0aDogNzY4cHgpIHsKICBjbG91ZGZsYXJlLWFwcFthcHA9IndlbGNvbWUtYmFyIl0gewogICAgcGFkZGluZzogLjVlbSAwOwogIH0KCiAgY2xvdWRmbGFyZS1hcHBbYXBwPSJ3ZWxjb21lLWJhciJdW2RhdGEtc3R5bGU9InByb21pbmVudCJdIC5hbGVydC1jdGEtYnV0dG9uIHsKICAgIHBhZGRpbmc6IC42NWVtIDEuNzVlbSAuNmVtIC45ZW0gIWltcG9ydGFudDsKICB9CgogIGNsb3VkZmxhcmUtYXBwW2FwcD0id2VsY29tZS1iYXIiXVtkYXRhLXN0eWxlPSJwcm9taW5lbnQiXSAuYWxlcnQtY3RhLWJ1dHRvbjo6YWZ0ZXIgewogICAgbGVmdDogYXV0bzsKICB9CgogIGNsb3VkZmxhcmUtYXBwW2FwcD0id2VsY29tZS1iYXIiXSAuYWxlcnQtY3RhLWJ1dHRvbiB7CiAgICBtYXJnaW4tbGVmdDogMWVtOwogIH0KfQoKQG1lZGlhIChtYXgtd2lkdGg6IDc2OHB4KSB7CiAgaHRtbCA+IGJvZHkgPiBjbG91ZGZsYXJlLWFwcFthcHA9IndlbGNvbWUtYmFyIl0gewogICAgLXdlYmtpdC1ib3gtYWxpZ246IGNlbnRlcjsKICAgICAgICAtbXMtZmxleC1hbGlnbjogY2VudGVyOwogICAgICAgICAgICBhbGlnbi1pdGVtczogY2VudGVyOwogICAgZm9udC1zaXplOiAuOTJlbTsKICAgIG1pbi1oZWlnaHQ6IDIuMmVtOwogICAgcGFkZGluZzogLjVlbSAwIC41ZW0gLjVlbTsKICB9CgogIGNsb3VkZmxhcmUtYXBwW2FwcD0id2VsY29tZS1iYXIiXSAuYWxlcnQtY3RhLWJ1dHRvbiB7CiAgICBtYXJnaW4tdG9wOiAuNWVtOwogICAgZGlzcGxheTogYmxvY2sgIWltcG9ydGFudDsKICAgIC13ZWJraXQtYm94LWZsZXg6IDA7CiAgICAgICAgLW1zLWZsZXg6IDAgMCBhdXRvOwogICAgICAgICAgICBmbGV4OiAwIDAgYXV0bzsKICB9CgogIGNsb3VkZmxhcmUtYXBwW2FwcD0id2VsY29tZS1iYXIiXSBhbGVydC1tZXNzYWdlLWNvbnRlbnQgewogICAgLXdlYmtpdC1ib3gtb3JpZW50OiB2ZXJ0aWNhbCAhaW1wb3J0YW50OwogICAgLXdlYmtpdC1ib3gtZGlyZWN0aW9uOiBub3JtYWwgIWltcG9ydGFudDsKICAgICAgICAtbXMtZmxleC1mbG93OiBjb2x1bW4gbm93cmFwICFpbXBvcnRhbnQ7CiAgICAgICAgICAgIGZsZXgtZmxvdzogY29sdW1uIG5vd3JhcCAhaW1wb3J0YW50OwogICAgLXdlYmtpdC1ib3gtYWxpZ246IHN0YXJ0ICFpbXBvcnRhbnQ7CiAgICAgICAgLW1zLWZsZXgtYWxpZ246IHN0YXJ0ICFpbXBvcnRhbnQ7CiAgICAgICAgICAgIGFsaWduLWl0ZW1zOiBmbGV4LXN0YXJ0ICFpbXBvcnRhbnQ7CiAgfQp9Cgo="></head>
+
+
+  <body>          
+            <div class="site-wrap">
+    <!-- FULL WIDTH BLOCK -->
+        <section class="container full">
+                <div class="info-block text-adapt">
+                    <div>
+                        <h2 id="introduction">Introduction</h2>
+
+<p>This is a list of the wallet-rpc calls, their inputs and outputs, and examples of each. The program wallet-rpc replaced the rpc interface that was in simplewallet and then wallet-cli.</p>
+
+<p>All wallet-rpc methods use the same JSON RPC interface. For example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>IP=127.0.0.1
+PORT=18082
+METHOD="make_integrated_address"
+PARAMS="{\"payment_id\":\"1234567890123456789012345678900012345678901234567890123456789000\"}"
+curl \
+    -X POST http://$IP:$PORT/json_rpc \
+    -d '{"jsonrpc":"2.0","id":"0","method":"'$METHOD'","params":'"$PARAMS"'}' \
+    -H 'Content-Type: application/json'
+</code></pre></div></div>
+
+<p>If the wallet-rpc was executed with the <code class="highlighter-rouge">--rpc-login</code> argument as <code class="highlighter-rouge">username:password</code>, then follow this example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>IP=127.0.0.1
+PORT=18082
+METHOD="make_integrated_address"
+PARAMS="{\"payment_id\":\"1234567890123456789012345678900012345678901234567890123456789000\"}"
+curl \
+    -u username:password --digest \
+    -X POST http://$IP:$PORT/json_rpc \
+    -d '{"jsonrpc":"2.0","id":"0","method":"'$METHOD'","params":'"$PARAMS"'}' \
+    -H 'Content-Type: application/json'
+</code></pre></div></div>
+
+<p>Note: "atomic units" refer to the smallest fraction of 1 XMR according to the implementation. <strong>1 XMR = 1e12 atomic units.</strong></p>
+
+<h3 id="index-of-json-rpc-methods">Index of JSON RPC Methods:</h3>
+
+<ul>
+  <li><a href="#getbalance">getbalance</a></li>
+  <li><a href="#getaddress">getaddress</a></li>
+  <li><a href="#getheight">getheight</a></li>
+  <li><a href="#transfer">transfer</a></li>
+  <li><a href="#transfer_split">transfer_split</a></li>
+  <li><a href="#sweep_dust">sweep_dust</a></li>
+  <li><a href="#sweep_all">sweep_all</a></li>
+  <li><a href="#store">store</a></li>
+  <li><a href="#get_payments">get_payments</a></li>
+  <li><a href="#get_bulk_payments">get_bulk_payments</a></li>
+  <li><a href="#get_transfers">get_transfers</a></li>
+  <li><a href="#get_transfer_by_txid">get_transfer_by_txid</a></li>
+  <li><a href="#incoming_transfers">incoming_transfers</a></li>
+  <li><a href="#query_key">query_key</a></li>
+  <li><a href="#make_integrated_address">make_integrated_address</a></li>
+  <li><a href="#split_integrated_address">split_integrated_address</a></li>
+  <li><a href="#stop_wallet">stop_wallet</a></li>
+  <li><a href="#make_uri">make_uri</a></li>
+  <li><a href="#parse_uri">parse_uri</a></li>
+  <li><a href="#rescan_blockchain">rescan_blockchain</a></li>
+  <li><a href="#set_tx_notes">set_tx_notes</a></li>
+  <li><a href="#get_tx_notes">get_tx_notes</a></li>
+  <li><a href="#sign">sign</a></li>
+  <li><a href="#verify">verify</a></li>
+  <li><a href="#export_key_images">export_key_images</a></li>
+  <li><a href="#import_key_images">import_key_images</a></li>
+  <li><a href="#get_address_book">get_address_book</a></li>
+  <li><a href="#add_address_book">add_address_book</a></li>
+  <li><a href="#delete_address_book">delete_address_book</a></li>
+  <li><a href="#rescan_spent">rescan_spent</a></li>
+  <li><a href="#start_mining">start_mining</a></li>
+  <li><a href="#stop_mining">stop_mining</a></li>
+  <li><a href="#get_languages">get_languages</a></li>
+  <li><a href="#create_wallet">create_wallet</a></li>
+  <li><a href="#open_wallet">open_wallet</a></li>
+</ul>
+
+<h4 id="new-methods">New methods:</h4>
+
+<ul>
+  <li><a href="#alias_address">alias_address</a></li>
+  <li><a href="#get_aliases">get_aliases</a></li>
+</ul>
+
+<hr>
+
+<h2 id="json-rpc-methods">JSON RPC Methods:</h2>
+
+<h3 id="getbalance"><strong>getbalance</strong></h3>
+
+<p>Return the wallet's balance.</p>
+
+<p>Inputs: <em>None</em>.</p>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>balance</em> - unsigned int; The total balance of the current wallet-rpc in session.</li>
+  <li><em>unlocked_balance</em> - unsigned int; Unlocked funds are those funds that are sufficiently deep enough in the blockchain to be considered safe to spend.</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"getbalance"}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "balance": 140000000000,
+    "unlocked_balance": 50000000000
+  }
+}
+</code></pre></div></div>
+
+<h3 id="getaddress"><strong>getaddress</strong></h3>
+
+<p>Return the wallet's address.</p>
+
+<p>Inputs: <em>None</em>.</p>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>address</em> - string; The 95-character hex address string of the wallet-rpc in session.</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"getaddress"}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "address": "427ZuEhNJQRXoyJAeEoBaNW56ScQaLXyyQWgxeRL9KgAUhVzkvfiELZV7fCPBuuB2CGuJiWFQjhnhhwiH1FsHYGQGaDsaBA"
+  }
+}
+</code></pre></div></div>
+
+<h3 id="getheight"><strong>getheight</strong></h3>
+
+<p>Returns the wallet's current block height.</p>
+
+<p>Inputs: <em>None</em>.</p>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>height</em> - unsigned int; The current wallet-rpc's blockchain height. If the wallet has been offline for a long time, it may need to catch up with the daemon.</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"getheight"}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "height": 994310
+  }
+}
+</code></pre></div></div>
+
+<h3 id="transfer"><strong>transfer</strong></h3>
+
+<p>Send citicash to a number of recipients.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>destinations</em> - array of destinations to receive XMR:
+    <ul>
+      <li><em>amount</em> - unsigned int; Amount to send to each destination, in atomic units.</li>
+      <li><em>address</em> - string; Destination public address or alias.</li>
+    </ul>
+  </li>
+  <li><em>fee</em> - unsigned int; Ignored, will be automatically calculated.</li>
+  <li><em>mixin</em> - unsigned int; Number of outpouts from the blockchain to mix with (0 means no mixing).</li>
+  <li><em>unlock_time</em> - unsigned int; Number of blocks before the citicash can be spent (0 to not add a lock).</li>
+  <li><em>payment_id</em> - string; (Optional) Random 32-byte/64-character hex string to identify a transaction.</li>
+  <li><em>get_tx_key</em> - boolean; (Optional) Return the transaction key after sending.</li>
+  <li><em>priority</em> - unsigned int; Set a priority for the transaction. Accepted Values are: 0-3 for: default, unimportant, normal, elevated, priority.</li>
+  <li><em>do_not_relay</em> - boolean; (Optional) If true, the newly created transaction will not be relayed to the network. (Defaults to false)</li>
+  <li><em>get_tx_hex</em> - boolean; Return the transaction as hex string after sending</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>fee</em> - Integer value of the fee charged for the txn.</li>
+  <li><em>tx_hash</em> - String for the publically searchable transaction hash</li>
+  <li><em>tx_key</em> - String for the transaction key if get_tx_key is true, otherwise, blank string.</li>
+  <li><em>tx_blob</em> - Transaction as hex string if get_tx_hex is true</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"transfer","params":{"destinations":[{"amount":100000000,"address":"9wNgSYy2F9qPZu7KBjvsFgZLTKE2TZgEpNFbGka9gA5zPmAXS35QzzYaLKJRkYTnzgArGNX7TvSqZC87tBLwtaC5RQgJ8rm"},{"amount":200000000,"address":"9vH5D7Fv47mbpCpdcthcjU34rqiiAYRCh1tYywmhqnEk9iwCE9yppgNCXAyVHG5qJt2kExa42TuhzQfJbmbpeGLkVbg8xit"}],"mixin":4,"get_tx_key": true}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "fee": 48958481211,
+    "tx_hash": "985180f468637bc6d2f72ee054e1e34b8d5097988bb29a2e0cb763e4464db23c",
+    "tx_key": "8d62e5637f1fcc9a8904057d6bed6c697618507b193e956f77c31ce662b2ee07"
+  }
+}
+</code></pre></div></div>
+
+<h3 id="transfer_split"><strong>transfer_split</strong></h3>
+
+<p>Same as transfer, but can split into more than one tx if necessary.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>destinations</em> - array of destinations to receive XMR:
+    <ul>
+      <li><em>amount</em> - unsigned int; Amount to send to each destination, in atomic units.</li>
+      <li><em>address</em> - string; Destination public address or alias.</li>
+    </ul>
+  </li>
+  <li><em>fee</em> - unsigned int; Ignored, will be automatically calculated.</li>
+  <li><em>mixin</em> - unsigned int; Number of outpouts from the blockchain to mix with (0 means no mixing).</li>
+  <li><em>unlock_time</em> - unsigned int; Number of blocks before the citicash can be spent (0 to not add a lock).</li>
+  <li><em>payment_id</em> - string; (Optional) Random 32-byte/64-character hex string to identify a transaction.</li>
+  <li><em>get_tx_keys</em> - boolean; (Optional) Return the transaction keys after sending. – Ignored</li>
+  <li><em>priority</em> - unsigned int; Set a priority for the transactions. Accepted Values are: 0-3 for: default, unimportant, normal, elevated, priority.</li>
+  <li><em>do_not_relay</em> - boolean; (Optional) If true, the newly created transaction will not be relayed to the network. (Defaults to false)</li>
+  <li><em>get_tx_hex</em> - boolean; Return the transactions as hex string after sending</li>
+  <li><em>new_algorithm</em> - boolean; True to use the new transaction construction algorithm, defaults to false.</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>fee_list</em> - array of: integer. The amount of fees paid for every transaction.</li>
+  <li><em>tx_hash_list</em> - array of: string. The tx hashes of every transaction.</li>
+  <li><em>tx_blob_list</em> - array of: string. The tx as hex string for every transaction.</li>
+  <li><em>amount_list</em> - array of: integer. The amount transferred for every transaction..</li>
+  <li><em>tx_key_list</em> - array of: string. The transaction keys for every transaction.</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"transfer_split","params":{"destinations":[{"amount":100000000,"address":"9wNgSYy2F9qPZu7KBjvsFgZLTKE2TZgEpNFbGka9gA5zPmAXS35QzzYaLKJRkYTnzgArGNX7TvSqZC87tBwtaC5RQgJ8rm"},{"amount":200000000,"address":"9vH5D7Fv47mbpCpdcthcjU34rqiiAYRCh1tYywmhqnEk9iwCE9yppgNCXAyVHG5qJt2kExa42TuhzQfJbmbpeGLkVbg8xit"},{"amount":200000000,"address":"9vC5Q25cR1d3WzKX6dpTaLJaqZyDrtTnfadTmVuB1Wue2tyFGxUhiE4RGa74pEDJv7gSySzcd1Ao6G1nzSaqp78vLfP6MPj"},{"amount":200000000,"address":"A2MSrn49ziBPJBh8ZNEhhbfyLMou6mao4C1F5TLGUatmUnCxZArDYkcbAnVkVEopWVeak2rKDrmc8JpoS7n5dvfN9YDPBTG"},{"amount":200000000,"address":"9tEDyVQ8zgRQbDYiykTdpw5kZ6qWQWcKfExEj9eQshjpGb3sdr3UyWE2AHWzUGzJjaH9HN1DdGBdyQQ4AqGMc7rr5xYwZWW"}],"mixin":4,"get_tx_key": true, "new_algorithm": true}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "fee_list": [97916962422],
+    "tx_hash_list": ["c5c389846e701c27aaf1f7ab8b9dc457b471fcea5bc9710e8020d51275afbc54"]
+  }
+}
+</code></pre></div></div>
+
+<h3 id="sweep_dust"><strong>sweep_dust</strong></h3>
+
+<p>Send all dust outputs back to the wallet's, to make them easier to spend (and mix).</p>
+
+<p>Inputs: <em>None</em>.</p>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>tx_hash_list</em> - list of: string</li>
+</ul>
+
+<p>Example (In this example, <code class="highlighter-rouge">sweep_dust</code> returns an error due to insufficient funds to sweep):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"sweep_dust"}' -H 'Content-Type: application/json'
+
+{
+  "error": {
+    "code": -4,
+    "message": "not enough money"
+  },
+  "id": "0",
+  "jsonrpc": "2.0"
+}
+</code></pre></div></div>
+
+<h3 id="sweep_all"><strong>sweep_all</strong></h3>
+
+<p>Send all unlocked balance to an address.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>address</em> - string; Destination public address.</li>
+  <li><em>priority</em> - unsigned int; (Optional)</li>
+  <li><em>mixin</em> - unsigned int; Number of outpouts from the blockchain to mix with (0 means no mixing).</li>
+  <li><em>unlock_time</em> - unsigned int; Number of blocks before the citicash can be spent (0 to not add a lock).</li>
+  <li><em>payment_id</em> - string; (Optional) Random 32-byte/64-character hex string to identify a transaction.</li>
+  <li><em>get_tx_keys</em> - boolean; (Optional) Return the transaction keys after sending.</li>
+  <li><em>below_amount</em> - unsigned int; (Optional)</li>
+  <li><em>do_not_relay</em> - boolean; (Optional)</li>
+  <li><em>get_tx_hex</em> - boolean; (Optional) return the transactions as hex encoded string.</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>tx_hash_list</em> - array of string;</li>
+  <li><em>tx_key_list</em> - array of string;</li>
+  <li><em>tx_blob_list</em> - array of string;</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"sweep_all","params":{"address":"9sS8eRU2b5ZbN2FPSrpkiab1bjbHE5XtL6Ti6We3Fhw5aQPudRfVVypjgzKDNkxtvTQSPs122NKggb2mqcqkKSeMNVu59S","mixin":2,"unlock_time":0,"get_tx_keys":true}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "tx_hash_list": ["53a3648797d5524dd037d4105e067fa61468faecab41927fc43adbb26c202d22"],
+    "tx_key_list": ["e83b3b78235e36cd7e4d9695efd81a3b3e64c7d1f1ebd61892f0a7add6a50301"]
+  }
+}
+</code></pre></div></div>
+
+<h3 id="store"><strong>store</strong></h3>
+
+<p>Save the blockchain.</p>
+
+<p>Inputs: <em>None</em>.</p>
+
+<p>Outputs: <em>None</em>.</p>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"store"}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+  }
+}
+</code></pre></div></div>
+
+<h3 id="get_payments"><strong>get_payments</strong></h3>
+
+<p>Get a list of incoming payments using a given payment id.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>payment_id</em> - string</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>payments</em> - list of:
+    <ul>
+      <li><em>alias</em> - string; only when the transactions is made with alias_address</li>
+      <li><em>payment_id</em> - string</li>
+      <li><em>tx_hash</em> - string</li>
+      <li><em>amount</em> - unsigned int</li>
+      <li><em>block_height</em> - unsigned int</li>
+      <li><em>unlock_time</em> - unsigned int</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_payments","params":{"payment_id":"4279257e0a20608e25dba8744949c9e1caff4fcdafc7d5362ecf14225f3d9030"}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "payments": [{
+      "amount": 10350000000000,
+      "block_height": 994327,
+      "payment_id": "4279257e0a20608e25dba8744949c9e1caff4fcdafc7d5362ecf14225f3d9030",
+      "tx_hash": "c391089f5b1b02067acc15294e3629a463412af1f1ed0f354113dd4467e4f6c1",
+      "unlock_time": 0
+    }]
+  }
+}
+</code></pre></div></div>
+
+<h3 id="get_bulk_payments"><strong>get_bulk_payments</strong></h3>
+
+<p>Get a list of incoming payments using a given payment id, or a list of payments ids, from a given height. This method is the preferred method over <code class="highlighter-rouge">get_payments</code> because it has the same functionality but is more extendable. Either is fine for looking up transactions by a single payment ID.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>payment_ids</em> - array of: string</li>
+  <li><em>min_block_height</em> - unsigned int; The block height at which to start looking for payments.</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>payments</em> - list of:
+    <ul>
+      <li><em>alias</em> - string; only when the transactions is made with alias_address</li>
+      <li><em>payment_id</em> - string</li>
+      <li><em>tx_hash</em> - string</li>
+      <li><em>amount</em> - unsigned int</li>
+      <li><em>block_height</em> - unsigned int</li>
+      <li><em>unlock_time</em> - unsigned int</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_bulk_payments","params":{"payment_ids":["4279257e0a20608e25dba8744949c9e1caff4fcdafc7d5362ecf14225f3d9030"],"min_block_height":990000}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "payments": [{
+      "amount": 10350000000000,
+      "block_height": 994327,
+      "payment_id": "4279257e0a20608e25dba8744949c9e1caff4fcdafc7d5362ecf14225f3d9030",
+      "tx_hash": "c391089f5b1b02067acc15294e3629a463412af1f1ed0f354113dd4467e4f6c1",
+      "unlock_time": 0
+    }]
+  }
+}
+</code></pre></div></div>
+
+<h3 id="get_transfers"><strong>get_transfers</strong></h3>
+
+<p>Returns a list of transfers.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>in</em> - boolean;</li>
+  <li><em>out</em> - boolean;</li>
+  <li><em>pending</em> - boolean;</li>
+  <li><em>failed</em> - boolean;</li>
+  <li><em>pool</em> - boolean;</li>
+  <li><em>filter_by_height</em> - boolean;</li>
+  <li><em>min_height</em> - unsigned int;</li>
+  <li><em>max_height</em> - unsigned int;</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>in</em> array of transfers:
+    <ul>
+      <li><em>alias</em> - string; only when the transactions is made with alias_address</li>
+      <li><em>txid</em> - string;</li>
+      <li><em>payment_id</em> - string;</li>
+      <li><em>height</em> - unsigned int;</li>
+      <li><em>timestamp</em> - unsigned int;</li>
+      <li><em>amount</em> - unsigned int;</li>
+      <li><em>fee</em> - unsigned int;</li>
+      <li><em>note</em> - string;</li>
+      <li><em>destinations</em> - std::list<transfer_destination>;</transfer_destination></li>
+      <li><em>type</em> - string;</li>
+    </ul>
+  </li>
+  <li><em>out</em> array of transfers</li>
+  <li><em>pending</em> array of transfers</li>
+  <li><em>failed</em> array of transfers</li>
+  <li><em>pool</em> array of transfers</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_transfers","params":{"pool":true}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "pool": [{
+      "amount": 500000000000,
+      "fee": 0,
+      "height": 0,
+      "note": "",
+      "payment_id": "758d9b225fda7b7f",
+      "timestamp": 1488312467,
+      "txid": "da7301d5423efa09fabacb720002e978d114ff2db6a1546f8b820644a1b96208",
+      "type": "pool"
+    }]
+  }
+}
+</code></pre></div></div>
+
+<h3 id="get_transfer_by_txid"><strong>get_transfer_by_txid</strong></h3>
+
+<p>Show information about a transfer to/from this address.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>txid</em> - string</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>transfer</em> - JSON object containing parment information:
+    <ul>
+      <li><em>alias</em> - string; only when the transactions is made with alias_address</li>
+      <li><em>amount</em> - unsigned int</li>
+      <li><em>fee</em> - unsigned int</li>
+      <li><em>height</em> - unsigned int</li>
+      <li><em>note</em> - string</li>
+      <li><em>payment_id</em> - string</li>
+      <li><em>timestamp</em> - unsigned int</li>
+      <li><em>txid</em> - string</li>
+      <li><em>type</em> - string</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_transfer_by_txid","params":{"txid":"f2d33ba969a09941c6671e6dfe7e9456e5f686eca72c1a94a3e63ac6d7f27baf"}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "transfer": {
+      "amount": 10000000000000,
+      "fee": 0,
+      "height": 1316388,
+      "note": "",
+      "payment_id": "0000000000000000",
+      "timestamp": 1495539310,
+      "txid": "f2d33ba969a09941c6671e6dfe7e9456e5f686eca72c1a94a3e63ac6d7f27baf",
+      "type": "in"
+    }
+  }
+}
+</code></pre></div></div>
+
+<h3 id="incoming_transfers"><strong>incoming_transfers</strong></h3>
+
+<p>Return a list of incoming transfers to the wallet.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>transfer_type</em> - string; "all": all the transfers, "available": only transfers which are not yet spent, OR "unavailable": only transfers which are already spent.</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>transfers</em> - list of:
+    <ul>
+      <li><em>alias</em> - string; only when the transactions is made with alias_address</li>
+      <li><em>amount</em> - unsigned int</li>
+      <li><em>spent</em> - boolean</li>
+      <li><em>global_index</em> - unsigned int; Mostly internal use, can be ignored by most users.</li>
+      <li><em>tx_hash</em> - string; Several incoming transfers may share the same hash if they were in the same transaction.</li>
+      <li><em>tx_size</em> - unsigned int</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Example (Return "all" transaction types):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"incoming_transfers","params":{"transfer_type":"all"}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "transfers": [{
+      "amount": 10000000000000,
+      "global_index": 711506,
+      "spent": false,
+      "tx_hash": "&amp;lt;c391089f5b1b02067acc15294e3629a463412af1f1ed0f354113dd4467e4f6c1&amp;gt;",
+      "tx_size": 5870
+    },{
+      "amount": 300000000000,
+      "global_index": 794232,
+      "spent": false,
+      "tx_hash": "&amp;lt;c391089f5b1b02067acc15294e3629a463412af1f1ed0f354113dd4467e4f6c1&amp;gt;",
+      "tx_size": 5870
+    },{
+      "amount": 50000000000,
+      "global_index": 213659,
+      "spent": false,
+      "tx_hash": "&amp;lt;c391089f5b1b02067acc15294e3629a463412af1f1ed0f354113dd4467e4f6c1&amp;gt;",
+      "tx_size": 5870
+    }]
+  }
+}
+</code></pre></div></div>
+
+<p>Example (Return "available" transactions):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"incoming_transfers","params":{"transfer_type":"available"}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "transfers": [{
+      "amount": 10000000000000,
+      "global_index": 711506,
+      "spent": false,
+      "tx_hash": "&amp;lt;c391089f5b1b02067acc15294e3629a463412af1f1ed0f354113dd4467e4f6c1&amp;gt;",
+      "tx_size": 5870
+    },{
+      "amount": 300000000000,
+      "global_index": 794232,
+      "spent": false,
+      "tx_hash": "&amp;lt;c391089f5b1b02067acc15294e3629a463412af1f1ed0f354113dd4467e4f6c1&amp;gt;",
+      "tx_size": 5870
+    },{
+      "amount": 50000000000,
+      "global_index": 213659,
+      "spent": false,
+      "tx_hash": "&amp;lt;c391089f5b1b02067acc15294e3629a463412af1f1ed0f354113dd4467e4f6c1&amp;gt;",
+      "tx_size": 5870
+    }]
+  }
+}
+</code></pre></div></div>
+
+<p>Example (Return "unavailable" transaction. Note that this particular example returns 0 unavailable transactions):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"incoming_transfers","params":{"transfer_type":"unavailable"}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+  }
+}
+</code></pre></div></div>
+
+<h3 id="query_key"><strong>query_key</strong></h3>
+
+<p>Return the spend or view private key.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>key_type</em> - string; Which key to retrieve: "mnemonic" - the mnemonic seed (older wallets do not have one) OR "view_key" - the view key</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>key</em> - string; The view key will be hex encoded, while the mnemonic will be a string of words.</li>
+</ul>
+
+<p>Example (Query view key):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"query_key","params":{"key_type":"view_key"}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "key": "7e341d..."
+  }
+}
+</code></pre></div></div>
+
+<p>Example (Query mnemonic key):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"query_key","params":{"key_type":"mnemonic"}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "key": "adapt adapt nostril ..."
+  }
+}
+</code></pre></div></div>
+
+<h3 id="make_integrated_address"><strong>make_integrated_address</strong></h3>
+
+<p>Make an integrated address from the wallet address and a payment id.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>payment_id</em> - string; hex encoded; can be empty, in which case a random payment id is generated</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>integrated_address</em> - string</li>
+</ul>
+
+<p>Example (Payment ID is empty, use a random ID):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"make_integrated_address","params":{"payment_id":""}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "integrated_address": "4BpEv3WrufwXoyJAeEoBaNW56ScQaLXyyQWgxeRL9KgAUhVzkvfiELZV7fCPBuuB2CGuJiWFQjhnhhwiH1FsHYGQQ8H2RRJveAtUeiFs6J"
+  }
+}
+</code></pre></div></div>
+
+<h3 id="split_integrated_address"><strong>split_integrated_address</strong></h3>
+
+<p>Retrieve the standard address and payment id corresponding to an integrated address.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>integrated_address</em> - string</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>standard_address</em> - string</li>
+  <li><em>payment</em> - string; hex encoded</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"split_integrated_address","params":{"integrated_address": "4BpEv3WrufwXoyJAeEoBaNW56ScQaLXyyQWgxeRL9KgAUhVzkvfiELZV7fCPBuuB2CGuJiWFQjhnhhwiH1FsHYGQQ8H2RRJveAtUeiFs6J"}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "payment_id": "&amp;lt;420fa29b2d9a49f5&amp;gt;",
+    "standard_address": "427ZuEhNJQRXoyJAeEoBaNW56ScQaLXyyQWgxeRL9KgAUhVzkvfiELZV7fCPBuuB2CGuJiWFQjhnhhwiH1FsHYGQGaDsaBA"
+  }
+}
+</code></pre></div></div>
+
+<h3 id="stop_wallet"><strong>stop_wallet</strong></h3>
+
+<p>Stops the wallet, storing the current state.</p>
+
+<p>Inputs: <em>None</em>.</p>
+
+<p>Outputs: <em>None</em>.</p>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"stop_wallet"}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+  }
+}
+</code></pre></div></div>
+
+<h3 id="make_uri"><strong>make_uri</strong></h3>
+
+<p>Create a payment URI using the official URI spec.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>address</em> - wallet address string</li>
+  <li><em>amount</em> (optional) - the integer amount to receive, in <strong>atomic</strong> units</li>
+  <li><em>payment_id</em> (optional) - 16 or 64 character hexadecimal payment id string</li>
+  <li><em>recipient_name</em> (optional) - string name of the payment recipient</li>
+  <li><em>tx_description</em> (optional) - string describing the reason for the tx</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>uri</em> - a string containing all the payment input information as a properly formatted payment URI</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"make_uri","params":{"address":"44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A","amount":10,"payment_id":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef","tx_description":"Testing out the make_uri function.","recipient_name":"Project donation address"}}'  -H 'Content-Type: application/json'
+
+{
+  "id": 0,
+  "jsonrpc": "2.0",
+  "result": {
+    "uri": "citicash:44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A?tx_payment_id=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef&amp;tx_amount=0.000000000010&amp;recipient_name=citicash%20Project%20donation%20address&amp;tx_description=Testing%20out%20the%20make_uri%20function."
+  }
+}
+</code></pre></div></div>
+
+<h3 id="parse_uri"><strong>parse_uri</strong></h3>
+
+<p>Parse a payment URI to get payment information.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>uri</em> - a string containing all the payment input information as a properly formatted payment URI</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>uri</em> - JSON object containing payment information:
+    <ul>
+      <li><em>address</em> - wallet address string</li>
+      <li><em>amount</em> - the decimal amount to receive, in <strong>coin</strong> units (0 if not provided)</li>
+      <li><em>payment_id</em> - 16 or 64 character hexadecimal payment id string (empty if not provided)</li>
+      <li><em>recipient_name</em> - string name of the payment recipient (empty if not provided)</li>
+      <li><em>tx_description</em> - string describing the reason for the tx (empty if not provided)</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"parse_uri","params":{"uri":"citicash:44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A?tx_payment_id=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef&amp;tx_amount=0.000000000010&amp;recipient_name=citicash%20Project%20donation%20address&amp;tx_description=Testing%20out%20the%20make_uri%20function."}}' -H 'Content-Type: application/json'
+
+{
+  "id": 0,
+  "jsonrpc": "2.0",
+  "result": {
+    "uri": {
+      "address": "44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A",
+      "amount": 10,
+      "payment_id": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "recipient_name": "Project donation address",
+      "tx_description": "Testing out the make_uri function."
+    }
+  }
+}
+</code></pre></div></div>
+
+<h3 id="rescan_blockchain"><strong>rescan_blockchain</strong></h3>
+
+<p>Rescan blockchain from scratch.</p>
+
+<p>Inputs: <em>None</em>.</p>
+
+<p>Outputs: <em>None</em>.</p>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"rescan_blockchain" -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+  }
+}
+</code></pre></div></div>
+
+<h3 id="set_tx_notes"><strong>set_tx_notes</strong></h3>
+
+<p>Set arbitrary string notes for transactions.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>txids</em> - array of string; transaction ids</li>
+  <li><em>notes</em> - array of string; notes for the transactions</li>
+</ul>
+
+<p>Outputs: <em>None</em>.</p>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"set_tx_notes","params":{"txids":["6a1a100c079c236e2cbf36f7760e8ef1a9e8357c434aa790a8c78de653ec4cf2"],"notes":["This is an example"]}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+  }
+}
+</code></pre></div></div>
+
+<h3 id="get_tx_notes"><strong>get_tx_notes</strong></h3>
+
+<p>Get string notes for transactions.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>txids</em> - array of string; transaction ids</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>notes</em> - array of string; notes for the transactions</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_tx_notes","params":{"txids":["6a1a100c079c236e2cbf36f7760e8ef1a9e8357c434aa790a8c78de653ec4cf2"]}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "notes": ["This is an example"]
+  }
+}
+</code></pre></div></div>
+
+<h3 id="sign"><strong>sign</strong></h3>
+
+<p>Sign a string.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>data</em> - string;</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>signature</em> - string;</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"sign","params":{"data":"This is sample data to be signed"}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "signature": "SigV1Xp61ZkGguxSCHpkYEVw9eaWfRfSoAf36PCsSCApx4DUrKWHEqM9CdNwjeuhJii6LHDVDFxvTPijFsj3L8NDQp1TV"
+  }
+}
+</code></pre></div></div>
+
+<h3 id="verify"><strong>verify</strong></h3>
+
+<p>Verify a signature on a string.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>data</em> - string;</li>
+  <li><em>address</em> - string;</li>
+  <li><em>signature</em> - string;</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>good</em> - boolean;</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"verify","params":{"data":"This is sample data to be signed","address":"9sS8eRU2b5ZbN2FPSrpkiab1bjbHE5XtL6Ti6We3Fhw5aQPudRfVVypjgzKDNkxtvTQZSPs122NKggb2mqcqkKSeMNVu59S","signature":"SigV1Xp61ZkGguxSCHpkYEVw9eaWfRfSoAf36PCsSCApx4DUrKWHEqM9CdNwjeuhJii6LHDVDFxvTPijFsj3L8NDQp1TV"}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "good": true
+  }
+}
+</code></pre></div></div>
+
+<h3 id="export_key_images"><strong>export_key_images</strong></h3>
+
+<p>Export a signed set of key images.</p>
+
+<p>Inputs: <em>None</em>.</p>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>signed_key_images</em> - array of signed key images:
+    <ul>
+      <li><em>key_image</em> - string;</li>
+      <li><em>signature</em> - string;</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"export_key_images"}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "signed_key_images": [{
+      "key_image": "62b83df78baad99e23b5ad3f667bc6f8d388a13d9e84c7bb6c223a556dfd34af",
+      "signature": "b87b7e989aa85aa3a2a7cd8adcb3a848d3512ff718b168e15217ff3e5da29c0183c0328b97cc052fcb5ee3548aa5e41e530ba9d854199ea19d7ddaf6a54a4c0a"
+    }]
+  }
+}
+</code></pre></div></div>
+
+<h3 id="import_key_images"><strong>import_key_images</strong></h3>
+
+<p>Import signed key images list and verify their spent status.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>signed_key_images</em> - array of signed key images:
+    <ul>
+      <li><em>key_image</em> - string;</li>
+      <li><em>signature</em> - string;</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>height</em> - unsigned int;</li>
+  <li><em>spent</em> - unsigned int;</li>
+  <li><em>unspent</em> - unsigned int;</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"import_key_images", "params":{"signed_key_images":[{"key_image":"63b83df78cafd99e23b5ad3f667bc6f8d38813d9e84c7bb6c223a556dfd34af","signature":"b87b7e989aa86aa2a7a7cd8adcb3a848d3512ff718b168e15217ff3e5da29c0183c0328b97cc052fcb5ee3548aa5e41e530ba9d854199ea19d7ddaf6a54a4c0a"},{"key_image":"44ec12fbc56c533a30b09de8ae26febd515528c4957dfe875430377a7e212b4e","signature":"91105f15be0b25bc2a94bd78a7e261608974d6d888080b9f1815655b98af190340325ea1a0840a5951dacf913d4de1b2bd33ea59c1cb7bce1b6648afa7133d03"}]}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "height": 986050,
+    "spent": 10000100000000,
+    "unspent": 4979852760000
+  }
+}
+</code></pre></div></div>
+
+<h3 id="get_address_book"><strong>get_address_book</strong></h3>
+
+<p>Retrieves entries from the address book.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>entries</em> - array of unsigned int; indices of the requested address book entries</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>entries</em> - array of entries:
+    <ul>
+      <li><em>address</em> - string;</li>
+      <li><em>description</em> - string;</li>
+      <li><em>index</em> - unsigned int;</li>
+      <li><em>payment_id</em> - string;</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_address_book","params":{"entries":[1,2]}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "entries": [{
+      "address": "A135xq3GVMdU5qtAm4hN7zjPgz8bRaiSUQmtuDdjZ6CgXayvQruJy3WPe95qj873JhK4YdTQjoR39Leg6esznQk8PckhjRN",
+      "description": "",
+      "index": 1,
+      "payment_id": "0000000000000000000000000000000000000000000000000000000000000000"
+    },{
+      "address": "A135xq3GVMdU5qtAm4hN7zjPgz8bRaiSUQmtuDdjZ6CgXayvQruJy3WPe95qj873JhK4YdTQjoR39Leg6esznQk8PckhjRN",
+      "description": "",
+      "index": 2,
+      "payment_id": "0000000000000000000000000000000000000000000000000000000000000000"
+    }]
+  }
+}
+</code></pre></div></div>
+
+<h3 id="add_address_book"><strong>add_address_book</strong></h3>
+
+<p>Add an entry to the address book.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>address</em> - string;</li>
+  <li><em>payment_id</em> - (optional) string, defaults to "0000000000000000000000000000000000000000000000000000000000000000";</li>
+  <li><em>description</em> - (optional) string, defaults to "";</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>index</em> - unsigned int; The index of the address book entry.</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"add_address_book","params":{"address":"44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A","description":"Donation address for the project"}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "index": 2
+  }
+}
+</code></pre></div></div>
+
+<h3 id="delete_address_book"><strong>delete_address_book</strong></h3>
+
+<p>Delete an entry from the address book.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>index</em> - unsigned int; The index of the address book entry.</li>
+</ul>
+
+<p>Outputs: <em>None</em>.</p>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"delete_address_book","params":{"index":0}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+  }
+}
+</code></pre></div></div>
+
+<h3 id="rescan_spent"><strong>rescan_spent</strong></h3>
+
+<p>Rescan the blockchain for spent outputs.</p>
+
+<p>Inputs: <em>None</em>.</p>
+
+<p>Outputs: <em>None</em>.</p>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"rescan_spent"}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+  }
+}
+</code></pre></div></div>
+
+<h3 id="start_mining"><strong>start_mining</strong></h3>
+
+<p>Start mining in the daemon.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>threads_count</em> - unsigned int; Number of threads created for mining</li>
+  <li><em>do_background_mining</em> - boolean;</li>
+  <li><em>ignore_battery</em> - boolean;</li>
+</ul>
+
+<p>Outputs: <em>None</em>.</p>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"start_mining","params":{"threads_count":1,"do_background_mining":true,"ignore_battery":true}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+  }
+}
+</code></pre></div></div>
+
+<h3 id="stop_mining"><strong>stop_mining</strong></h3>
+
+<p>Stop mining in the daemon.</p>
+
+<p>Inputs: <em>None</em>.</p>
+
+<p>Outputs: <em>None</em>.</p>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"stop_mining"}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+  }
+}
+</code></pre></div></div>
+
+<h3 id="get_languages"><strong>get_languages</strong></h3>
+
+<p>Get a list of available languages for your wallet's seed.</p>
+
+<p>Inputs: <em>None</em>.</p>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>languages</em> - array of string; List of available languages</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_languages"}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "languages": ["Deutsch","English","Español","Français","Italiano","Nederlands","Português","русский язык","日本語","简体中文 (中国)","Esperanto"]
+  }
+}
+</code></pre></div></div>
+
+<h3 id="create_wallet"><strong>create_wallet</strong></h3>
+
+<p>Create a new wallet. You need to have set the argument "–wallet-dir" when launching wallet-rpc to make this work.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>filename</em> - string;</li>
+  <li><em>password</em> - string;</li>
+  <li><em>language</em> - string; Language for your wallets' seed.</li>
+</ul>
+
+<p>Outputs: <em>None</em>.</p>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"create_wallet","params":{"filename":"mytestwallet","password":"mytestpassword","language":"English"}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+  }
+}
+</code></pre></div></div>
+
+<h3 id="open_wallet"><strong>open_wallet</strong></h3>
+
+<p>Open a wallet. You need to have set the argument "–wallet-dir" when launching wallet-rpc to make this work.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>filename</em> - string;</li>
+  <li><em>password</em> - string;</li>
+</ul>
+
+<p>Outputs: <em>None</em>.</p>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"open_wallet","params":{"filename":"mytestwallet","password":"mytestpassword"}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+  }
+}
+</code></pre></div></div>
+
+<h3 id="alias_address"><strong>alias_address</strong></h3>
+
+<p>Creates alias for primary wallet address.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>unlock_time</em> - unsigned int; Number of blocks before the citicash can be spent (0 to not add a lock).</li>
+  <li><em>alias</em> - string; Desired alias.</li>
+  <li><em>priority</em> - unsigned int; Set a priority for the transaction. Accepted Values are: 0-3 for: default, unimportant, normal, elevated, priority.</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>fee</em> - Integer value of the fee charged for the txn.</li>
+  <li><em>tx_hash</em> - String for the publically searchable transaction hash</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://localhost:19836/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"alias_address","params":{"alias":"lukas.salich","unlock_time":0,"priority":3}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "fee": 77183800,
+    "tx_hash": "63c3e4538280a085662298f93ebbbedaf9e2f7a91ca4fb81091c21df72e80bc9"
+  }
+}
+</code></pre></div></div>
+
+<p>TODO: Extend for subaddresses.</p>
+
+<h3 id="get_aliases"><strong>get_aliases</strong></h3>
+
+<p>Returns alias array for primary wallet address.</p>
+
+<p>Inputs: <em>None</em>.</p>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>aliases</em> - array of string</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://localhost:19836/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_aliases"}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "aliases": ["salda","lukas","salich","lukas.salich"]
+  }
+}
+</code></pre></div></div>
+
+<p>TODO: Extend for subaddresses.</p>
+
+                    </div>
+                </div>
+        </section>
+    <!-- END FULL WIDTH BLOCK -->
+    </div>
+    <footer class="container-fluid">
+            <div class="container">
+                <div class="row around-xs footer-wrapper">
+                                                                                          
+                </div>
+            </div>
+</footer>
+<!-- page served by server N -->
+    </div>
