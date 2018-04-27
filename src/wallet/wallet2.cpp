@@ -1204,9 +1204,9 @@ void wallet2::process_outgoing(const crypto::hash &txid, const cryptonote::trans
     std::vector<tx_extra_field> tx_extra_fields;
     if(parse_tx_extra(tx.extra, tx_extra_fields)) {
       tx_extra_nonce extra_nonce;
-      if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce)) // we do not care about failure here
-        get_payment_id_from_tx_extra_nonce(extra_nonce.nonce, entry.first->second.m_payment_id);        
-      if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 0) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS)
+      if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 0)) // we do not care about failure here
+        if (!get_payment_id_from_tx_extra_nonce(extra_nonce.nonce, entry.first->second.m_payment_id);
+      if (!extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS)
         entry.first->second.m_alias = extra_nonce.nonce.substr(1);
     }
     entry.first->second.m_subaddr_account = subaddr_account;
