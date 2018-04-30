@@ -1050,6 +1050,12 @@ bool Blockchain::create_block_template(block& b, const account_public_address& m
   b.prev_id = get_tail_id();
   b.timestamp = time(NULL);
 
+  uint64_t median_ts;
+  if (!check_block_timestamp(b, median_ts))
+  {
+    b.timestamp = median_ts;
+  }
+
   diffic = get_difficulty_for_next_block();
   CHECK_AND_ASSERT_MES(diffic, false, "difficulty overhead.");
 
@@ -1191,13 +1197,12 @@ bool Blockchain::create_block_template(block& b, const account_public_address& m
 bool Blockchain::complete_timestamps_vector(uint64_t start_top_height, std::vector<uint64_t>& timestamps)
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
-  size_t blockchain_timestamp_check_window = BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW;
 
-  if (timestamps.size() >= blockchain_timestamp_check_window)
+  if (timestamps.size() >= BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW)
     return true;
 
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  size_t need_elements = blockchain_timestamp_check_window - timestamps.size();
+  size_t need_elements = BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW - timestamps.size();
   CHECK_AND_ASSERT_MES(start_top_height < m_db->height(), false, "internal error: passed start_height not < " << " m_db->height() -- " << start_top_height << " >= " << m_db->height());
   size_t stop_offset = start_top_height > need_elements ? start_top_height - need_elements : 0;
   while (start_top_height != stop_offset)
@@ -2806,15 +2811,14 @@ uint64_t Blockchain::get_adjusted_time() const
 }
 //------------------------------------------------------------------
 //TODO: revisit, has changed a bit on upstream
-bool Blockchain::check_block_timestamp(std::vector<uint64_t>& timestamps, const block& b) const
+bool Blockchain::check_block_timestamp(std::vector<uint64_t>& timestamps, const block& b, uint64_t& median_ts) const
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
-  uint64_t median_ts = epee::misc_utils::median(timestamps);
-  size_t blockchain_timestamp_check_window = BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW;
+  median_ts = epee::misc_utils::median(timestamps);
 
   if(b.timestamp < median_ts)
   {
-    LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << ", less than median of last " << blockchain_timestamp_check_window << " blocks, " << median_ts);
+    LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << ", less than median of last " << BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW << " blocks, " << median_ts);
     return false;
   }
 
@@ -2828,11 +2832,10 @@ bool Blockchain::check_block_timestamp(std::vector<uint64_t>& timestamps, const 
 //   true if the block's timestamp is not less than the timestamp of the
 //       median of the selected blocks
 //   false otherwise
-bool Blockchain::check_block_timestamp(const block& b) const
+bool Blockchain::check_block_timestamp(const block& b, uint64_t& median_ts) const
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
   uint64_t block_future_time_limit = CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT;
-  size_t blockchain_timestamp_check_window = BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW;
 
   if (b.timestamp > get_adjusted_time() + block_future_time_limit)
   {
@@ -2842,7 +2845,7 @@ bool Blockchain::check_block_timestamp(const block& b) const
   }
 
   // if not enough blocks, no proper median yet, return true
-  if (m_db->height() < blockchain_timestamp_check_window)
+  if (m_db->height() < BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW)
   {
     return true;
   }
@@ -2851,13 +2854,13 @@ bool Blockchain::check_block_timestamp(const block& b) const
   auto h = m_db->height();
 
   // need most recent 60 blocks, get index of first of those
-  size_t offset = h - blockchain_timestamp_check_window;
+  size_t offset = h - BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW;
   for(;offset < h; ++offset)
   {
     timestamps.push_back(m_db->get_block_timestamp(offset));
   }
 
-  return check_block_timestamp(timestamps, b);
+  return check_block_timestamp(timestamps, b, median_ts);
 }
 
 void Blockchain::return_tx_to_pool(const std::vector<transaction> &txs)
