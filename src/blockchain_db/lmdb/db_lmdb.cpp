@@ -2188,7 +2188,7 @@ bool BlockchainLMDB::for_all_blocks(std::function<bool(uint64_t, const crypto::h
       throw0(DB_ERROR("Failed to parse block from blob retrieved from the db"));
     crypto::hash hash;
     if (!get_block_hash(b, hash))
-        throw0(DB_ERROR("Failed to get block hash from blob retrieved from the db"));
+      throw0(DB_ERROR("Failed to get block hash from blob retrieved from the db"));
     if (!f(height, hash, b)) {
       ret = false;
       break;
@@ -2246,6 +2246,29 @@ bool BlockchainLMDB::for_all_transactions(std::function<bool(const crypto::hash&
   TXN_POSTFIX_RDONLY();
 
   return ret;
+}
+
+alias_bimap BlockchainLMDB::get_aliases() const {
+  LOG_PRINT_L3("BlockchainLMDB::" << __func__);
+  check_open();
+
+  alias_bimap aliases;
+
+  TXN_PREFIX_RDONLY();
+  RCURSOR(aliases);
+
+  MDB_val k, v;
+
+  int ret = mdb_cursor_get(m_cur_aliases, &k, &v, MDB_FIRST);
+  while (ret != MDB_NOTFOUND) {
+    if (ret)
+      throw0(DB_ERROR("failed to enumerate aliases"));
+    aliases.insert(alias_bimap::value_type(std::string(reinterpret_cast<char*>(k.mv_data), k.mv_size - 1), std::string(reinterpret_cast<char*>(v.mv_data), v.mv_size - 1))); // LUKAS TODO make more neat
+    ret = mdb_cursor_get(m_cur_aliases, &k, &v, MDB_NEXT);
+  }
+
+  TXN_POSTFIX_RDONLY();
+  return aliases;
 }
 
 bool BlockchainLMDB::for_all_outputs(std::function<bool(uint64_t amount, const crypto::hash &tx_hash, size_t tx_idx)> f) const

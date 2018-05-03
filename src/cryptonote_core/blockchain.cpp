@@ -339,11 +339,12 @@ bool Blockchain::init(BlockchainDB* db, const bool testnet, const cryptonote::te
   uint64_t timestamp_diff = time(NULL) - top_block_timestamp;
 
   // genesis block has no timestamp, could probably change it to have timestamp of 1341378000...
-  if(!top_block_timestamp)
+  if (!top_block_timestamp)
     timestamp_diff = time(NULL) - 1341378000;
 
-  // create general purpose async service queue
+  m_aliases = m_db->get_aliases();
 
+  // create general purpose async service queue
   m_async_work_idle = std::unique_ptr < boost::asio::io_service::work > (new boost::asio::io_service::work(m_async_service));
   // we only need 1
   m_async_pool.create_thread(boost::bind(&boost::asio::io_service::run, &m_async_service));

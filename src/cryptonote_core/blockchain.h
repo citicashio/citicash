@@ -40,9 +40,6 @@
 #include <atomic>
 #include <unordered_map>
 #include <unordered_set>
-#include <boost/bimap/bimap.hpp>
-#include <boost/bimap/unordered_set_of.hpp>
-#include <boost/bimap/multiset_of.hpp>
 
 #include "syncobj.h"
 #include "string_tools.h"
@@ -855,9 +852,9 @@ namespace cryptonote
           return "";
         }
 
-        std::vector<std::string> get_address_aliases(const std::string& alias) const {
+        std::vector<std::string> get_address_aliases(const std::string& address) const {
           std::vector<std::string> aliases;
-          auto range = m_aliases.right.equal_range(alias);
+          auto range = m_aliases.right.equal_range(address);
           for (auto it = range.first; it != range.second; ++it)
             aliases.push_back(it->second);
           return aliases;
@@ -897,11 +894,6 @@ namespace cryptonote
         std::unordered_map<crypto::hash, std::unordered_map<crypto::key_image, bool>> m_check_txin_table;
 
         // aliases
-        struct alias {};
-        struct address {};
-        typedef boost::bimaps::bimap<
-            boost::bimaps::unordered_set_of<boost::bimaps::tagged<std::string, alias>>, 
-            boost::bimaps::multiset_of<boost::bimaps::tagged<std::string, address>>> alias_bimap;
         alias_bimap m_aliases;
 
         // SHA-3 hashes for each block and for fast pow checking

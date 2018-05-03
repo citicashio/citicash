@@ -33,6 +33,9 @@
 #include <list>
 #include <string>
 #include <exception>
+#include <boost/bimap/bimap.hpp>
+#include <boost/bimap/unordered_set_of.hpp>
+#include <boost/bimap/multiset_of.hpp>
 #include "crypto/hash.h"
 #include "cryptonote_core/cryptonote_basic.h"
 #include "cryptonote_core/difficulty.h"
@@ -93,6 +96,13 @@
  *   OUTPUT_EXISTS
  *   KEY_IMAGE_EXISTS
  */
+
+struct alias {};
+struct address {};
+typedef boost::bimaps::bimap<
+  boost::bimaps::unordered_set_of<boost::bimaps::tagged<std::string, alias>>, 
+  boost::bimaps::multiset_of<boost::bimaps::tagged<std::string, address>>
+> alias_bimap;
 
 namespace cryptonote
 {
@@ -1272,6 +1282,7 @@ public:
    */
   virtual bool for_all_outputs(std::function<bool(uint64_t amount, const crypto::hash &tx_hash, size_t tx_idx)> f) const = 0;
 
+  virtual alias_bimap get_aliases() const = 0;
 
   //
   // Hard fork related storage
