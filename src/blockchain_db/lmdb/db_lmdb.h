@@ -56,6 +56,8 @@ typedef struct mdb_txn_cursors
   MDB_cursor *m_txc_spent_keys;
 
   MDB_cursor *m_txc_hf_versions;
+
+  MDB_cursor *m_txc_aliases;
 } mdb_txn_cursors;
 
 #define m_cur_blocks	m_cursors->m_txc_blocks
@@ -68,6 +70,7 @@ typedef struct mdb_txn_cursors
 #define m_cur_tx_outputs	m_cursors->m_txc_tx_outputs
 #define m_cur_spent_keys	m_cursors->m_txc_spent_keys
 #define m_cur_hf_versions	m_cursors->m_txc_hf_versions
+#define m_cur_aliases m_cursors->m_txc_aliases
 
 typedef struct mdb_rflags
 {
@@ -82,6 +85,7 @@ typedef struct mdb_rflags
   bool m_rf_tx_outputs;
   bool m_rf_spent_keys;
   bool m_rf_hf_versions;
+  bool m_rf_aliases;
 } mdb_rflags;
 
 typedef struct mdb_threadinfo
@@ -358,12 +362,11 @@ private:
   MDB_dbi m_output_amounts;
 
   MDB_dbi m_spent_keys;
-  MDB_dbi m_aliases;
 
-  MDB_dbi m_hf_starting_heights;
   MDB_dbi m_hf_versions;
 
   MDB_dbi m_properties;
+  MDB_dbi m_aliases;
 
   uint64_t m_height;
   uint64_t m_num_txs;

@@ -192,12 +192,11 @@ const char* const LMDB_OUTPUT_TXS = "output_txs";
 const char* const LMDB_OUTPUT_AMOUNTS = "output_amounts";
 
 const char* const LMDB_SPENT_KEYS = "spent_keys";
-const char* const LMDB_ALIASES = "aliases";
 
-const char* const LMDB_HF_STARTING_HEIGHTS = "hf_starting_heights";
 const char* const LMDB_HF_VERSIONS = "hf_versions";
 
 const char* const LMDB_PROPERTIES = "properties";
+const char* const LMDB_ALIASES = "aliases";
 
 const char zerokey[8] = {0};
 const MDB_val zerokval = { sizeof(zerokey), (void *)zerokey };
@@ -381,8 +380,6 @@ void mdb_txn_safe::allow_new_txns()
 {
   creation_gate.clear();
 }
-
-
 
 void BlockchainLMDB::do_resize(uint64_t increase_size)
 {
@@ -704,10 +701,7 @@ uint64_t BlockchainLMDB::add_transaction_data(const crypto::hash& blk_hash, cons
   int result;
   uint64_t tx_id = m_num_txs;
 
-  CURSOR(txs)
   CURSOR(tx_indices)
-
-  MDB_val_set(val_tx_id, tx_id);
   MDB_val_set(val_h, tx_hash);
   result = mdb_cursor_get(m_cur_tx_indices, (MDB_val *)&zerokval, &val_h, MDB_GET_BOTH);
   if (result == 0) {
@@ -730,10 +724,46 @@ uint64_t BlockchainLMDB::add_transaction_data(const crypto::hash& blk_hash, cons
   if (result)
     throw0(DB_ERROR(lmdb_error("Failed to add tx data to db transaction: ", result).c_str()));
 
+  CURSOR(txs)
+  MDB_val_set(val_tx_id, tx_id);
   MDB_val_copy<blobdata> blob(tx_to_blob(tx));
   result = mdb_cursor_put(m_cur_txs, &val_tx_id, &blob, MDB_APPEND);
   if (result)
     throw0(DB_ERROR(lmdb_error("Failed to add tx blob to db transaction: ", result).c_str()));
+
+  // LUKAS TODO remove duplicate code
+  std::vector<tx_extra_field> tx_extra_fields;
+  if (parse_tx_extra(tx.extra, tx_extra_fields)) {
+    tx_extra_nonce alias, address, signature;
+    if (find_tx_extra_field_by_type(tx_extra_fields, alias, 0) && !alias.nonce.empty() && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS
+      && find_tx_extra_field_by_type(tx_extra_fields, address, 1) && !address.nonce.empty() && address.nonce.front() == (char)TX_EXTRA_NONCE_ADDRESS
+      && find_tx_extra_field_by_type(tx_extra_fields, signature, 2) && !signature.nonce.empty() && signature.nonce.front() == (char)TX_EXTRA_NONCE_SIGNATURE)
+    {
+      address.nonce.erase(address.nonce.begin());
+      cryptonote::address_parse_info info;
+      if (!cryptonote::get_account_address_from_str(info, false/* LUKAS TODO should be something like m_testnet*/, address.nonce))
+        LOG_PRINT_L2("Aliased address " + address.nonce + " not found.");
+      else {
+        alias.nonce.erase(alias.nonce.begin());
+        cryptonote::convert_alias(alias.nonce);
+        if (!alias.nonce.empty()) {
+          signature.nonce.erase(signature.nonce.begin());
+          if (!verifyHelper(alias.nonce, info.address, signature.nonce))
+            LOG_PRINT_L2("Alias " + alias.nonce + " is not signed with keys for address " + address.nonce + ", signature was " + signature.nonce + ".");
+          else {
+            CURSOR(aliases)
+            MDB_val_copy<const char*> k(alias.nonce.data());
+            MDB_val_copy<const char*> v(address.nonce.data());
+            result = mdb_cursor_put(m_cur_aliases, &k, &v, MDB_NOOVERWRITE);
+            if (result == MDB_KEYEXIST)
+              LOG_PRINT_L2("Alias " + alias.nonce + " already exists.");
+            else if (result)
+              throw0(DB_ERROR(lmdb_error("Failed to add alias-address pair to db aliases: ", result).c_str()));
+          }
+        }
+      }
+    }
+  }
 
   m_num_txs++;
   return tx_id;
@@ -750,24 +780,24 @@ void BlockchainLMDB::remove_transaction_data(const crypto::hash& tx_hash, const 
 
   mdb_txn_cursors *m_cursors = &m_wcursors;
   CURSOR(tx_indices)
-  CURSOR(txs)
-  CURSOR(tx_outputs)
 
   MDB_val_set(val_h, tx_hash);
 
   if (mdb_cursor_get(m_cur_tx_indices, (MDB_val *)&zerokval, &val_h, MDB_GET_BOTH))
-      throw1(TX_DNE("Attempting to remove transaction that isn't in the db"));
+    throw1(TX_DNE("Attempting to remove transaction that isn't in the db"));
   txindex *tip = (txindex *)val_h.mv_data;
   MDB_val_set(val_tx_id, tip->data.tx_id);
 
+  CURSOR(txs)
   if ((result = mdb_cursor_get(m_cur_txs, &val_tx_id, NULL, MDB_SET)))
-      throw1(DB_ERROR(lmdb_error("Failed to locate tx for removal: ", result).c_str()));
+    throw1(DB_ERROR(lmdb_error("Failed to locate tx for removal: ", result).c_str()));
   result = mdb_cursor_del(m_cur_txs, 0);
   if (result)
-      throw1(DB_ERROR(lmdb_error("Failed to add removal of tx to db transaction: ", result).c_str()));
+    throw1(DB_ERROR(lmdb_error("Failed to add removal of tx to db transaction: ", result).c_str()));
 
   remove_tx_outputs(tip->data.tx_id, tx);
 
+  CURSOR(tx_outputs)
   result = mdb_cursor_get(m_cur_tx_outputs, &val_tx_id, NULL, MDB_SET);
   if (result == MDB_NOTFOUND)
     LOG_PRINT_L1("tx has no outputs to remove: " << tx_hash);
@@ -780,9 +810,42 @@ void BlockchainLMDB::remove_transaction_data(const crypto::hash& tx_hash, const 
       throw1(DB_ERROR(lmdb_error("Failed to add removal of tx outputs to db transaction: ", result).c_str()));
   }
 
+  // LUKAS TODO remove duplicate code
+  std::vector<tx_extra_field> tx_extra_fields;
+  if (parse_tx_extra(tx.extra, tx_extra_fields)) {
+    tx_extra_nonce alias, address, signature;
+    if (find_tx_extra_field_by_type(tx_extra_fields, alias, 0) && !alias.nonce.empty() && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS
+      && find_tx_extra_field_by_type(tx_extra_fields, address, 1) && !address.nonce.empty() && address.nonce.front() == (char)TX_EXTRA_NONCE_ADDRESS
+      && find_tx_extra_field_by_type(tx_extra_fields, signature, 2) && !signature.nonce.empty() && signature.nonce.front() == (char)TX_EXTRA_NONCE_SIGNATURE)
+    {
+      address.nonce.erase(address.nonce.begin());
+      cryptonote::address_parse_info info;
+      if (!cryptonote::get_account_address_from_str(info, false/* LUKAS TODO should be something like m_testnet*/, address.nonce))
+        LOG_PRINT_L2("Aliased address " + address.nonce + " not found.");
+      else {
+        alias.nonce.erase(alias.nonce.begin());
+        cryptonote::convert_alias(alias.nonce);
+        if (!alias.nonce.empty()) {
+          signature.nonce.erase(signature.nonce.begin());
+          if (!verifyHelper(alias.nonce, info.address, signature.nonce))
+            LOG_PRINT_L2("Alias " + alias.nonce + " is not signed with keys for address " + address.nonce + ", signature was " + signature.nonce + ".");
+          else {
+            CURSOR(aliases)
+            MDB_val_copy<const char*> k(alias.nonce.data());
+            if ((result = mdb_cursor_get(m_cur_aliases, &k, NULL, MDB_SET)))
+              throw1(DB_ERROR(lmdb_error("Failed to locate alias for removal: ", result).c_str()));
+            result = mdb_cursor_del(m_cur_aliases, 0);
+            if (result)
+              throw1(DB_ERROR(lmdb_error("Failed to add removal of alias-address pair to db transaction: ", result).c_str()));
+          }
+        }
+      }
+    }
+  }
+
   // Don't delete the tx_indices entry until the end, after we're done with val_tx_id
   if (mdb_cursor_del(m_cur_tx_indices, 0))
-      throw1(DB_ERROR("Failed to add removal of tx index to db transaction"));
+    throw1(DB_ERROR("Failed to add removal of tx index to db transaction"));
 
   m_num_txs--;
 }
@@ -1119,17 +1182,11 @@ void BlockchainLMDB::open(const std::string& filename, const int mdb_flags)
   lmdb_db_open(txn, LMDB_OUTPUT_AMOUNTS, MDB_INTEGERKEY | MDB_DUPSORT | MDB_DUPFIXED | MDB_CREATE, m_output_amounts, "Failed to open db handle for m_output_amounts");
 
   lmdb_db_open(txn, LMDB_SPENT_KEYS, MDB_INTEGERKEY | MDB_CREATE | MDB_DUPSORT | MDB_DUPFIXED, m_spent_keys, "Failed to open db handle for m_spent_keys");
-  lmdb_db_open(txn, LMDB_ALIASES, MDB_INTEGERKEY | MDB_CREATE , m_aliases, "Failed to open db handle for m_aliases");
-
-  // this subdb is dropped on sight, so it may not be present when we open the DB.
-  // Since we use MDB_CREATE, we'll get an exception if we open read-only and it does not exist.
-  // So we don't open for read-only, and also not drop below. It is not used elsewhere.
-  if (!(mdb_flags & MDB_RDONLY))
-    lmdb_db_open(txn, LMDB_HF_STARTING_HEIGHTS, MDB_CREATE, m_hf_starting_heights, "Failed to open db handle for m_hf_starting_heights");
 
   lmdb_db_open(txn, LMDB_HF_VERSIONS, MDB_INTEGERKEY | MDB_CREATE, m_hf_versions, "Failed to open db handle for m_hf_versions");
 
   lmdb_db_open(txn, LMDB_PROPERTIES, MDB_CREATE, m_properties, "Failed to open db handle for m_properties");
+  lmdb_db_open(txn, LMDB_ALIASES, MDB_CREATE, m_aliases, "Failed to open db handle for m_aliases");
 
   mdb_set_dupsort(txn, m_spent_keys, compare_hash32);
   mdb_set_dupsort(txn, m_block_heights, compare_hash32);
@@ -1139,13 +1196,7 @@ void BlockchainLMDB::open(const std::string& filename, const int mdb_flags)
   mdb_set_dupsort(txn, m_block_info, compare_uint64);
 
   mdb_set_compare(txn, m_properties, compare_string);
-
-  if (!(mdb_flags & MDB_RDONLY))
-  {
-    result = mdb_drop(txn, m_hf_starting_heights, 1);
-    if (result && result != MDB_NOTFOUND)
-      throw0(DB_ERROR(lmdb_error("Failed to drop m_hf_starting_heights: ", result).c_str()));
-  }
+  mdb_set_compare(txn, m_aliases, compare_string);
 
   // get and keep current height
   MDB_stat db_stats;
@@ -1279,13 +1330,12 @@ void BlockchainLMDB::reset()
     throw0(DB_ERROR(lmdb_error("Failed to drop m_output_amounts: ", result).c_str()));
   if (auto result = mdb_drop(txn, m_spent_keys, 0))
     throw0(DB_ERROR(lmdb_error("Failed to drop m_spent_keys: ", result).c_str()));
-  if (auto result = mdb_drop(txn, m_aliases, 0))
-    throw0(DB_ERROR(lmdb_error("Failed to drop m_aliases: ", result).c_str()));
-  (void)mdb_drop(txn, m_hf_starting_heights, 0); // this one is dropped in new code
   if (auto result = mdb_drop(txn, m_hf_versions, 0))
     throw0(DB_ERROR(lmdb_error("Failed to drop m_hf_versions: ", result).c_str()));
   if (auto result = mdb_drop(txn, m_properties, 0))
     throw0(DB_ERROR(lmdb_error("Failed to drop m_properties: ", result).c_str()));
+  if (auto result = mdb_drop(txn, m_aliases, 0))
+    throw0(DB_ERROR(lmdb_error("Failed to drop m_aliases: ", result).c_str()));
 
   // init with current version
   MDB_val_copy<const char*> k("version");
@@ -2761,7 +2811,6 @@ void BlockchainLMDB::drop_hard_fork_info()
 
   TXN_PREFIX(0);
 
-  mdb_drop(*txn_ptr, m_hf_starting_heights, 1);
   mdb_drop(*txn_ptr, m_hf_versions, 1);
 
   TXN_POSTFIX_SUCCESS();
