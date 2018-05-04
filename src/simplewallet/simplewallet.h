@@ -160,7 +160,9 @@ namespace cryptonote
     bool import_key_images(const std::vector<std::string> &args);
     bool export_outputs(const std::vector<std::string> &args);
     bool import_outputs(const std::vector<std::string> &args);
-
+    bool alias_address(const std::vector<std::string> &args);
+    bool get_aliases(const std::vector<std::string> &args);
+    
     uint64_t get_daemon_blockchain_height(std::string& err);
     bool try_connect_to_daemon(bool silent = false);
     bool ask_wallet_create_if_needed();

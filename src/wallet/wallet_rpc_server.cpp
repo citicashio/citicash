@@ -458,6 +458,7 @@ namespace tools
     return true;
   }
 
+  // LUKAS TODO fix duplicate code with CLI
   bool wallet_rpc_server::on_alias_address(wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::response& res, epee::json_rpc::error& er) {
     if (req.alias.empty()) {
       er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
@@ -491,41 +492,36 @@ namespace tools
     dst.is_subaddress = false;
     dst.amount = 1;
     
-    /* Append alias, wallet_address and signature into extra */
+  // append alias, wallet_address and signature into extra
     std::vector<uint8_t> extra;
     if (!cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ALIAS + req.alias)
       || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ADDRESS + wallet_address)
       || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_SIGNATURE + m_wallet.sign(req.alias))) 
     { // LUKAS TODO consider encrypting dst.addr and signature to chars and use them instead, then decrypt via get_account_address_as_str (or get_subaddress_as_str)
       er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
-      er.message = "Something went wrong with alias. Please check its format: \"" + req.alias + "\", expected up to 63-character string";
+      er.message = "Something went wrong with alias. Please check its format: \"" + req.alias + "\"";
       return false;
     }
 
-    try
-    {
-      std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions_2({dst}, DEFAULT_MIXIN, req.unlock_time, req.priority, extra, 0/*req.account_index, LUKAS TODO prolly subaddress index*/, std::set<uint32_t>()/*LUKAS TODO didn't check this parameter at all*/, false);
-
+    try {
+      std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions({dst}, DEFAULT_MIXIN, req.unlock_time, req.priority, extra, 0/*req.account_index, LUKAS TODO prolly subaddress index*/, std::set<uint32_t>()/*LUKAS TODO I didn't check this parameter at all*/, false);
       m_wallet.commit_tx(ptx_vector.back());
 
       // populate response with tx hash
       res.tx_hash = epee::string_tools::pod_to_hex(cryptonote::get_transaction_hash(ptx_vector.back().tx));
       res.fee = ptx_vector.back().fee;
     }
-    catch (const tools::error::daemon_busy& e)
-    {
+    catch (const tools::error::daemon_busy& e) {
       er.code = WALLET_RPC_ERROR_CODE_DAEMON_IS_BUSY;
       er.message = e.what();
       return false;
     }
-    catch (const std::exception& e)
-    {
+    catch (const std::exception& e) {
       er.code = WALLET_RPC_ERROR_CODE_GENERIC_TRANSFER_ERROR;
       er.message = e.what();
       return false;
     }
-    catch (...)
-    {
+    catch (...) {
       er.code = WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR;
       er.message = "WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR";
       return false;
@@ -569,7 +565,7 @@ namespace tools
         mixin = MAX_MIXIN;
       }
       
-      std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions_2(dsts, mixin, req.unlock_time, req.priority, extra, req.account_index, req.subaddr_indices, req.trusted_daemon);
+      std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions(dsts, mixin, req.unlock_time, req.priority, extra, req.account_index, req.subaddr_indices, req.trusted_daemon);
 
       // reject proposed transactions if there are more than one.  see on_transfer_split below.
       if (ptx_vector.size() != 1)
@@ -642,7 +638,7 @@ namespace tools
       }
       
       std::vector<wallet2::pending_tx> ptx_vector;
-      ptx_vector = m_wallet.create_transactions_2(dsts, mixin, req.unlock_time, req.priority, extra, req.account_index, req.subaddr_indices, req.trusted_daemon);
+      ptx_vector = m_wallet.create_transactions(dsts, mixin, req.unlock_time, req.priority, extra, req.account_index, req.subaddr_indices, req.trusted_daemon);
 
       m_wallet.commit_tx(ptx_vector);
 
