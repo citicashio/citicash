@@ -529,6 +529,7 @@ namespace tools
     return true;
   }
 
+  // LUKAS TODO fix duplicate code with CLI
   bool wallet_rpc_server::on_get_aliases(wallet_rpc::COMMAND_RPC_GET_ALIASES::request& req, wallet_rpc::COMMAND_RPC_GET_ALIASES::response& res, epee::json_rpc::error& er) {
     const std::string wallet_address = m_wallet.get_account().get_public_address_str(m_wallet.testnet()); // LUKAS TODO consider extending to subaddresses via get_subaddress_as_str(const cryptonote::subaddress_index& index)
     res.aliases = m_wallet.get_address_aliases(wallet_address);

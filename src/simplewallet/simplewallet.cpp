@@ -4194,8 +4194,9 @@ bool simple_wallet::alias_address(const std::vector<std::string> &args) {
 
     m_wallet->commit_tx(ptx_vector.back());
 
-    success_msg_writer(true) << tr("Transaction successfully sent, \ntransaction hash is ") << get_transaction_hash(ptx_vector.back().tx)
-      << tr(", \nthe transaction fee is ") << print_money(ptx_vector.back().fee) << tr(".");
+    success_msg_writer(true) << tr("Transaction successfully sent.");
+    success_msg_writer(false) << tr("transaction hash is ") << get_transaction_hash(ptx_vector.back().tx)
+      << tr("\ntransaction fee is ") << print_money(ptx_vector.back().fee);
   }
   catch (const tools::error::daemon_busy&) {
     fail_msg_writer() << tr("daemon is busy. Please try again later.");
@@ -4259,8 +4260,13 @@ bool simple_wallet::alias_address(const std::vector<std::string> &args) {
   return true;
 }
 
+// LUKAS TODO fix duplicate code with RPC
 bool simple_wallet::get_aliases(const std::vector<std::string> &args) {
-  return true; // LUKAS TODO
+  const std::string wallet_address = m_wallet->get_account().get_public_address_str(m_wallet->testnet()); // LUKAS TODO consider extending to subaddresses via get_subaddress_as_str(const cryptonote::subaddress_index& index)
+  success_msg_writer(true) << tr("Aliases:");
+  for (auto alias : m_wallet->get_address_aliases(wallet_address))
+    success_msg_writer(false) << tr(" ") << alias;
+  return true;
 }
 
 bool simple_wallet::process_command(const std::vector<std::string> &args)
