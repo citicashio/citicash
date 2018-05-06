@@ -2107,8 +2107,13 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
   {
     cryptonote::address_parse_info info;
     cryptonote::tx_destination_entry de;
-    if (!cryptonote::get_account_address_from_str_or_url(info, m_wallet->testnet(), local_args[i]))
-      return true;
+    if (!cryptonote::get_account_address_from_str_or_url(info, m_wallet->testnet(), local_args[i])) {
+      std::string address = m_wallet->get_alias_address(local_args[i]);
+      if (address.empty() || !get_account_address_from_str(info, m_wallet->testnet(), address)) {
+        fail_msg_writer() << tr("wrong address: ") << address.empty() ? local_args[i] : address;
+        return true;
+      }
+    }
 
     de.is_subaddress = info.is_subaddress;
     de.addr = info.address;
@@ -2484,16 +2489,16 @@ bool simple_wallet::sweep_all(const std::vector<std::string> &args_, bool retry,
   }
 
   cryptonote::address_parse_info info;
-  if (!cryptonote::get_account_address_from_str_or_url(info, m_wallet->testnet(), local_args[0]))
-  {
-    fail_msg_writer() << tr("failed to parse address");
-    return true;
+  if (!cryptonote::get_account_address_from_str_or_url(info, m_wallet->testnet(), local_args.front())) {
+    std::string address = m_wallet->get_alias_address(local_args.front());
+    if (address.empty() || !get_account_address_from_str(info, m_wallet->testnet(), address)) {
+      fail_msg_writer() << tr("wrong address: ") << address.empty() ? local_args.front() : address;
+      return true;
+    }
   }
 
-  if (info.has_payment_id)
-  {
-    if (payment_id_seen)
-    {
+  if (info.has_payment_id) {
+    if (payment_id_seen) {
       fail_msg_writer() << tr("a single transaction cannot use more than one payment id: ") << local_args[0];
       return true;
     }
