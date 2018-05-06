@@ -573,8 +573,6 @@ namespace tools
     static bool parse_long_payment_id(const std::string& payment_id_str, crypto::hash& payment_id);
     static bool parse_short_payment_id(const std::string& payment_id_str, crypto::hash8& payment_id);
     static bool parse_payment_id(const std::string& payment_id_str, crypto::hash& payment_id);
-    static void parse_alias_into_hash(const std::string& alias_str, crypto::hash& alias_hash);
-
 
     static std::vector<std::string> addresses_from_url(const std::string& url, bool& dnssec_valid);
 

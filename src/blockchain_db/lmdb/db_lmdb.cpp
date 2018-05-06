@@ -37,6 +37,7 @@
 #include "cryptonote_core/cryptonote_format_utils.h"
 #include "crypto/crypto.h"
 #include "profile_tools.h"
+#include "common/base58.h"
 
 #if defined(__i386) || defined(__x86_64)
 #define MISALIGNED_OK	1
@@ -741,8 +742,18 @@ uint64_t BlockchainLMDB::add_transaction_data(const crypto::hash& blk_hash, cons
     {
       address.nonce.erase(address.nonce.begin());
       cryptonote::address_parse_info info;
-      if (!cryptonote::get_account_address_from_str(info, false/* LUKAS TODO should be something like m_testnet*/, address.nonce))
+      std::string helper;
+      uint64_t prefix;
+      if (!tools::base58::decode_addr(address.nonce, prefix, helper)) // LUKAS TODO pull bool testnet somehow better
+        LOG_PRINT_L2("invalid address format: " + address.nonce);
+      if (!cryptonote::get_account_address_from_str(info,
+        prefix == config::testnet::CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX
+        || prefix == config::testnet::CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX
+        || prefix == config::testnet::CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX,
+        address.nonce))
+      {
         LOG_PRINT_L2("Aliased address " + address.nonce + " not found.");
+      }
       else {
         alias.nonce.erase(alias.nonce.begin());
         cryptonote::convert_alias(alias.nonce);
@@ -820,8 +831,18 @@ void BlockchainLMDB::remove_transaction_data(const crypto::hash& tx_hash, const 
     {
       address.nonce.erase(address.nonce.begin());
       cryptonote::address_parse_info info;
-      if (!cryptonote::get_account_address_from_str(info, false/* LUKAS TODO should be something like m_testnet*/, address.nonce))
+      std::string helper;
+      uint64_t prefix;
+      if (!tools::base58::decode_addr(address.nonce, prefix, helper)) // LUKAS TODO pull bool testnet somehow better
+        LOG_PRINT_L2("invalid address format: " + address.nonce);
+      if (!cryptonote::get_account_address_from_str(info,
+        prefix == config::testnet::CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX
+        || prefix == config::testnet::CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX
+        || prefix == config::testnet::CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX,
+        address.nonce))
+      {
         LOG_PRINT_L2("Aliased address " + address.nonce + " not found.");
+      }
       else {
         alias.nonce.erase(alias.nonce.begin());
         cryptonote::convert_alias(alias.nonce);
