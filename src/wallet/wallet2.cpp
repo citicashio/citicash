@@ -1100,21 +1100,15 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
   if (tx_money_got_in_outs.size() > 0) {
     tx_extra_nonce extra_nonce;
     crypto::hash payment_id = null_hash;
-    if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce))
-    {
+    if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce)) {
       crypto::hash8 payment_id8 = null_hash8;
-      if(get_encrypted_payment_id_from_tx_extra_nonce(extra_nonce.nonce, payment_id8))
-      {
+      if(get_encrypted_payment_id_from_tx_extra_nonce(extra_nonce.nonce, payment_id8)) {
         // We got a payment ID to go with this tx
         LOG_PRINT_L2("Found encrypted payment ID: " << payment_id8);
-        if (tx_pub_key != null_pkey)
-        {
+        if (tx_pub_key != null_pkey) {
           if (!decrypt_payment_id(payment_id8, tx_pub_key, m_account.get_keys().m_view_secret_key))
-          {
             LOG_PRINT_L0("Failed to decrypt payment ID: " << payment_id8);
-          }
-          else
-          {
+          else {
             LOG_PRINT_L2("Decrypted payment ID: " << payment_id8);
             // put the 64 bit decrypted payment id in the first 8 bytes
             memcpy(payment_id.data, payment_id8.data, 8);
@@ -1123,25 +1117,23 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
           }
         }
         else
-        {
           LOG_PRINT_L1("No public key found in tx, unable to decrypt payment id");
-        }
       }
       else if (get_payment_id_from_tx_extra_nonce(extra_nonce.nonce, payment_id))
-      {
         LOG_PRINT_L2("Found unencrypted payment ID: " << payment_id);
-      }
     }
     else if (get_payment_id_from_tx_extra_nonce(extra_nonce.nonce, payment_id))
-    {
       LOG_PRINT_L2("Found unencrypted payment ID: " << payment_id);
-    }
 
-    tx_extra_nonce alias;
-    if (find_tx_extra_field_by_type(tx_extra_fields, alias, 0) && !alias.nonce.empty() && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS) {
-      alias.nonce.erase(alias.nonce.begin());
-      LOG_PRINT_L2("Found alias: " << alias.nonce);
+    if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 2) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_SIGNATURE
+      && find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 1) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_ADDRESS
+      && find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 0) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS)
+    { // just simple check
+      extra_nonce.nonce.erase(extra_nonce.nonce.begin());
+      LOG_PRINT_L2("Found alias: " << extra_nonce.nonce);
     }
+    else
+      extra_nonce.nonce.clear();
 
 	  for (const auto& i : tx_money_got_in_outs) {   
 		  payment_details payment;
@@ -1151,7 +1143,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
   		payment.m_unlock_time = tx.unlock_time;
 	  	payment.m_timestamp = ts;
 		  payment.m_subaddr_index = i.first;
-      payment.m_alias = alias.nonce;
+      payment.m_alias = extra_nonce.nonce;
 
 	  	if (pool) {
 		  	m_unconfirmed_payments.emplace(payment_id, payment);
@@ -1164,7 +1156,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
 	  }
   }
 }
-//----------------------------------------------------------------------------------------------------
+
 void wallet2::process_unconfirmed(const cryptonote::transaction& tx, uint64_t height)
 {
   if (m_unconfirmed_txs.empty())
@@ -1204,9 +1196,13 @@ void wallet2::process_outgoing(const crypto::hash &txid, const cryptonote::trans
     std::vector<tx_extra_field> tx_extra_fields;
     if (parse_tx_extra(tx.extra, tx_extra_fields)) {
       tx_extra_nonce extra_nonce;
-      if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 0) && !extra_nonce.nonce.empty()) { // we do not care about failure here
-        if (extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS)
+      if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 0) && !extra_nonce.nonce.empty()) {
+        if (extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS) {
           entry.first->second.m_alias = extra_nonce.nonce.substr(1);
+          if (!find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 2) || extra_nonce.nonce.empty() || extra_nonce.nonce.front() != (char)TX_EXTRA_NONCE_SIGNATURE
+          || !find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 1) || extra_nonce.nonce.empty() || extra_nonce.nonce.front() != (char)TX_EXTRA_NONCE_ADDRESS)
+            entry.first->second.m_alias.clear(); // just simple check
+        }
         else
           get_payment_id_from_tx_extra_nonce(extra_nonce.nonce, entry.first->second.m_payment_id);
       }
@@ -1217,7 +1213,7 @@ void wallet2::process_outgoing(const crypto::hash &txid, const cryptonote::trans
   entry.first->second.m_block_height = height;
   entry.first->second.m_timestamp = ts;
 }
-//----------------------------------------------------------------------------------------------------
+
 void wallet2::process_new_blockchain_entry(const cryptonote::block& b, const cryptonote::block_complete_entry& bche, const crypto::hash& bl_id, uint64_t height, const cryptonote::COMMAND_RPC_GET_BLOCKS_FAST::block_output_indices &o_indices)
 {
   size_t txidx = 0;
@@ -3288,17 +3284,6 @@ crypto::hash wallet2::get_payment_id(const pending_tx &ptx) const
   return payment_id;
 }
 
-std::string wallet2::get_alias(const pending_tx &ptx) const {
-  std::vector<tx_extra_field> tx_extra_fields;
-  tx_extra_nonce alias;
-  if (parse_tx_extra(ptx.tx.extra, tx_extra_fields) && find_tx_extra_field_by_type(tx_extra_fields, alias, 0)
-    && !alias.nonce.empty() && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS)
-  {
-      return alias.nonce.substr(1);
-  }
-  return "";
-}
-
 // take a pending tx and actually send it to the daemon
 void wallet2::commit_tx(pending_tx& ptx)
 {
@@ -3325,18 +3310,27 @@ void wallet2::commit_tx(pending_tx& ptx)
 
   txid = get_transaction_hash(ptx.tx);
   crypto::hash payment_id = cryptonote::null_hash;
-  std::string alias;
+  tx_extra_nonce extra_nonce;
   std::vector<cryptonote::tx_destination_entry> dests;
   uint64_t amount_in = 0;
-  if (store_tx_info())
-  {
+  if (store_tx_info()) {
     payment_id = get_payment_id(ptx);
-    alias = get_alias(ptx);
+  
+    std::vector<tx_extra_field> tx_extra_fields;
+    if (parse_tx_extra(ptx.tx.extra, tx_extra_fields)
+      && find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 2) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_SIGNATURE
+      && find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 1) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_ADDRESS
+      && find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 0) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS)
+    { // just simple check
+      extra_nonce.nonce.erase(extra_nonce.nonce.begin());
+    } else
+      extra_nonce.nonce.clear();
+
     dests = ptx.dests;
     BOOST_FOREACH(size_t idx, ptx.selected_transfers)
       amount_in += m_transfers[idx].amount();
   }
-  add_unconfirmed_tx(ptx.tx, amount_in, dests, payment_id, alias, ptx.change_dts.amount, ptx.construction_data.subaddr_account, ptx.construction_data.subaddr_indices);
+  add_unconfirmed_tx(ptx.tx, amount_in, dests, payment_id, extra_nonce.nonce, ptx.change_dts.amount, ptx.construction_data.subaddr_account, ptx.construction_data.subaddr_indices);
   if (store_tx_info())
   {
     m_tx_keys.insert(std::make_pair(txid, ptx.tx_key));

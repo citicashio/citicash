@@ -746,7 +746,7 @@ uint64_t BlockchainLMDB::add_transaction_data(const crypto::hash& blk_hash, cons
       uint64_t prefix;
       if (!tools::base58::decode_addr(address.nonce, prefix, helper)) // LUKAS TODO pull bool testnet somehow better
         LOG_PRINT_L2("invalid address format: " + address.nonce);
-      if (!cryptonote::get_account_address_from_str(info,
+      else if (!cryptonote::get_account_address_from_str(info,
         prefix == config::testnet::CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX
         || prefix == config::testnet::CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX
         || prefix == config::testnet::CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX,
@@ -814,8 +814,7 @@ void BlockchainLMDB::remove_transaction_data(const crypto::hash& tx_hash, const 
     LOG_PRINT_L1("tx has no outputs to remove: " << tx_hash);
   else if (result)
     throw1(DB_ERROR(lmdb_error("Failed to locate tx outputs for removal: ", result).c_str()));
-  if (!result)
-  {
+  if (!result) {
     result = mdb_cursor_del(m_cur_tx_outputs, 0);
     if (result)
       throw1(DB_ERROR(lmdb_error("Failed to add removal of tx outputs to db transaction: ", result).c_str()));
@@ -835,7 +834,7 @@ void BlockchainLMDB::remove_transaction_data(const crypto::hash& tx_hash, const 
       uint64_t prefix;
       if (!tools::base58::decode_addr(address.nonce, prefix, helper)) // LUKAS TODO pull bool testnet somehow better
         LOG_PRINT_L2("invalid address format: " + address.nonce);
-      if (!cryptonote::get_account_address_from_str(info,
+      else if (!cryptonote::get_account_address_from_str(info,
         prefix == config::testnet::CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX
         || prefix == config::testnet::CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX
         || prefix == config::testnet::CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX,
