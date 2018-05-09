@@ -33,6 +33,9 @@
 #include <list>
 #include <string>
 #include <exception>
+#include <boost/bimap/bimap.hpp>
+#include <boost/bimap/unordered_set_of.hpp>
+#include <boost/bimap/multiset_of.hpp>
 #include "crypto/hash.h"
 #include "cryptonote_core/cryptonote_basic.h"
 #include "cryptonote_core/difficulty.h"
@@ -93,6 +96,13 @@
  *   OUTPUT_EXISTS
  *   KEY_IMAGE_EXISTS
  */
+
+struct alias {};
+struct address {};
+typedef boost::bimaps::bimap<
+  boost::bimaps::unordered_set_of<boost::bimaps::tagged<std::string, alias>>, 
+  boost::bimaps::multiset_of<boost::bimaps::tagged<std::string, address>>
+> alias_bimap;
 
 namespace cryptonote
 {
@@ -1272,6 +1282,7 @@ public:
    */
   virtual bool for_all_outputs(std::function<bool(uint64_t amount, const crypto::hash &tx_hash, size_t tx_idx)> f) const = 0;
 
+  virtual alias_bimap get_aliases() const = 0;
 
   //
   // Hard fork related storage
@@ -1328,16 +1339,6 @@ public:
    * @brief fix up anything that may be wrong due to past bugs
    */
   virtual void fixup();
-
-  /**
-   * @brief set whether or not to automatically remove logs
-   *
-   * This function is only relevant for one implementation (BlockchainBDB), but
-   * is here to keep BlockchainDB users implementation-agnostic.
-   *
-   * @param auto_remove whether or not to auto-remove logs
-   */
-  void set_auto_remove_logs(bool auto_remove) { m_auto_remove_logs = auto_remove; }
 
   bool m_open;  //!< Whether or not the BlockchainDB is open/ready for use
   mutable epee::critical_section m_synchronization_lock;  //!< A lock, currently for when BlockchainLMDB needs to resize the backing db file

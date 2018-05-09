@@ -273,10 +273,8 @@ namespace wallet_rpc
     END_KV_SERIALIZE_MAP()
   };
 
-  struct COMMAND_RPC_ALIAS_ADDRESS
-  {
-    struct request
-    {
+  struct COMMAND_RPC_ALIAS_ADDRESS {
+    struct request {
       std::string alias;
       uint32_t priority;
       uint64_t unlock_time;
@@ -288,14 +286,28 @@ namespace wallet_rpc
       END_KV_SERIALIZE_MAP()
     };
 
-    struct response
-    {
+    struct response {
       std::string tx_hash;
       uint64_t fee;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tx_hash)
         KV_SERIALIZE(fee)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+  struct COMMAND_RPC_GET_ALIASES {
+    struct request {
+      BEGIN_KV_SERIALIZE_MAP()
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response {
+      std::vector<std::string> aliases;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(aliases)
       END_KV_SERIALIZE_MAP()
     };
   };
@@ -501,7 +513,7 @@ namespace wallet_rpc
   struct payment_details
   {
     std::string payment_id;
-    std::string alias; // LUKAS TODO check, if it's needed here
+    std::string alias;
     std::string tx_hash;
     uint64_t amount;
     uint64_t block_height;
@@ -510,7 +522,8 @@ namespace wallet_rpc
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(payment_id)
-      KV_SERIALIZE(alias) // LUKAS TODO check, if it's needed here
+      if (!this_ref.alias.empty())
+        KV_SERIALIZE(alias)
       KV_SERIALIZE(tx_hash)
       KV_SERIALIZE(amount)
       KV_SERIALIZE(block_height)
@@ -771,7 +784,8 @@ namespace wallet_rpc
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(txid);
       KV_SERIALIZE(payment_id);
-      KV_SERIALIZE(alias); // LUKAS TODO add something like "if (alias)" not to handle alias when empty
+      if (!this_ref.alias.empty())
+        KV_SERIALIZE(alias);
       KV_SERIALIZE(height);
       KV_SERIALIZE(timestamp);
       KV_SERIALIZE(amount);

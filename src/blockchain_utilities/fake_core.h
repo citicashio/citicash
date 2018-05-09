@@ -33,9 +33,6 @@
 #include "cryptonote_core/tx_pool.h"
 #include "blockchain_db/blockchain_db.h"
 #include "blockchain_db/lmdb/db_lmdb.h"
-#if defined(BERKELEY_DB)
-#include "blockchain_db/berkeleydb/db_bdb.h"
-#endif
 
 using namespace cryptonote;
 
@@ -57,22 +54,12 @@ struct fake_core_db
   bool support_add_block;
 
   // for multi_db_runtime:
-  fake_core_db(const boost::filesystem::path &path, const bool use_testnet=false, const bool do_batch=true, const std::string& db_type="lmdb", const int db_flags=0) : m_pool(m_storage), m_storage(m_pool)
+  fake_core_db(const boost::filesystem::path &path, const bool use_testnet=false, const bool do_batch=true, const int db_flags=0) : m_pool(m_storage), m_storage(m_pool)
   {
     m_pool.init(path.string());
 
     BlockchainDB* db = nullptr;
-    if (db_type == "lmdb")
-      db = new BlockchainLMDB();
-#if defined(BERKELEY_DB)
-    else if (db_type == "berkeley")
-      db = new BlockchainBDB();
-#endif
-    else
-    {
-      LOG_ERROR("Attempted to use non-existent database type: " << db_type);
-      throw std::runtime_error("Attempting to use non-existent database type");
-    }
+    db = new BlockchainLMDB();
 
     boost::filesystem::path folder(path);
 

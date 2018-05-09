@@ -339,11 +339,12 @@ bool Blockchain::init(BlockchainDB* db, const bool testnet, const cryptonote::te
   uint64_t timestamp_diff = time(NULL) - top_block_timestamp;
 
   // genesis block has no timestamp, could probably change it to have timestamp of 1341378000...
-  if(!top_block_timestamp)
+  if (!top_block_timestamp)
     timestamp_diff = time(NULL) - 1341378000;
 
-  // create general purpose async service queue
+  m_aliases = m_db->get_aliases();
 
+  // create general purpose async service queue
   m_async_work_idle = std::unique_ptr < boost::asio::io_service::work > (new boost::asio::io_service::work(m_async_service));
   // we only need 1
   m_async_pool.create_thread(boost::bind(&boost::asio::io_service::run, &m_async_service));
@@ -3195,12 +3196,9 @@ leave:
         if(!parse_tx_extra(transaction.extra, tx_extra_fields))
           continue;
         tx_extra_nonce alias, address, signature;
-        if (find_tx_extra_field_by_type(tx_extra_fields, alias, 0)
-          && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS
-          && find_tx_extra_field_by_type(tx_extra_fields, address, 1)
-          && address.nonce.front() == (char)TX_EXTRA_NONCE_ADDRESS
-          && find_tx_extra_field_by_type(tx_extra_fields, signature, 2)
-          && signature.nonce.front() == (char)TX_EXTRA_NONCE_SIGNATURE)
+        if (find_tx_extra_field_by_type(tx_extra_fields, alias, 0) && !alias.nonce.empty() && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS
+          && find_tx_extra_field_by_type(tx_extra_fields, address, 1) && !address.nonce.empty() && address.nonce.front() == (char)TX_EXTRA_NONCE_ADDRESS
+          && find_tx_extra_field_by_type(tx_extra_fields, signature, 2) && !signature.nonce.empty() && signature.nonce.front() == (char)TX_EXTRA_NONCE_SIGNATURE)
         {
           address.nonce.erase(address.nonce.begin());
           cryptonote::address_parse_info info;
@@ -3209,13 +3207,14 @@ leave:
             continue;
           }
           alias.nonce.erase(alias.nonce.begin());
+          cryptonote::convert_alias(alias.nonce);
+          if (alias.nonce.empty())
+            continue;
           signature.nonce.erase(signature.nonce.begin());
-          if (verifyHelper(alias.nonce, info.address, signature.nonce)) {
-            if (!m_aliases.emplace(alias.nonce, address.nonce).second)
-              LOG_PRINT_L2("Alias " + alias.nonce + " already exists.");
-          }
-          else
+          if (!verifyHelper(alias.nonce, info.address, signature.nonce))
             LOG_PRINT_L2("Alias " + alias.nonce + " is not signed with keys for address " + address.nonce + ", signature was " + signature.nonce + ".");
+          else if (!m_aliases.insert(alias_bimap::value_type(alias.nonce, address.nonce)).second)
+            LOG_PRINT_L2("Alias " + alias.nonce + " already exists.");
         }
       }
     }

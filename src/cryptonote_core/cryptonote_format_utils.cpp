@@ -522,20 +522,17 @@ namespace cryptonote
     return true;
   }
 
-  void set_alias_to_tx_extra_nonce(blobdata& extra_nonce, const crypto::hash& alias)
-  {
-    extra_nonce.clear();
-    extra_nonce.push_back(TX_EXTRA_NONCE_ALIAS);
-    const uint8_t* alias_ptr = reinterpret_cast<const uint8_t*>(&alias);
-    std::copy(alias_ptr, alias_ptr + sizeof(alias), std::back_inserter(extra_nonce));
-  }
-
-  bool get_alias_from_tx_extra_nonce(const blobdata& extra_nonce, crypto::hash& alias)
-  {
-    if (TX_EXTRA_NONCE_ALIAS != extra_nonce[0])
-      return false;
-    alias = *reinterpret_cast<const crypto::hash*>(extra_nonce.data() + 1);
-    return true;
+  void convert_alias(std::string& alias) {
+    for (char& c : alias) {
+      if (c == '-' || c == '_' || c == '.' || c == '@' || c >= '0' && c <= '9' || c >= 'a' && c <= 'z')
+        continue;
+      if (c >= 'A' && c <= 'Z') {
+        c = std::tolower(c);
+        continue;
+      }
+      alias = "";
+      return;
+    }
   }
 
   crypto::public_key get_destination_view_key_pub(const std::vector<tx_destination_entry> &destinations, const account_keys &sender_keys)
