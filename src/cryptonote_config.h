@@ -53,7 +53,7 @@
 
 // MONEY_SUPPLY - total number coins to be generated
 #define MONEY_SUPPLY                                    ((uint64_t)1000000000000000000)
-#define EMISSION_SPEED_FACTOR                           20
+#define EMISSION_SPEED_FACTOR                           21
 #define FINAL_SUBSIDY                                   ((uint64_t)4000000000) // 4 * pow(10, 9)
 #define GENESIS_BLOCK_REWARD                            ((uint64_t)135000000000000000) // ~10% dev premine
 
@@ -70,7 +70,7 @@
 
 #define ORPHANED_BLOCKS_MAX_COUNT                       100
 
-#define DIFFICULTY_TARGET                               120  // seconds
+#define DIFFICULTY_TARGET                               60  // seconds
 #define DIFFICULTY_WINDOW                               17  // blocks
 #define DIFFICULTY_LAG                                  15   // !!!
 #define DIFFICULTY_CUT                                  6   // timestamps to cut after sorting
