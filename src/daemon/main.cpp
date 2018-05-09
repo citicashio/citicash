@@ -41,7 +41,6 @@
 #include "p2p/net_node.h"
 #include "rpc/core_rpc_server.h"
 #include "daemon/command_line_args.h"
-#include "blockchain_db/db_types.h"
 
 #ifdef STACK_TRACE
 #include "common/stack_trace.h"
@@ -152,19 +151,6 @@ int main(int argc, char const * argv[])
     }
 
     epee::debug::g_test_dbg_lock_sleep() = command_line::get_arg(vm, command_line::arg_test_dbg_lock_sleep);
-
-    std::string db_type = command_line::get_arg(vm, command_line::arg_db_type);
-
-    // verify that blockchaindb type is valid
-    if(cryptonote::blockchain_db_types.count(db_type) == 0)
-    {
-      std::cout << "Invalid database type (" << db_type << "), available types are:" << std::endl;
-      for (const auto& type : cryptonote::blockchain_db_types)
-      {
-        std::cout << "\t" << type << std::endl;
-      }
-      return 0;
-    }
 
     bool testnet_mode = command_line::get_arg(vm, command_line::arg_testnet_on);
 

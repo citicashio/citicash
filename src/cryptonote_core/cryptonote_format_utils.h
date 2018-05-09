@@ -102,7 +102,7 @@ namespace cryptonote
   bool find_tx_extra_field_by_type(const std::vector<tx_extra_field>& tx_extra_fields, T& field, size_t index = 0)
   {
     auto it = std::find_if(tx_extra_fields.begin(), tx_extra_fields.end(), [&index](const tx_extra_field& f) { return typeid(T) == f.type() && !index--; });
-    if(tx_extra_fields.end() == it)
+    if (it == tx_extra_fields.end())
       return false;
 
     field = boost::get<T>(*it);
@@ -123,8 +123,7 @@ namespace cryptonote
   void set_encrypted_payment_id_to_tx_extra_nonce(blobdata& extra_nonce, const crypto::hash8& payment_id);
   bool get_payment_id_from_tx_extra_nonce(const blobdata& extra_nonce, crypto::hash& payment_id);
   bool get_encrypted_payment_id_from_tx_extra_nonce(const blobdata& extra_nonce, crypto::hash8& payment_id);
-  void set_alias_to_tx_extra_nonce(blobdata& extra_nonce, const crypto::hash& alias);
-  bool get_alias_from_tx_extra_nonce(const blobdata& extra_nonce, crypto::hash& alias);
+  void convert_alias(std::string& alias);
   bool is_out_to_acc(const account_keys& acc, const txout_to_key& out_key, const crypto::public_key& tx_pub_key, const std::vector<crypto::public_key>& additional_tx_pub_keys, size_t output_index);
   struct subaddress_receive_info
   {

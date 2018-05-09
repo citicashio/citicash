@@ -401,15 +401,11 @@ namespace dns_utils
     return addresses;
   }
 
-  std::string get_account_address_as_str_from_url(const std::string& url, bool& dnssec_valid, bool cli_confirm)
-  {
+  std::string get_account_address_as_str_from_url(const std::string& url, bool& dnssec_valid, bool cli_confirm) {
     // attempt to get address from dns query
     auto addresses = addresses_from_url(url, dnssec_valid);
     if (addresses.empty())
-    {
-      LOG_ERROR("wrong address: " << url);
-      return{};
-    }
+      return "";
     // for now, move on only if one address found
     if (addresses.size() > 1)
     {

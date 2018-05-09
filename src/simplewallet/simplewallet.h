@@ -125,7 +125,6 @@ namespace cryptonote
     bool show_blockchain_height(const std::vector<std::string> &args);
     bool transfer_main(int transfer_type, const std::vector<std::string> &args, bool retry=false, float tx_size_target_factor=1.0f);
     bool transfer(const std::vector<std::string> &args);
-    bool transfer_new(const std::vector<std::string> &args);
     bool locked_transfer(const std::vector<std::string> &args);
     bool sweep_all(const std::vector<std::string> &args);
     bool sweep_all(const std::vector<std::string> &args, bool retry=false, float tx_size_target_factor = 1.0f);
@@ -160,7 +159,9 @@ namespace cryptonote
     bool import_key_images(const std::vector<std::string> &args);
     bool export_outputs(const std::vector<std::string> &args);
     bool import_outputs(const std::vector<std::string> &args);
-
+    bool alias_address(const std::vector<std::string> &args);
+    bool get_aliases(const std::vector<std::string> &args);
+    
     uint64_t get_daemon_blockchain_height(std::string& err);
     bool try_connect_to_daemon(bool silent = false);
     bool ask_wallet_create_if_needed();

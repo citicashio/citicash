@@ -134,7 +134,7 @@ namespace tools
     entry.payment_id = string_tools::pod_to_hex(payment_id);
     if (entry.payment_id.substr(16).find_first_not_of('0') == std::string::npos)
       entry.payment_id = entry.payment_id.substr(0, 16);
-    //entry.alias = string_tools::pod_to_str(pd.m_alias); // LUKAS TODO check where payment_id comes from
+    entry.alias = pd.m_alias;
     entry.height = pd.m_block_height;
     entry.timestamp = pd.m_timestamp;
     entry.amount = pd.m_amount;
@@ -150,7 +150,7 @@ namespace tools
     entry.payment_id = string_tools::pod_to_hex(pd.m_payment_id);
     if (entry.payment_id.substr(16).find_first_not_of('0') == std::string::npos)
       entry.payment_id = entry.payment_id.substr(0, 16);
-    entry.alias = string_tools::pod_to_str(pd.m_alias);
+    entry.alias = pd.m_alias;
     entry.height = pd.m_block_height;
     entry.timestamp = pd.m_timestamp;
     entry.fee = pd.m_amount_in - pd.m_amount_out;
@@ -174,10 +174,9 @@ namespace tools
     bool is_failed = pd.m_state == tools::wallet2::unconfirmed_transfer_details::failed;
     entry.txid = string_tools::pod_to_hex(txid);
     entry.payment_id = string_tools::pod_to_hex(pd.m_payment_id);
-    entry.payment_id = string_tools::pod_to_hex(pd.m_payment_id);
     if (entry.payment_id.substr(16).find_first_not_of('0') == std::string::npos)
       entry.payment_id = entry.payment_id.substr(0, 16);
-    entry.alias = string_tools::pod_to_str(pd.m_alias);
+    entry.alias = pd.m_alias;
     entry.height = 0;
     entry.timestamp = pd.m_timestamp;
     entry.fee = pd.m_amount_in - pd.m_amount_out;
@@ -193,7 +192,7 @@ namespace tools
     entry.payment_id = string_tools::pod_to_hex(payment_id);
     if (entry.payment_id.substr(16).find_first_not_of('0') == std::string::npos)
       entry.payment_id = entry.payment_id.substr(0, 16);
-    //entry.alias = string_tools::pod_to_str(pd.m_alias); // LUKAS TODO check where payment_id comes from
+    entry.alias = pd.m_alias;
     entry.height = 0;
     entry.timestamp = pd.m_timestamp;
     entry.amount = pd.m_amount;
@@ -459,7 +458,21 @@ namespace tools
     return true;
   }
 
-  bool wallet_rpc_server::on_alias_address(const wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::response& res, epee::json_rpc::error& er) {
+  // LUKAS TODO fix duplicate code with CLI
+  bool wallet_rpc_server::on_alias_address(wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_ALIAS_ADDRESS::response& res, epee::json_rpc::error& er) {
+    if (req.alias.empty()) {
+      er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
+      er.message = "Missing alias.";
+      return false;
+    }
+
+    cryptonote::convert_alias(req.alias);
+    if (req.alias.empty()) {
+      er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
+      er.message = "Alias can contain only a-z (conveting A-Z), 0-9, \'-\', \'_\', \'.\' and \'@\'.";
+      return false;
+    }
+
     if (!m_wallet.get_alias_address(req.alias).empty()) {
       er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
       er.message = "Alias already exists.";
@@ -472,12 +485,6 @@ namespace tools
       return false;
     }
 
-    if (req.alias.empty()) {
-      er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
-      er.message = "Missing alias.";
-      return false;
-    }
-
     const std::string wallet_address = m_wallet.get_account().get_public_address_str(m_wallet.testnet()); // LUKAS TODO consider extending to subaddresses via get_subaddress_as_str(const cryptonote::subaddress_index& index)
 
     cryptonote::tx_destination_entry dst;
@@ -485,46 +492,47 @@ namespace tools
     dst.is_subaddress = false;
     dst.amount = 1;
     
-    /* Append alias, wallet_address and signature into extra */
+  // append alias, wallet_address and signature into extra
     std::vector<uint8_t> extra;
     if (!cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ALIAS + req.alias)
       || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ADDRESS + wallet_address)
       || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_SIGNATURE + m_wallet.sign(req.alias))) 
     { // LUKAS TODO consider encrypting dst.addr and signature to chars and use them instead, then decrypt via get_account_address_as_str (or get_subaddress_as_str)
       er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
-      er.message = "Something went wrong with alias. Please check its format: \"" + req.alias + "\", expected up to 63-character string";
+      er.message = "Something went wrong with alias. Please check its format: \"" + req.alias + "\"";
       return false;
     }
 
-    try
-    {
-      std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions_2({dst}, DEFAULT_MIXIN, req.unlock_time, req.priority, extra, 0/*req.account_index, LUKAS TODO prolly subaddress index*/, std::set<uint32_t>()/*LUKAS TODO didn't check this parameter at all*/, false);
-
+    try {
+      std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions({dst}, DEFAULT_MIXIN, req.unlock_time, req.priority, extra, 0/*req.account_index, LUKAS TODO prolly subaddress index*/, std::set<uint32_t>()/*LUKAS TODO I didn't check this parameter at all*/, false);
       m_wallet.commit_tx(ptx_vector.back());
 
       // populate response with tx hash
       res.tx_hash = epee::string_tools::pod_to_hex(cryptonote::get_transaction_hash(ptx_vector.back().tx));
       res.fee = ptx_vector.back().fee;
-      return true;
     }
-    catch (const tools::error::daemon_busy& e)
-    {
+    catch (const tools::error::daemon_busy& e) {
       er.code = WALLET_RPC_ERROR_CODE_DAEMON_IS_BUSY;
       er.message = e.what();
       return false;
     }
-    catch (const std::exception& e)
-    {
+    catch (const std::exception& e) {
       er.code = WALLET_RPC_ERROR_CODE_GENERIC_TRANSFER_ERROR;
       er.message = e.what();
       return false;
     }
-    catch (...)
-    {
+    catch (...) {
       er.code = WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR;
       er.message = "WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR";
       return false;
     }
+    return true;
+  }
+
+  // LUKAS TODO fix duplicate code with CLI
+  bool wallet_rpc_server::on_get_aliases(wallet_rpc::COMMAND_RPC_GET_ALIASES::request& req, wallet_rpc::COMMAND_RPC_GET_ALIASES::response& res, epee::json_rpc::error& er) {
+    const std::string wallet_address = m_wallet.get_account().get_public_address_str(m_wallet.testnet()); // LUKAS TODO consider extending to subaddresses via get_subaddress_as_str(const cryptonote::subaddress_index& index)
+    res.aliases = m_wallet.get_address_aliases(wallet_address);
     return true;
   }
 
@@ -558,7 +566,7 @@ namespace tools
         mixin = MAX_MIXIN;
       }
       
-      std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions_2(dsts, mixin, req.unlock_time, req.priority, extra, req.account_index, req.subaddr_indices, req.trusted_daemon);
+      std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions(dsts, mixin, req.unlock_time, req.priority, extra, req.account_index, req.subaddr_indices, req.trusted_daemon);
 
       // reject proposed transactions if there are more than one.  see on_transfer_split below.
       if (ptx_vector.size() != 1)
@@ -570,14 +578,12 @@ namespace tools
 
       m_wallet.commit_tx(ptx_vector);
 
-      // populate response with tx hash
       res.tx_hash = epee::string_tools::pod_to_hex(cryptonote::get_transaction_hash(ptx_vector.back().tx));
       if (req.get_tx_key)
       {
         res.tx_key = epee::string_tools::pod_to_hex(ptx_vector.back().tx_key);
       }
       res.fee = ptx_vector.back().fee;
-      return true;
     }
     catch (const tools::error::daemon_busy& e)
     {
@@ -633,7 +639,7 @@ namespace tools
       }
       
       std::vector<wallet2::pending_tx> ptx_vector;
-      ptx_vector = m_wallet.create_transactions_2(dsts, mixin, req.unlock_time, req.priority, extra, req.account_index, req.subaddr_indices, req.trusted_daemon);
+      ptx_vector = m_wallet.create_transactions(dsts, mixin, req.unlock_time, req.priority, extra, req.account_index, req.subaddr_indices, req.trusted_daemon);
 
       m_wallet.commit_tx(ptx_vector);
 

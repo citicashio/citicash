@@ -845,11 +845,19 @@ namespace cryptonote
 
         void cancel();
 
-        std::string get_alias_address(const std::string alias) const { 
-            auto it = m_aliases.find(alias);
-            if (it != m_aliases.end())
-                return it->second;
-            return std::string();
+        std::string get_alias_address(const std::string& alias) const {
+          auto it = m_aliases.left.find(alias);
+          if (it != m_aliases.left.end())
+            return it->second;
+          return "";
+        }
+
+        std::vector<std::string> get_address_aliases(const std::string& address) const {
+          std::vector<std::string> aliases;
+          auto range = m_aliases.right.equal_range(address);
+          for (auto it = range.first; it != range.second; ++it)
+            aliases.push_back(it->second);
+          return aliases;
         }
 
     private:
@@ -886,7 +894,7 @@ namespace cryptonote
         std::unordered_map<crypto::hash, std::unordered_map<crypto::key_image, bool>> m_check_txin_table;
 
         // aliases
-        std::map<std::string, std::string> m_aliases;
+        alias_bimap m_aliases;
 
         // SHA-3 hashes for each block and for fast pow checking
         std::vector<crypto::hash> m_blocks_hash_check;
