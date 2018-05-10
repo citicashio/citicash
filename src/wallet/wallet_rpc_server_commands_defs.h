@@ -312,6 +312,22 @@ namespace wallet_rpc
     };
   };
 
+  struct COMMAND_RPC_GET_ALIAS_ADDRESS {
+    struct request {
+      std::string alias;
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(alias)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response {
+      std::string address;
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(address)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
   struct COMMAND_RPC_TRANSFER
   {
     struct request

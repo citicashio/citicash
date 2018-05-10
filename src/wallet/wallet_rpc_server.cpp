@@ -536,6 +536,24 @@ namespace tools
     return true;
   }
 
+  bool wallet_rpc_server::on_get_alias_address(wallet_rpc::COMMAND_RPC_GET_ALIAS_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_GET_ALIAS_ADDRESS::response& res, epee::json_rpc::error& er) {
+    if (req.alias.empty()) {
+      er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
+      er.message = "Missing alias.";
+      return false;
+    }
+
+    cryptonote::convert_alias(req.alias);
+    if (req.alias.empty()) {
+      er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
+      er.message = "Alias can contain only a-z (conveting A-Z), 0-9, \'-\', \'_\', \'.\' and \'@\'.";
+      return false;
+    }
+
+    res.address = m_wallet.get_alias_address(req.alias);
+    return true;
+  }
+
   bool wallet_rpc_server::on_transfer(const wallet_rpc::COMMAND_RPC_TRANSFER::request& req, wallet_rpc::COMMAND_RPC_TRANSFER::response& res, epee::json_rpc::error& er)
   {
     std::vector<cryptonote::tx_destination_entry> dsts;
