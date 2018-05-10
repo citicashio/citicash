@@ -130,6 +130,7 @@ curl \
 
 <ul>
   <li><a href="#alias_address">alias_address</a></li>
+  <li><a href="#get_alias_address">get_alias_address</a></li>
   <li><a href="#get_aliases">get_aliases</a></li>
 </ul>
 
@@ -1375,6 +1376,35 @@ curl \
 </code></pre></div></div>
 
 <p>TODO: Extend for subaddresses.</p>
+
+<h3 id="get_alias_address"><strong>get_alias_address</strong></h3>
+
+<p>Returns address for specified alias.</p>
+
+<p>Inputs:</p>
+
+<ul>
+  <li><em>alias</em> - string</li>
+</ul>
+
+<p>Outputs:</p>
+
+<ul>
+  <li><em>address</em> - string</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -X POST http://localhost:19836/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_alias_address","params":{"alias":"salda"}}' -H 'Content-Type: application/json'
+
+{
+  "id": "0",
+  "jsonrpc": "2.0",
+  "result": {
+    "adress": "cczJnE1vdCfjMt6rBwmcAK95vB4xWwKRHS9CVzgxwGvhjimgWKZrufuixH4fTrSwwMZFEJFRvKscBiWH4AVZuUMs2fHejTRnRB"
+  }
+}
+</code></pre></div></div>
 
 <h3 id="get_aliases"><strong>get_aliases</strong></h3>
 
