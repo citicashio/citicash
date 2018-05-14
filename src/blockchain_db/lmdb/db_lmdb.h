@@ -241,7 +241,9 @@ public:
   virtual bool for_all_transactions(std::function<bool(const crypto::hash&, const cryptonote::transaction&)>) const;
   virtual bool for_all_outputs(std::function<bool(uint64_t amount, const crypto::hash &tx_hash, size_t tx_idx)> f) const;
 
-  virtual alias_bimap get_aliases() const;
+  virtual void load_aliases();
+  virtual std::string get_alias_address(const std::string& alias) const;
+  virtual std::vector<std::string> get_address_aliases(const std::string& address) const;
 
   virtual uint64_t add_block( const block& blk
                             , const size_t& block_size
@@ -369,6 +371,8 @@ private:
 
   MDB_dbi m_properties;
   MDB_dbi m_aliases;
+
+  alias_bimap m_alias_bimap; // contains pairs alias-address
 
   uint64_t m_height;
   uint64_t m_num_txs;

@@ -384,20 +384,14 @@ namespace cryptonote
       crypto::hash h;
       get_block_longhash(b, hash_ctx, h);
 
-      if(check_hash(h, local_diff))
-      {
+      if(check_hash(h, local_diff)) {
         //we lucky!
         ++m_config.current_extra_message_index;
         LOG_PRINT_GREEN("Found block for difficulty: " << local_diff, LOG_LEVEL_0);
         if(!m_phandler->handle_block_found(b))
-        {
           --m_config.current_extra_message_index;
-        }else
-        {
-          //success update, lets update config
-          if (!m_config_folder_path.empty())
-            epee::serialization::store_t_to_json_file(m_config, m_config_folder_path + "/" + MINER_CONFIG_FILE_NAME);
-        }
+        else if (!m_config_folder_path.empty()) //success update, lets update config
+          epee::serialization::store_t_to_json_file(m_config, m_config_folder_path + "/" + MINER_CONFIG_FILE_NAME);
       }
       nonce+=m_threads_total;
       ++m_hashes;

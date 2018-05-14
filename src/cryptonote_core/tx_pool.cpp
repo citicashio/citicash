@@ -256,7 +256,7 @@ namespace cryptonote
 
     return true;
   }
-  //---------------------------------------------------------------------------------
+
   bool tx_memory_pool::add_tx(const transaction &tx, tx_verification_context& tvc, bool keeped_by_block, bool relayed, uint8_t version)
   {
     crypto::hash h = null_hash;
@@ -473,13 +473,10 @@ namespace cryptonote
   {
     return true;
   }
-  //---------------------------------------------------------------------------------
-  bool tx_memory_pool::have_tx(const crypto::hash &id) const
-  {
+
+  bool tx_memory_pool::have_tx(const crypto::hash &id) const {
     CRITICAL_REGION_LOCAL(m_transactions_lock);
-    if(m_transactions.count(id))
-      return true;
-    return false;
+    return m_transactions.count(id);
   }
   //---------------------------------------------------------------------------------
   bool tx_memory_pool::have_tx_keyimges_as_spent(const transaction& tx) const

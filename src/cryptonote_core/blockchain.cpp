@@ -342,8 +342,6 @@ bool Blockchain::init(BlockchainDB* db, const bool testnet, const cryptonote::te
   if (!top_block_timestamp)
     timestamp_diff = time(NULL) - 1341378000;
 
-  m_aliases = m_db->get_aliases();
-
   // create general purpose async service queue
   m_async_work_idle = std::unique_ptr < boost::asio::io_service::work > (new boost::asio::io_service::work(m_async_service));
   // we only need 1
@@ -2862,7 +2860,7 @@ bool Blockchain::check_block_timestamp(const block& b) const
 
   return check_block_timestamp(timestamps, b);
 }
-//------------------------------------------------------------------
+
 void Blockchain::return_tx_to_pool(const std::vector<transaction> &txs)
 {
   uint8_t version = get_current_hard_fork_version();
@@ -2880,7 +2878,7 @@ void Blockchain::return_tx_to_pool(const std::vector<transaction> &txs)
     }
   }
 }
-//------------------------------------------------------------------
+
 bool Blockchain::flush_txes_from_pool(const std::list<crypto::hash> &txids)
 {
   CRITICAL_REGION_LOCAL(m_tx_pool);
@@ -3185,10 +3183,8 @@ leave:
   m_db->block_txn_stop();
   TIME_MEASURE_START(addblock);
   uint64_t new_height = 0;
-  if (!bvc.m_verifivation_failed)
-  {
-    try
-    {
+  if (!bvc.m_verifivation_failed) {
+    try {
       new_height = m_db->add_block(bl, block_size, cumulative_difficulty, already_generated_coins, txs);
 
       for (auto transaction : txs) {
@@ -3200,21 +3196,14 @@ leave:
           && find_tx_extra_field_by_type(tx_extra_fields, address, 1) && !address.nonce.empty() && address.nonce.front() == (char)TX_EXTRA_NONCE_ADDRESS
           && find_tx_extra_field_by_type(tx_extra_fields, signature, 2) && !signature.nonce.empty() && signature.nonce.front() == (char)TX_EXTRA_NONCE_SIGNATURE)
         {
-          address.nonce.erase(address.nonce.begin());
-          cryptonote::address_parse_info info;
-          if (!cryptonote::get_account_address_from_str(info, m_testnet, address.nonce)) {
-            LOG_PRINT_L2("Aliased address " + address.nonce + " not found.");
-            continue;
-          }
           alias.nonce.erase(alias.nonce.begin());
           cryptonote::convert_alias(alias.nonce);
-          if (alias.nonce.empty())
-            continue;
-          signature.nonce.erase(signature.nonce.begin());
-          if (!verifyHelper(alias.nonce, info.address, signature.nonce))
-            LOG_PRINT_L2("Alias " + alias.nonce + " is not signed with keys for address " + address.nonce + ", signature was " + signature.nonce + ".");
-          else if (!m_aliases.insert(alias_bimap::value_type(alias.nonce, address.nonce)).second)
-            LOG_PRINT_L2("Alias " + alias.nonce + " already exists.");
+          if (!m_db->m_alias_bimap.insert(alias_bimap::value_type(alias.nonce, address.nonce.substr(1))).second) {
+            LOG_ERROR("Alias " + alias.nonce + " already exists."); // this should never happen
+            // LUKAS TODO should I set "bvc.m_verifivation_failed = true;" or not?
+            return_tx_to_pool(txs);
+            return false;
+          }
         }
       }
     }

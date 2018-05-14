@@ -316,7 +316,6 @@ class KEY_IMAGE_EXISTS : public DB_EXCEPTION
  */
 class BlockchainDB
 {
-private:
   /*********************************************************************
    * private virtual members
    *********************************************************************/
@@ -506,7 +505,6 @@ protected:
 
   mutable uint64_t time_tx_exists = 0;  //!< a performance metric
   uint64_t time_commit1 = 0;  //!< a performance metric
-  bool m_auto_remove_logs = true;  //!< whether or not to automatically remove old logs
 
   HardFork* m_hardfork;
 
@@ -1282,7 +1280,9 @@ public:
    */
   virtual bool for_all_outputs(std::function<bool(uint64_t amount, const crypto::hash &tx_hash, size_t tx_idx)> f) const = 0;
 
-  virtual alias_bimap get_aliases() const = 0;
+  virtual void load_aliases() = 0;
+  virtual std::string get_alias_address(const std::string& alias) const = 0;
+  virtual std::vector<std::string> get_address_aliases(const std::string& address) const = 0;
 
   //
   // Hard fork related storage

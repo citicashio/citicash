@@ -613,7 +613,7 @@ namespace cryptonote
         
     return 1;
   }  
-  //------------------------------------------------------------------------------------------------------------------------  
+    
   template<class t_core>
   int t_cryptonote_protocol_handler<t_core>::handle_request_fluffy_missing_tx(int command, NOTIFY_REQUEST_FLUFFY_MISSING_TX::request& arg, cryptonote_connection_context& context)
   {

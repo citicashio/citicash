@@ -751,7 +751,7 @@ namespace cryptonote
       error_resp.message = "Core is busy";
       return false;
     }
-    res.address = m_core.get_blockchain_storage().get_alias_address(req.alias);
+    res.address = m_core.get_blockchain_storage().get_db().get_alias_address(req.alias);
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }
@@ -762,7 +762,7 @@ namespace cryptonote
       error_resp.message = "Core is busy";
       return false;
     }
-    res.aliases = m_core.get_blockchain_storage().get_address_aliases(req.address);
+    res.aliases = m_core.get_blockchain_storage().get_db().get_address_aliases(req.address);
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }
@@ -858,7 +858,7 @@ namespace cryptonote
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }
-  //------------------------------------------------------------------------------------------------------------------------------
+  
   bool core_rpc_server::on_submitblock(const COMMAND_RPC_SUBMITBLOCK::request& req, COMMAND_RPC_SUBMITBLOCK::response& res, epee::json_rpc::error& error_resp)
   {
     CHECK_CORE_READY();
@@ -904,7 +904,7 @@ namespace cryptonote
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }
-  //------------------------------------------------------------------------------------------------------------------------------
+  
   uint64_t core_rpc_server::get_block_reward(const block& blk)
   {
     uint64_t reward = 0;

@@ -137,8 +137,7 @@ uint64_t BlockchainDB::add_block( const block& blk
   add_transaction(blk_hash, blk.miner_tx);
   int tx_i = 0;
   crypto::hash tx_hash = null_hash;
-  for (const transaction& tx : txs)
-  {
+  for (const transaction& tx : txs) {
     tx_hash = blk.tx_hashes[tx_i];
     add_transaction(blk_hash, tx, &tx_hash);
     ++tx_i;

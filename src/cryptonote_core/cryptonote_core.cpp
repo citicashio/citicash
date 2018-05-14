@@ -490,15 +490,15 @@ namespace cryptonote
 
     bool r = add_new_tx(tx, tx_hash, tx_prefixt_hash, tx_blob.size(), tvc, keeped_by_block, relayed);
     if(tvc.m_verifivation_failed)
-    {LOG_PRINT_RED_L1("Transaction verification failed: " << tx_hash);}
+      LOG_PRINT_RED_L1("Transaction verification failed: " << tx_hash);
     else if(tvc.m_verifivation_impossible)
-    {LOG_PRINT_RED_L1("Transaction verification impossible: " << tx_hash);}
+      LOG_PRINT_RED_L1("Transaction verification impossible: " << tx_hash);
 
     if(tvc.m_added_to_pool)
       LOG_PRINT_L1("tx added: " << tx_hash);
     return r;
   }
-  //-----------------------------------------------------------------------------------------------
+
   bool core::get_stat_info(core_stat_info& st_inf) const
   {
     st_inf.mining_speed = m_miner.get_speed();
@@ -577,6 +577,30 @@ namespace cryptonote
       return false;
     }
 
+    std::vector<tx_extra_field> tx_extra_fields;
+    if(parse_tx_extra(tx.extra, tx_extra_fields)) {
+      tx_extra_nonce alias, address, signature;
+      if (find_tx_extra_field_by_type(tx_extra_fields, alias, 0) && !alias.nonce.empty() && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS
+        && find_tx_extra_field_by_type(tx_extra_fields, address, 1) && !address.nonce.empty() && address.nonce.front() == (char)TX_EXTRA_NONCE_ADDRESS
+        && find_tx_extra_field_by_type(tx_extra_fields, signature, 2) && !signature.nonce.empty() && signature.nonce.front() == (char)TX_EXTRA_NONCE_SIGNATURE)
+      {
+        address.nonce.erase(address.nonce.begin());
+        cryptonote::address_parse_info info;
+        if (!cryptonote::get_account_address_from_str(info, m_testnet, address.nonce)) {
+          LOG_PRINT_RED_L1("Aliased address " + address.nonce + " not found.");
+          return false;
+        }
+        alias.nonce.erase(alias.nonce.begin());
+        cryptonote::convert_alias(alias.nonce);
+        if (alias.nonce.empty())
+          return false;
+        signature.nonce.erase(signature.nonce.begin());
+        if (!verifyHelper(alias.nonce, info.address, signature.nonce)) {
+          LOG_PRINT_RED_L1("Alias " + alias.nonce + " is not signed with keys for address " + address.nonce + ", signature was " + signature.nonce + ".");
+          return false;
+        }
+      }
+    }
 
     return true;
   }
@@ -775,7 +799,7 @@ namespace cryptonote
   {
     m_miner.resume();
   }
-  //-----------------------------------------------------------------------------------------------
+  
   bool core::handle_block_found(block& b)
   {
     block_verification_context bvc = boost::value_initialized<block_verification_context>();
@@ -784,7 +808,6 @@ namespace cryptonote
     //anyway - update miner template
     update_miner_block_template();
     m_miner.resume();
-
 
     CHECK_AND_ASSERT_MES(!bvc.m_verifivation_failed, false, "mined block failed verification");
     if(bvc.m_added_to_main_chain)

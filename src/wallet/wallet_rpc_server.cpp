@@ -568,9 +568,7 @@ namespace tools
 
     // validate the transfer requested and populate dsts & extra
     if (!validate_transfer(req.destinations, req.payment_id, dsts, extra, er))
-    {
       return false;
-    }
 
     try
     {
@@ -638,9 +636,7 @@ namespace tools
 
     // validate the transfer requested and populate dsts & extra; RPC_TRANSFER::request and RPC_TRANSFER_SPLIT::request are identical types.
     if (!validate_transfer(req.destinations, req.payment_id, dsts, extra, er))
-    {
       return false;
-    }
 
     bool retry = false;
     try
@@ -778,11 +774,8 @@ namespace tools
     destination.push_back(wallet_rpc::transfer_destination());
     destination.back().amount = 0;
     destination.back().address = req.address;
-    bool is_subaddress;
     if (!validate_transfer(destination, req.payment_id, dsts, extra, er))
-    {
       return false;
-    }
 
     try
     {
