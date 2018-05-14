@@ -743,12 +743,15 @@ uint64_t BlockchainLMDB::add_transaction_data(const crypto::hash& blk_hash, cons
       cryptonote::convert_alias(alias.nonce);
       CURSOR(aliases)
       MDB_val_copy<const char*> k(alias.nonce.data());
-      MDB_val_copy<const char*> v(address.nonce.substr(1).data());
+      address.nonce.erase(address.nonce.begin());
+      MDB_val_copy<const char*> v(address.nonce.data());
       result = mdb_cursor_put(m_cur_aliases, &k, &v, MDB_NOOVERWRITE);
       if (result == MDB_KEYEXIST)
-        throw0(DB_ERROR(("Alias " + alias.nonce + " already exists.").data())); // this should never happen
+        throw0(DB_ERROR(("Alias " + alias.nonce + " already exists in database.").data())); // this should never happen
       else if (result)
         throw0(DB_ERROR(lmdb_error("Failed to add alias-address pair to db aliases: ", result).c_str()));
+      else if (!m_alias_bimap.insert(alias_bimap::value_type(alias.nonce, address.nonce).second))
+        throw0(DB_ERROR(("Alias " + alias.nonce + " already exists in cache.").data())); // this should never happen, TODO consider unrolling transaction
     }
   }
 
@@ -829,10 +832,12 @@ void BlockchainLMDB::remove_transaction_data(const crypto::hash& tx_hash, const 
             CURSOR(aliases)
             MDB_val_copy<const char*> k(alias.nonce.data());
             if ((result = mdb_cursor_get(m_cur_aliases, &k, NULL, MDB_SET)))
-              throw1(DB_ERROR(lmdb_error("Failed to locate alias for removal: ", result).c_str()));
+              throw1(DB_ERROR(lmdb_error("Failed to locate alias for removal in database: ", result).c_str())); // this should never happen
             result = mdb_cursor_del(m_cur_aliases, 0);
             if (result)
               throw1(DB_ERROR(lmdb_error("Failed to add removal of alias-address pair to db transaction: ", result).c_str()));
+            else if (!m_alias_bimap.erase(alias_bimap::value_type(alias.nonce)))
+              throw1(DB_ERROR(("Alias for removal " + alias.nonce + " not found in cache.").data())); // this should never happen, TODO consider unrolling transaction
           }
         }
       }

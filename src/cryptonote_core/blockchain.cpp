@@ -3186,26 +3186,6 @@ leave:
   if (!bvc.m_verifivation_failed) {
     try {
       new_height = m_db->add_block(bl, block_size, cumulative_difficulty, already_generated_coins, txs);
-
-      for (auto transaction : txs) {
-        std::vector<tx_extra_field> tx_extra_fields;
-        if(!parse_tx_extra(transaction.extra, tx_extra_fields))
-          continue;
-        tx_extra_nonce alias, address, signature;
-        if (find_tx_extra_field_by_type(tx_extra_fields, alias, 0) && !alias.nonce.empty() && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS
-          && find_tx_extra_field_by_type(tx_extra_fields, address, 1) && !address.nonce.empty() && address.nonce.front() == (char)TX_EXTRA_NONCE_ADDRESS
-          && find_tx_extra_field_by_type(tx_extra_fields, signature, 2) && !signature.nonce.empty() && signature.nonce.front() == (char)TX_EXTRA_NONCE_SIGNATURE)
-        {
-          alias.nonce.erase(alias.nonce.begin());
-          cryptonote::convert_alias(alias.nonce);
-          if (!m_db->m_alias_bimap.insert(alias_bimap::value_type(alias.nonce, address.nonce.substr(1))).second) {
-            LOG_ERROR("Alias " + alias.nonce + " already exists."); // this should never happen
-            // LUKAS TODO should I set "bvc.m_verifivation_failed = true;" or not?
-            return_tx_to_pool(txs);
-            return false;
-          }
-        }
-      }
     }
     catch (const KEY_IMAGE_EXISTS& e)
     {
