@@ -587,7 +587,7 @@ namespace cryptonote
         address.nonce.erase(address.nonce.begin());
         cryptonote::address_parse_info info;
         if (!cryptonote::get_account_address_from_str(info, m_testnet, address.nonce)) {
-          LOG_PRINT_RED_L1("Aliased address " + address.nonce + " not found.");
+          LOG_PRINT_RED_L1("Aliased address " + address.nonce + " incorrect.");
           return false;
         }
         alias.nonce.erase(alias.nonce.begin());
@@ -599,6 +599,12 @@ namespace cryptonote
           LOG_PRINT_RED_L1("Alias " + alias.nonce + " is not signed with keys for address " + address.nonce + ", signature was " + signature.nonce + ".");
           return false;
         }
+        if (!get_blockchain_storage().get_db().get_alias_address(alias.nonce).empty()) {
+          LOG_PRINT_RED_L1("Alias " + alias.nonce + " already exists.");
+          return false;
+        }
+        if (false)// kontrola duplicity aliasu s aliasy v pending transakcich
+          ;
       }
     }
 

@@ -750,7 +750,7 @@ uint64_t BlockchainLMDB::add_transaction_data(const crypto::hash& blk_hash, cons
         throw0(DB_ERROR(("Alias " + alias.nonce + " already exists in database.").data())); // this should never happen
       else if (result)
         throw0(DB_ERROR(lmdb_error("Failed to add alias-address pair to db aliases: ", result).c_str()));
-      else if (!m_alias_bimap.insert(alias_bimap::value_type(alias.nonce, address.nonce).second))
+      else if (!m_alias_bimap.insert(alias_bimap::value_type(alias.nonce, address.nonce)).second)
         throw0(DB_ERROR(("Alias " + alias.nonce + " already exists in cache.").data())); // this should never happen, TODO consider unrolling transaction
     }
   }
@@ -836,7 +836,7 @@ void BlockchainLMDB::remove_transaction_data(const crypto::hash& tx_hash, const 
             result = mdb_cursor_del(m_cur_aliases, 0);
             if (result)
               throw1(DB_ERROR(lmdb_error("Failed to add removal of alias-address pair to db transaction: ", result).c_str()));
-            else if (!m_alias_bimap.erase(alias_bimap::value_type(alias.nonce)))
+            else if (!m_alias_bimap.right.erase(alias.nonce))
               throw1(DB_ERROR(("Alias for removal " + alias.nonce + " not found in cache.").data())); // this should never happen, TODO consider unrolling transaction
           }
         }

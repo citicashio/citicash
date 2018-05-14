@@ -53,6 +53,7 @@
 #include "crypto/hash.h"
 #include "checkpoints.h"
 #include "hardfork.h"
+#include "blockchain_db/blockchain_db.h"
 
 namespace cryptonote
 {
@@ -816,7 +817,7 @@ namespace cryptonote
          *
          * @return a reference to the BlockchainDB instance
          */
-        BlockchainDB& get_db()
+        BlockchainDB& get_db() const
         {
           return *m_db;
         }
