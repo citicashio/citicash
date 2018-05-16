@@ -116,7 +116,7 @@ bool Blockchain::have_tx_keyimg_as_spent(const crypto::key_image &key_im) const
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
   CRITICAL_REGION_LOCAL(m_blockchain_lock);
-  return  m_db->has_key_image(key_im);
+  return m_db->has_key_image(key_im);
 }
 //------------------------------------------------------------------
 // This function makes sure that each "input" in an input (mixins) exists
@@ -3110,8 +3110,7 @@ leave:
     {
       // validate that transaction inputs and the keys spending them are correct.
       tx_verification_context tvc;
-      if(!check_tx_inputs(tx, tvc))
-      {
+      if(!check_tx_inputs(tx, tvc)) {
         LOG_PRINT_L1("Block with id: " << id  << " has at least one transaction (id: " << tx_id << ") with wrong inputs.");
 
         //TODO: why is this done?  make sure that keeping invalid blocks makes sense.
@@ -3139,6 +3138,29 @@ leave:
       }
     }
 #endif
+
+    std::vector<tx_extra_field> tx_extra_fields;
+    tx_extra_nonce extra_nonce;
+    if (parse_tx_extra(tx.extra, tx_extra_fields)
+      && find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 2) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_SIGNATURE
+      && find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 1) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_ADDRESS
+      && find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 0) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS)
+    {
+      extra_nonce.nonce.erase(extra_nonce.nonce.begin());
+      cryptonote::convert_alias(extra_nonce.nonce);
+
+      if (!extra_nonce.nonce.empty() && !get_db().get_alias_address(extra_nonce.nonce).empty()) {
+        LOG_PRINT_L1("Alias already exists in blockchain: " << extra_nonce.nonce);
+        LOG_PRINT_L1("Block with id: " << id  << " has at least one transaction (id: " << tx_id << ") with already used alias.");
+        //TODO: why is this done?  make sure that keeping invalid blocks makes sense.
+        add_block_as_invalid(bl, id);
+        LOG_PRINT_L1("Block with id " << id << " added as invalid because of already used alias in some transaction");
+        bvc.m_verifivation_failed = true;
+        return_tx_to_pool(txs);
+        goto leave;
+      }
+    }
+
     TIME_MEASURE_FINISH(cc);
     t_checktx += cc;
     fee_summary += fee;

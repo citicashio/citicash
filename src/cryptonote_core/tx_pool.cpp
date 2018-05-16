@@ -75,13 +75,10 @@ namespace cryptonote
       return amount * ACCEPT_THRESHOLD;
     }
   }
-  //---------------------------------------------------------------------------------
-  //---------------------------------------------------------------------------------
-  tx_memory_pool::tx_memory_pool(Blockchain& bchs): m_blockchain(bchs)
-  {
 
-  }
-  //---------------------------------------------------------------------------------
+
+  tx_memory_pool::tx_memory_pool(Blockchain& bchs): m_blockchain(bchs) {}
+  
   bool tx_memory_pool::add_tx(const transaction &tx, /*const crypto::hash& tx_prefix_hash,*/ const crypto::hash &id, size_t blob_size, tx_verification_context& tvc, bool kept_by_block, bool relayed, uint8_t version)
   {
     PERF_TIMER(add_tx);
@@ -145,36 +142,52 @@ namespace cryptonote
     }
     
     if (!kept_by_block && mixin_too_low){
-      LOG_PRINT_L1("Transaction with id= "<< id << " has too low mixin");
+      LOG_PRINT_L1("transaction with id= "<< id << " has too low mixin");
       tvc.m_low_mixin = true;
       tvc.m_verifivation_failed = true;
       return false;
     }
 
     if (!kept_by_block && mixin_too_high){
-      LOG_PRINT_L1("Transaction with id= " << id << " has too high mixin");
+      LOG_PRINT_L1("transaction with id= " << id << " has too high mixin");
       tvc.m_high_mixin = true;
       tvc.m_verifivation_failed = true;
       return false;
     }
 
+    std::vector<tx_extra_field> tx_extra_fields;
+    tx_extra_nonce extra_nonce;
+    if (parse_tx_extra(tx.extra, tx_extra_fields)
+      && find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 2) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_SIGNATURE
+      && find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 1) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_ADDRESS
+      && find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 0) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS)
+    {
+      extra_nonce.nonce.erase(extra_nonce.nonce.begin());
+      cryptonote::convert_alias(extra_nonce.nonce);
+    }
+    else
+      extra_nonce.nonce.clear();
+
     // if the transaction came from a block popped from the chain,
     // don't check if we have its key images as spent.
-    // TODO: Investigate why not?
-    if(!kept_by_block)
-    {
-      if(have_tx_keyimges_as_spent(tx))
-      {
-        LOG_PRINT_L1("Transaction with id= "<< id << " used already spent key images");
+    // TODO: Investigate why not? LUKAS I think it has already been checked
+    if (!kept_by_block) {
+      if (have_tx_keyimges_as_spent(tx)) {
+        LOG_PRINT_L1("transaction with id= "<< id << " used already spent key images");
         tvc.m_verifivation_failed = true;
         tvc.m_double_spend = true;
         return false;
       }
+      if (!extra_nonce.nonce.empty() && has_alias(extra_nonce.nonce)) {
+        LOG_PRINT_L1("transaction with id= "<< id << " used already pending alias");
+        tvc.m_verifivation_failed = true;
+        tvc.m_alias_already_exists = true;
+        return false;
+      }
     }
 
-    if (!m_blockchain.check_tx_outputs(tx, tvc))
-    {
-      LOG_PRINT_L1("Transaction with id= "<< id << " has at least one invalid output");
+    if (!m_blockchain.check_tx_outputs(tx, tvc)) {
+      LOG_PRINT_L1("transaction with id= "<< id << " has at least one invalid output");
       tvc.m_verifivation_failed = true;
       tvc.m_invalid_output = true;
       return false;
@@ -187,13 +200,16 @@ namespace cryptonote
     tx_details txd;
     txd.tx = tx;
     bool ch_inp_res = m_blockchain.check_tx_inputs(txd.tx, max_used_block_height, max_used_block_id, tvc, kept_by_block);
+    bool alias_duplicity = !extra_nonce.nonce.empty() && !m_blockchain.get_db().get_alias_address(extra_nonce.nonce).empty();
+    if (alias_duplicity) {
+        LOG_PRINT_L1("Alias already exists in blockchain: " << extra_nonce.nonce);
+        tvc.m_alias_already_exists = true;
+    }
     CRITICAL_REGION_LOCAL(m_transactions_lock);
-    if(!ch_inp_res)
-    {
+    if (!ch_inp_res || alias_duplicity) {
       // if the transaction was valid before (kept_by_block), then it
       // may become valid again, so ignore the failed inputs check.
-      if(kept_by_block)
-      {
+      if(kept_by_block) {
         auto txd_p = m_transactions.insert(transactions_container::value_type(id, txd));
         CHECK_AND_ASSERT_MES(txd_p.second, false, "transaction already exists at inserting in memory pool");
         txd_p.first->second.blob_size = blob_size;
@@ -206,14 +222,14 @@ namespace cryptonote
         txd_p.first->second.relayed = relayed;
         tvc.m_verifivation_impossible = true;
         tvc.m_added_to_pool = true;
-      }else
-      {
-        LOG_PRINT_L1("tx used wrong inputs, rejected");
+      }
+      else {
+        LOG_PRINT_L1(std::string(ch_inp_res ? "tx tried to use alias that already exists" : "tx used wrong inputs") + ", rejected");
         tvc.m_verifivation_failed = true;
         return false;
       }
-    }else
-    {
+    }
+    else {
       //update transactions container
       auto txd_p = m_transactions.insert(transactions_container::value_type(id, txd));
       CHECK_AND_ASSERT_MES(txd_p.second, false, "internal error: transaction already exists at inserting in memorypool");
@@ -229,7 +245,7 @@ namespace cryptonote
       txd_p.first->second.relayed = relayed;
       tvc.m_added_to_pool = true;
 
-      if(txd_p.first->second.fee > 0)
+      if (txd_p.first->second.fee > 0)
         tvc.m_should_be_relayed = true;
     }
 
@@ -240,11 +256,18 @@ namespace cryptonote
     {
       CHECKED_GET_SPECIFIC_VARIANT(in, const txin_to_key, txin, false);
       std::unordered_set<crypto::hash>& kei_image_set = m_spent_key_images[txin.k_image];
-      CHECK_AND_ASSERT_MES(kept_by_block || kei_image_set.size() == 0, false, "internal error: kept_by_block=" << kept_by_block
-                                          << ",  kei_image_set.size()=" << kei_image_set.size() << ENDL << "txin.k_image=" << txin.k_image << ENDL
-                                          << "tx_id=" << id );
+      CHECK_AND_ASSERT_MES(kept_by_block || kei_image_set.empty(), false, "internal error: kept_by_block=" << kept_by_block
+        << ",  kei_image_set.size()=" << kei_image_set.size() << ENDL << "txin.k_image=" << txin.k_image << ENDL
+        << "tx_id=" << id);
       auto ins_res = kei_image_set.insert(id);
       CHECK_AND_ASSERT_MES(ins_res.second, false, "internal error: try to insert duplicate iterator in key_image set");
+    }
+
+    if (!extra_nonce.nonce.empty()) {
+      std::unordered_set<crypto::hash>& alias_txs = m_pending_aliases[extra_nonce.nonce];
+      CHECK_AND_ASSERT_MES(kept_by_block || alias_txs.empty(), false, "internal error: kept_by_block=" << kept_by_block
+        << ",  alias_txs.size()=" << alias_txs.size() << ENDL << "alias=" << extra_nonce.nonce << ENDL << "tx_id=" << id);
+      CHECK_AND_ASSERT_MES(alias_txs.insert(id).second, false, "internal error: trying to insert duplicate tx_hash in alias set");
     }
 
     tvc.m_verifivation_failed = false;
@@ -264,23 +287,21 @@ namespace cryptonote
     get_transaction_hash(tx, h, blob_size);
     return add_tx(tx, h, blob_size, tvc, keeped_by_block, relayed, version);
   }
-  //---------------------------------------------------------------------------------
+  
   //FIXME: Can return early before removal of all of the key images.
   //       At the least, need to make sure that a false return here
   //       is treated properly.  Should probably not return early, however.
-  bool tx_memory_pool::remove_transaction_keyimages(const transaction& tx)
-  {
+  bool tx_memory_pool::remove_transaction_keyimages(const transaction& tx) {
     CRITICAL_REGION_LOCAL(m_transactions_lock);
     // ND: Speedup
     // 1. Move transaction hash calcuation outside of loop. ._.
     crypto::hash actual_hash = get_transaction_hash(tx);
-    BOOST_FOREACH(const txin_v& vi, tx.vin)
-    {
+    BOOST_FOREACH(const txin_v& vi, tx.vin) {
       CHECKED_GET_SPECIFIC_VARIANT(vi, const txin_to_key, txin, false);
       auto it = m_spent_key_images.find(txin.k_image);
       CHECK_AND_ASSERT_MES(it != m_spent_key_images.end(), false, "failed to find transaction input in key images. img=" << txin.k_image << ENDL
-                                    << "transaction id = " << get_transaction_hash(tx));
-      std::unordered_set<crypto::hash>& key_image_set =  it->second;
+        << "transaction id = " << actual_hash);
+      std::unordered_set<crypto::hash>& key_image_set = it->second;
       CHECK_AND_ASSERT_MES(key_image_set.size(), false, "empty key_image set, img=" << txin.k_image << ENDL
         << "transaction id = " << actual_hash);
 
@@ -288,16 +309,46 @@ namespace cryptonote
       CHECK_AND_ASSERT_MES(it_in_set != key_image_set.end(), false, "transaction id not found in key_image set, img=" << txin.k_image << ENDL
         << "transaction id = " << actual_hash);
       key_image_set.erase(it_in_set);
-      if(!key_image_set.size())
-      {
-        //it is now empty hash container for this key_image
+      if (key_image_set.empty())
         m_spent_key_images.erase(it);
-      }
-
     }
     return true;
   }
-  //---------------------------------------------------------------------------------
+
+  bool tx_memory_pool::remove_transaction_alias(const transaction& tx) {
+    std::vector<tx_extra_field> tx_extra_fields;
+    tx_extra_nonce extra_nonce;
+    if (parse_tx_extra(tx.extra, tx_extra_fields)
+      && find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 2) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_SIGNATURE
+      && find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 1) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_ADDRESS
+      && find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 0) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS)
+    {
+      extra_nonce.nonce.erase(extra_nonce.nonce.begin());
+      cryptonote::convert_alias(extra_nonce.nonce);
+    }
+    else
+      return true;
+
+    CRITICAL_REGION_LOCAL(m_transactions_lock);
+
+    crypto::hash actual_hash = get_transaction_hash(tx);
+
+    auto it = m_pending_aliases.find(extra_nonce.nonce);
+    CHECK_AND_ASSERT_MES(it != m_pending_aliases.end(), false, "failed to find alias in pending aliases. alias=" << extra_nonce.nonce << ENDL
+      << "transaction id = " << actual_hash);
+    std::unordered_set<crypto::hash>& alias_txs = it->second;
+    CHECK_AND_ASSERT_MES(!alias_txs.empty(), false, "empty alias set, alias=" << extra_nonce.nonce << ENDL
+      << "transaction id = " << actual_hash);
+
+    auto it_in_set = alias_txs.find(actual_hash);
+    CHECK_AND_ASSERT_MES(it_in_set != alias_txs.end(), false, "transaction id not found in alias set, alias=" << extra_nonce.nonce << ENDL
+      << "transaction id = " << actual_hash);
+    alias_txs.erase(it_in_set);
+    if (alias_txs.empty())
+      m_pending_aliases.erase(it);
+    return true;
+  }
+
   bool tx_memory_pool::take_tx(const crypto::hash &id, transaction &tx, size_t& blob_size, uint64_t& fee, bool &relayed)
   {
     CRITICAL_REGION_LOCAL(m_transactions_lock);
@@ -315,6 +366,7 @@ namespace cryptonote
     fee = it->second.fee;
     relayed = it->second.relayed;
     remove_transaction_keyimages(it->second.tx);
+    remove_transaction_alias(it->second.tx);
     m_transactions.erase(it);
     m_txs_by_fee_and_receive_time.erase(sorted_it);
     return true;
@@ -347,6 +399,7 @@ namespace cryptonote
       {
         LOG_PRINT_L1("Tx " << it->first << " removed from tx pool due to outdated, age: " << tx_age );
         remove_transaction_keyimages(it->second.tx);
+        remove_transaction_alias(it->second.tx);
         auto sorted_it = find_tx_in_sorted_container(it->first);
         if (sorted_it == m_txs_by_fee_and_receive_time.end())
         {
@@ -479,24 +532,26 @@ namespace cryptonote
     return m_transactions.count(id);
   }
   //---------------------------------------------------------------------------------
-  bool tx_memory_pool::have_tx_keyimges_as_spent(const transaction& tx) const
-  {
+  bool tx_memory_pool::have_tx_keyimges_as_spent(const transaction& tx) const {
     CRITICAL_REGION_LOCAL(m_transactions_lock);
-    BOOST_FOREACH(const auto& in, tx.vin)
-    {
+    BOOST_FOREACH(const auto& in, tx.vin) {
       CHECKED_GET_SPECIFIC_VARIANT(in, const txin_to_key, tokey_in, true);//should never fail
-      if(have_tx_keyimg_as_spent(tokey_in.k_image))
-         return true;
+      if (have_tx_keyimg_as_spent(tokey_in.k_image))
+        return true;
     }
     return false;
   }
-  //---------------------------------------------------------------------------------
-  bool tx_memory_pool::have_tx_keyimg_as_spent(const crypto::key_image& key_im) const
-  {
+  
+  bool tx_memory_pool::have_tx_keyimg_as_spent(const crypto::key_image& key_im) const {
     CRITICAL_REGION_LOCAL(m_transactions_lock);
-    return m_spent_key_images.end() != m_spent_key_images.find(key_im);
+    return m_spent_key_images.find(key_im) != m_spent_key_images.end();
   }
-  //---------------------------------------------------------------------------------
+
+  bool tx_memory_pool::has_alias(const std::string& alias) const {
+    CRITICAL_REGION_LOCAL(m_transactions_lock);
+    return m_pending_aliases.find(alias) != m_pending_aliases.end();
+  }
+
   void tx_memory_pool::lock() const
   {
     m_transactions_lock.lock();
@@ -546,6 +601,20 @@ namespace cryptonote
     //if we here, transaction seems valid, but, anyway, check for key_images collisions with blockchain, just to be sure
     if(m_blockchain.have_tx_keyimges_as_spent(txd.tx))
       return false;
+
+    std::vector<tx_extra_field> tx_extra_fields;
+    tx_extra_nonce extra_nonce;
+    if (parse_tx_extra(txd.tx.extra, tx_extra_fields)
+      && find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 2) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_SIGNATURE
+      && find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 1) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_ADDRESS
+      && find_tx_extra_field_by_type(tx_extra_fields, extra_nonce, 0) && !extra_nonce.nonce.empty() && extra_nonce.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS)
+    {
+      extra_nonce.nonce.erase(extra_nonce.nonce.begin());
+      cryptonote::convert_alias(extra_nonce.nonce);
+
+      if (!extra_nonce.nonce.empty() && !m_blockchain.get_db().get_alias_address(extra_nonce.nonce).empty())
+        return false;
+    }
 
     //transaction is ok.
     return true;
@@ -723,6 +792,7 @@ namespace cryptonote
       m_transactions.clear();
       m_txs_by_fee_and_receive_time.clear();
       m_spent_key_images.clear();
+      m_pending_aliases.clear();
     }
 
     // no need to store queue of sorted transactions, as it's easy to generate.

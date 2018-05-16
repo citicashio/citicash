@@ -577,8 +577,8 @@ namespace cryptonote
       return false;
     }
 
-    std::vector<tx_extra_field> tx_extra_fields;
-    if(parse_tx_extra(tx.extra, tx_extra_fields)) {
+    std::vector<tx_extra_field> tx_extra_fields; // LUKAS TODO kontrolu presunout jinam
+    if (parse_tx_extra(tx.extra, tx_extra_fields)) {
       tx_extra_nonce alias, address, signature;
       if (find_tx_extra_field_by_type(tx_extra_fields, alias, 0) && !alias.nonce.empty() && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS
         && find_tx_extra_field_by_type(tx_extra_fields, address, 1) && !address.nonce.empty() && address.nonce.front() == (char)TX_EXTRA_NONCE_ADDRESS
@@ -599,12 +599,6 @@ namespace cryptonote
           LOG_PRINT_RED_L1("Alias " + alias.nonce + " is not signed with keys for address " + address.nonce + ", signature was " + signature.nonce + ".");
           return false;
         }
-        if (!get_blockchain_storage().get_db().get_alias_address(alias.nonce).empty()) {
-          LOG_PRINT_RED_L1("Alias " + alias.nonce + " already exists.");
-          return false;
-        }
-        if (false)// kontrola duplicity aliasu s aliasy v pending transakcich
-          ;
       }
     }
 

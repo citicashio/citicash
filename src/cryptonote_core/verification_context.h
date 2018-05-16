@@ -44,6 +44,7 @@ namespace cryptonote
     bool m_low_mixin;
     bool m_high_mixin;
     bool m_double_spend;
+    bool m_alias_already_exists;
     bool m_invalid_input;
     bool m_invalid_output;
     bool m_too_big;

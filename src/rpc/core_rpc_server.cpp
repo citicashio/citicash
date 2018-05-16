@@ -541,6 +541,8 @@ namespace cryptonote
         res.reason = "mixin too high";
       if ((res.double_spend = tvc.m_double_spend))
         res.reason = "double spend";
+      if ((res.double_spend = tvc.m_alias_already_exists))
+        res.reason = "alias already pending";
       if ((res.invalid_input = tvc.m_invalid_input))
         res.reason = "invalid input";
       if ((res.invalid_output = tvc.m_invalid_output))

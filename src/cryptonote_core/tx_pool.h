@@ -326,6 +326,7 @@ namespace cryptonote
       CRITICAL_REGION_LOCAL(m_transactions_lock);
       a & m_transactions;
       a & m_spent_key_images;
+      a & m_pending_aliases;
       a & m_timed_out_transactions;
     }
 
@@ -387,6 +388,7 @@ namespace cryptonote
      * @return true if the spent key image is present, otherwise false
      */
     bool have_tx_keyimg_as_spent(const crypto::key_image& key_im) const;
+    bool has_alias(const std::string& alias) const;
 
     /**
      * @brief check if any spent key image in a transaction is in the pool
@@ -414,6 +416,7 @@ namespace cryptonote
      * @return false if any key images to be removed cannot be found, otherwise true
      */
     bool remove_transaction_keyimages(const transaction& tx);
+    bool remove_transaction_alias(const transaction& tx);
 
     /**
      * @brief check if any of a transaction's spent key images are present in a given set
@@ -468,7 +471,9 @@ private:
 #endif
 
     //! container for spent key images from the transactions in the pool
-    key_images_container m_spent_key_images;  
+    key_images_container m_spent_key_images;
+
+    std::unordered_map<std::string, std::unordered_set<crypto::hash>> m_pending_aliases;
 
     //TODO: this time should be a named constant somewhere, not hard-coded
     //! interval on which to check for stale/"stuck" transactions
