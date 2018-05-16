@@ -359,6 +359,7 @@ namespace cryptonote
       db->open(filename, db_flags);
       if(!db->m_open)
         return false;
+      db->load_aliases();
     }
     catch (const DB_ERROR& e)
     {
@@ -366,8 +367,7 @@ namespace cryptonote
       return false;
     }
 
-    m_blockchain_storage.set_user_options(blocks_threads,
-        blocks_per_sync, sync_mode, fast_sync);
+    m_blockchain_storage.set_user_options(blocks_threads, blocks_per_sync, sync_mode, fast_sync);
 
     r = m_blockchain_storage.init(db, m_testnet, test_options);
 

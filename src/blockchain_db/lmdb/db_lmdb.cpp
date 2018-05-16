@@ -1199,8 +1199,6 @@ void BlockchainLMDB::open(const std::string& filename, const int mdb_flags)
   mdb_set_compare(txn, m_properties, compare_string);
   mdb_set_compare(txn, m_aliases, compare_string);
 
-  load_aliases();
-
   // get and keep current height
   MDB_stat db_stats;
   if ((result = mdb_stat(txn, m_blocks, &db_stats)))
