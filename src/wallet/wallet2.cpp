@@ -480,6 +480,8 @@ std::pair<std::unique_ptr<wallet2>, password_container> wallet2::make_new(const 
 }
 
 bool wallet2::init(std::string daemon_address, boost::optional<epee::net_utils::http::login> daemon_login, uint64_t upper_transaction_size_limit, bool enable_ssl, const char* cacerts_path) {
+  if(m_http_client.is_connected())
+    m_http_client.disconnect();
   m_upper_transaction_size_limit = upper_transaction_size_limit;
   if (enable_ssl)
     m_http_client.enable_ssl(cacerts_path);

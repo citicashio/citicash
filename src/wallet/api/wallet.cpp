@@ -81,13 +81,14 @@ struct Wallet2CallbackImpl : public tools::i_wallet2_callback
         return m_listener;
     }
 
-    virtual void on_new_block(uint64_t height, const cryptonote::block& block)
-    {
-        LOG_PRINT_L3(__FUNCTION__ << ": new block. height: " << height);
-
-        if (m_listener) {
-            m_listener->newBlock(height);
-            //  m_listener->updated();
+    virtual void on_new_block(uint64_t height, const cryptonote::block& block) {
+        // Don't flood the GUI with signals. On fast refresh - send signal every 1000th block
+        // get_refresh_from_block_height() returns the blockheight from when the wallet was 
+        // created or the restore height specified when wallet was recovered
+        if (height >= m_wallet->m_wallet->get_refresh_from_block_height() || height % 1000 == 0) {
+            // LOG_PRINT_L3(__FUNCTION__ << ": new block. height: " << height);
+            if (m_listener)
+                m_listener->newBlock(height);
         }
     }
 
@@ -205,6 +206,7 @@ WalletImpl::WalletImpl(bool testnet)
     , m_recoveringFromSeed(false)
     , m_synchronized(false)
     , m_rebuildWalletCache(false)
+    , m_is_connected(false)
 {
     m_wallet = new tools::wallet2(testnet);
     m_history = new TransactionHistoryImpl(this);
@@ -227,23 +229,24 @@ WalletImpl::WalletImpl(bool testnet)
 
 WalletImpl::~WalletImpl()
 {
+    LOG_PRINT_L1(__FUNCTION__);
     // Pause refresh thread - prevents refresh from starting again
     pauseRefresh();
     // Close wallet - stores cache and stops ongoing refresh operation
     close(false);
     // Stop refresh thread
     stopRefresh();
+    delete m_wallet2Callback;
     delete m_history;
     delete m_addressBook;
     delete m_wallet;
-    delete m_wallet2Callback;
     delete m_subaddress;
     delete m_subaddressAccount;
+    LOG_PRINT_L1(__FUNCTION__ << " finished");
 }
 
 bool WalletImpl::create(const std::string &path, const std::string &password, const std::string &language)
 {
-
     clearStatus();
     m_recoveringFromSeed = false;
     bool keys_file_exists;
@@ -416,7 +419,6 @@ bool WalletImpl::recover(const std::string &path, const std::string &seed)
     try {
         m_wallet->set_seed_language(old_language);
         m_wallet->generate(path, "", recovery_key, true, false);
-        // TODO: wallet->init(daemon_address);
 
     } catch (const std::exception &e) {
         m_status = Status_Critical;
@@ -567,15 +569,6 @@ bool WalletImpl::init(const std::string &daemon_address, uint64_t upper_transact
     return doInit(daemon_address, upper_transaction_size_limit, enable_ssl, cacerts_path);
 }
 
-bool WalletImpl::initAsync(const string &daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl, const char* cacerts_path)
-{
-    clearStatus();
-    if (!doInit(daemon_address, upper_transaction_size_limit, enable_ssl, cacerts_path))
-        return false;
-    startRefresh();
-    return true;
-}
-
 void WalletImpl::setRefreshFromBlockHeight(uint64_t refresh_from_block_height)
 {
     m_wallet->set_refresh_from_block_height(refresh_from_block_height);
@@ -606,6 +599,8 @@ uint64_t WalletImpl::approximateBlockChainHeight() const
 }
 uint64_t WalletImpl::daemonBlockChainHeight() const
 {
+    if (!m_is_connected)
+        return 0;
     std::string err;
     uint64_t result = m_wallet->get_daemon_blockchain_height(err);
     if (!err.empty()) {
@@ -618,7 +613,17 @@ uint64_t WalletImpl::daemonBlockChainHeight() const
         m_status = Status_Ok;
         m_errorString = "";
     }
+    // Target height can be 0 when daemon is synced. Use blockchain height instead. 
+    if(result == 0)
+        result = daemonBlockChainHeight();
     return result;
+}
+
+bool WalletImpl::daemonSynced() const {   
+    if(connected() == Wallet::ConnectionStatus_Disconnected)
+        return false;
+    uint64_t blockChainHeight = daemonBlockChainHeight();
+    return (blockChainHeight >= daemonBlockChainTargetHeight() && blockChainHeight > 1);
 }
 
 uint64_t WalletImpl::daemonBlockChainTargetHeight() const
@@ -1122,8 +1127,8 @@ bool WalletImpl::connectToDaemon()
 Wallet::ConnectionStatus WalletImpl::connected() const
 {
     uint32_t version = 0;
-    bool is_connected = m_wallet->check_connection(&version);
-    if (!is_connected)
+    m_is_connected = m_wallet->check_connection(&version);
+    if (!m_is_connected)
         return Wallet::ConnectionStatus_Disconnected;
     if ((version >> 16) != CORE_RPC_VERSION_MAJOR)
         return Wallet::ConnectionStatus_WrongVersion;
@@ -1173,7 +1178,7 @@ void WalletImpl::refreshThreadFunc()
         LOG_PRINT_L3(__FUNCTION__ << ": refresh lock acquired...");
         LOG_PRINT_L3(__FUNCTION__ << ": m_refreshEnabled: " << m_refreshEnabled);
         LOG_PRINT_L3(__FUNCTION__ << ": m_status: " << m_status);
-        if (m_refreshEnabled /*&& m_status == Status_Ok*/) {
+        if (m_refreshEnabled) {
             LOG_PRINT_L3(__FUNCTION__ << ": refreshing...");
             doRefresh();
         }
@@ -1186,16 +1191,23 @@ void WalletImpl::doRefresh()
     // synchronizing async and sync refresh calls
     boost::lock_guard<boost::mutex> guarg(m_refreshMutex2);
     try {
-        m_wallet->refresh();
-        if (!m_synchronized) {
-            m_synchronized = true;
-        }
-        // assuming if we have empty history, it wasn't initialized yet
-        // for futher history changes client need to update history in
-        // "on_money_received" and "on_money_sent" callbacks
-        if (m_history->count() == 0) {
-            m_history->refresh();
-        }
+        // Syncing daemon and refreshing wallet simultaneously is very resource intensive.
+        // Disable refresh if wallet is disconnected or daemon isn't synced.
+        if (daemonSynced()) {
+            // Use fast refresh for new wallets
+            if (isNewWallet())
+                m_wallet->set_refresh_from_block_height(daemonBlockChainHeight());        
+            m_wallet->refresh();
+            if (!m_synchronized) {
+                m_synchronized = true;
+            }
+            // assuming if we have empty history, it wasn't initialized yet
+            // for futher history changes client need to update history in
+            // "on_money_received" and "on_money_sent" callbacks
+            if (m_history->count() == 0) {
+                m_history->refresh();
+            }
+        } 
     } catch (const std::exception &e) {
         m_status = Status_Error;
         m_errorString = e.what();
@@ -1206,10 +1218,9 @@ void WalletImpl::doRefresh()
 }
 
 
-void WalletImpl::startRefresh()
-{
-    LOG_PRINT_L2(__FUNCTION__ << ": refresh started/resumed...");
+void WalletImpl::startRefresh() {
     if (!m_refreshEnabled) {
+        LOG_PRINT_L2(__FUNCTION__ << ": refresh started/resumed...");
         m_refreshEnabled = true;
         m_refreshCV.notify_one();
     }
@@ -1252,9 +1263,14 @@ bool WalletImpl::doInit(const string &daemon_address, uint64_t upper_transaction
         return false;
 
     // in case new wallet, this will force fast-refresh (pulling hashes instead of blocks)
-    if (isNewWallet()) {
+    // If daemon isn't synced a calculated block height will be used instead
+    if (isNewWallet() && daemonSynced()) {
+        LOG_PRINT_L2(__FUNCTION__ << ":New Wallet - fast refresh until " << daemonBlockChainHeight());
         m_wallet->set_refresh_from_block_height(daemonBlockChainHeight());
     }
+
+    if (m_rebuildWalletCache)
+      LOG_PRINT_L2(__FUNCTION__ << ": Rebuilding wallet cache, fast refresh until block " << m_wallet->get_refresh_from_block_height());
 
     if (Utils::isAddressLocal(daemon_address)) {
         this->setTrustedDaemon(true);
