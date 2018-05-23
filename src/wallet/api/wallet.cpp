@@ -561,17 +561,19 @@ string WalletImpl::keysFilename() const
     return m_wallet->get_keys_file();
 }
 
-void WalletImpl::init(const std::string &daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl, const char* cacerts_path)
+bool WalletImpl::init(const std::string &daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl, const char* cacerts_path)
 {
     clearStatus();
-    doInit(daemon_address, upper_transaction_size_limit, enable_ssl, cacerts_path); // LUKAS TODO monero returns false if failed
+    return doInit(daemon_address, upper_transaction_size_limit, enable_ssl, cacerts_path);
 }
 
-void WalletImpl::initAsync(const string &daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl, const char* cacerts_path)
+bool WalletImpl::initAsync(const string &daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl, const char* cacerts_path)
 {
     clearStatus();
-    doInit(daemon_address, upper_transaction_size_limit, enable_ssl, cacerts_path);
+    if (!doInit(daemon_address, upper_transaction_size_limit, enable_ssl, cacerts_path))
+        return false;
     startRefresh();
+    return true;
 }
 
 void WalletImpl::setRefreshFromBlockHeight(uint64_t refresh_from_block_height)

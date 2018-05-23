@@ -376,7 +376,7 @@ struct Wallet
      * \param cacerts_path - optional path to a CA certificates file.
      * \return  - true if initialized and refreshed successfully
      */
-    virtual void init(const std::string &daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl=false,
+    virtual bool init(const std::string &daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl=false,
                       const char* cacerts_path=nullptr) = 0;
 
     /*!
@@ -389,7 +389,7 @@ struct Wallet
      * \param cacerts_path - optional path to a CA certificates file.
      * \return  - true if initialized and refreshed successfully
      */
-    virtual void initAsync(const std::string &daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl=false,
+    virtual bool initAsync(const std::string &daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl=false,
                            const char* cacerts_path=nullptr) = 0;
 
    /*!
