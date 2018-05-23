@@ -136,7 +136,7 @@ private:
     void stopRefresh();
     void pauseRefresh();
     bool isNewWallet() const;
-    void doInit(const std::string &daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl=false, const char* cacerts_path=nullptr);
+    bool doInit(const std::string &daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl=false, const char* cacerts_path=nullptr);
 
 private:
     friend class PendingTransactionImpl;

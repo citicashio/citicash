@@ -61,7 +61,6 @@
 
 
 #include <iostream>
-#define WALLET_RCP_CONNECTION_TIMEOUT                          200000
 
 namespace tools
 {
@@ -93,6 +92,8 @@ namespace tools
   class wallet2
   {
   public:
+    static constexpr const std::chrono::seconds rpc_timeout = std::chrono::minutes(3) + std::chrono::seconds(30);
+    
     enum RefreshType {
       RefreshFull,
       RefreshOptimizeCoinbase,
@@ -104,7 +105,7 @@ namespace tools
     wallet2(const wallet2&) : m_run(true), m_callback(0), m_testnet(false), m_always_confirm_transfers(true), m_store_tx_info(true), m_default_mixin(0), m_default_priority(0), m_refresh_type(RefreshOptimizeCoinbase), m_auto_refresh(true), m_refresh_from_block_height(0), m_confirm_missing_payment_id(true) {}
 
   public:
-    static const char* tr(const char* str);// { return i18n_translate(str, "cryptonote::simple_wallet"); }
+    static const char* tr(const char* str);
 
     static bool has_testnet_option(const boost::program_options::variables_map& vm);
     static void init_options(boost::program_options::options_description& desc_params);
@@ -401,9 +402,9 @@ namespace tools
     // free block size. TODO: fix this so that it actually takes
     // into account the current median block size rather than
     // the minimum block size.
-    void init(const std::string& daemon_address = "http://localhost:8080", uint64_t upper_transaction_size_limit = 0, bool enable_ssl=false,
-              const char* cacerts_path=nullptr);
     bool deinit();
+    bool init(std::string daemon_address = "http://localhost:8080", boost::optional<epee::net_utils::http::login> daemon_login = boost::none, uint64_t upper_transaction_size_limit = 0,
+      bool enable_ssl=false, const char* cacerts_path=nullptr);
 
     void stop() { m_run.store(false, std::memory_order_relaxed); }
 
@@ -481,7 +482,7 @@ namespace tools
     std::vector<wallet2::pending_tx> create_transactions_all(uint64_t below, const cryptonote::account_public_address &address, const size_t fake_outs_count, const uint64_t unlock_time, uint32_t priority, const std::vector<uint8_t> extra, bool is_subaddress, uint32_t subaddr_account, std::set<uint32_t> subaddr_indices, bool trusted_daemon, float tx_size_target_factor = 1.0f);
     std::vector<wallet2::pending_tx> create_transactions_from(const cryptonote::account_public_address &address, bool is_subaddress, std::vector<size_t> unused_transfers_indices, std::vector<size_t> unused_dust_indices, const size_t fake_outs_count, const uint64_t unlock_time, uint32_t priority, const std::vector<uint8_t> extra, bool trusted_daemon, float tx_size_target_factor = 1.0f);
     std::vector<pending_tx> create_unmixable_sweep_transactions(bool trusted_daemon);
-    bool check_connection(uint32_t *version = NULL);
+    bool check_connection(uint32_t *version = NULL, uint32_t timeout = 200000);
     void get_transfers(wallet2::transfer_container& incoming_transfers) const;
     void get_payments(const crypto::hash& payment_id, std::list<wallet2::payment_details>& payments, uint64_t min_height = 0, const boost::optional<uint32_t>& subaddr_account = boost::none, const std::set<uint32_t>& subaddr_indices = {}) const;
     void get_payments(std::list<std::pair<crypto::hash, wallet2::payment_details>>& payments, uint64_t min_height, uint64_t max_height = (uint64_t)-1, const boost::optional<uint32_t>& subaddr_account = boost::none, const std::set<uint32_t>& subaddr_indices = {}) const;
@@ -609,6 +610,7 @@ namespace tools
     std::string get_wallet_file() const;
     std::string get_keys_file() const;
     std::string get_daemon_address() const;
+    const boost::optional<epee::net_utils::http::login>& get_daemon_login() const { return m_daemon_login; }
     uint64_t get_daemon_blockchain_height(std::string& err);
     uint64_t get_daemon_blockchain_target_height(std::string& err);
    /*!
@@ -699,6 +701,7 @@ namespace tools
     crypto::public_key get_tx_pub_key_from_received_outs(const tools::wallet2::transfer_details &td) const;
     
     cryptonote::account_base m_account;
+    boost::optional<epee::net_utils::http::login> m_daemon_login;
     std::string m_daemon_address;
     std::string m_wallet_file;
     std::string m_keys_file;
@@ -1136,7 +1139,7 @@ namespace tools
       }
 
       m_daemon_rpc_mutex.lock();
-      bool r = epee::net_utils::invoke_http_bin_remote_command2(m_daemon_address + "/getrandom_outs.bin", req, daemon_resp, m_http_client, 200000);
+      bool r = epee::net_utils::invoke_http_bin("/getrandom_outs.bin", req, daemon_resp, m_http_client, rpc_timeout);
       m_daemon_rpc_mutex.unlock();
       THROW_WALLET_EXCEPTION_IF(!r, error::no_connection_to_daemon, "getrandom_outs.bin");
       THROW_WALLET_EXCEPTION_IF(daemon_resp.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "getrandom_outs.bin");

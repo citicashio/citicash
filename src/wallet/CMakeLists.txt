@@ -35,7 +35,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(wallet_sources
   wallet2.cpp
   wallet_args.cpp
-  wallet_rpc_server.cpp
   api/wallet.cpp
   api/wallet_manager.cpp
   api/transaction_info.cpp
@@ -75,6 +74,7 @@ sumokoin_add_library(wallet
   ${wallet_private_headers})
 target_link_libraries(wallet
   PUBLIC
+    common
     cryptonote_core
     mnemonics
     p2p
@@ -107,6 +107,7 @@ if (NOT BUILD_GUI_DEPS)
   target_link_libraries(wallet_rpc_server
     PRIVATE
       wallet
+      epee
       rpc
       cryptonote_core
       crypto

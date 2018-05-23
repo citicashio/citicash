@@ -564,7 +564,7 @@ string WalletImpl::keysFilename() const
 void WalletImpl::init(const std::string &daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl, const char* cacerts_path)
 {
     clearStatus();
-    doInit(daemon_address, upper_transaction_size_limit, enable_ssl, cacerts_path);
+    doInit(daemon_address, upper_transaction_size_limit, enable_ssl, cacerts_path); // LUKAS TODO monero returns false if failed
 }
 
 void WalletImpl::initAsync(const string &daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl, const char* cacerts_path)
@@ -1244,9 +1244,10 @@ bool WalletImpl::isNewWallet() const
     return !(blockChainHeight() > 1 || m_recoveringFromSeed || m_rebuildWalletCache);
 }
 
-void WalletImpl::doInit(const string &daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl, const char* cacerts_path)
+bool WalletImpl::doInit(const string &daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl, const char* cacerts_path)
 {
-    m_wallet->init(daemon_address, upper_transaction_size_limit, enable_ssl, cacerts_path);
+    if (m_wallet->init(daemon_address, boost::none, upper_transaction_size_limit, enable_ssl, cacerts_path))
+        return false;
 
     // in case new wallet, this will force fast-refresh (pulling hashes instead of blocks)
     if (isNewWallet()) {
@@ -1257,6 +1258,7 @@ void WalletImpl::doInit(const string &daemon_address, uint64_t upper_transaction
         this->setTrustedDaemon(true);
     }
 
+    return true;
 }
 
 } // namespace
