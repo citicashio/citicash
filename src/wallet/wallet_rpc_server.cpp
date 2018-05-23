@@ -131,7 +131,7 @@ namespace tools
       }
       assert(bool(http_login));
 
-      std::string temp = "monero-wallet-rpc." + bind_port + ".login";
+      std::string temp = "citicash-wallet-rpc." + bind_port + ".login";
       const auto cookie = tools::create_private_file(temp);
       if (!cookie) {
         LOG_ERROR(tr("Failed to create file ") << temp << tr(". Check permissions or remove file"));
