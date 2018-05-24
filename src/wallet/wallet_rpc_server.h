@@ -32,6 +32,7 @@
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
+#include <string>
 #include "net/http_server_impl_base.h"
 #include "wallet_rpc_server_commands_defs.h"
 #include "wallet2.h"
@@ -48,6 +49,7 @@ namespace tools
     static const char* tr(const char* str);
 
     wallet_rpc_server(wallet2& cr);
+    ~wallet_rpc_server();
 
     bool init(const boost::program_options::variables_map& vm);
     bool run();
@@ -155,6 +157,7 @@ namespace tools
       bool not_open(epee::json_rpc::error& er);
 
       wallet2& m_wallet;
+      std::string rpc_login_filename;
       std::atomic<bool> m_stop;
   };
 }

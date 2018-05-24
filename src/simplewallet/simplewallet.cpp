@@ -1149,6 +1149,7 @@ bool simple_wallet::init(const boost::program_options::variables_map& vm)
   }
   catch (const std::exception &e) { }
 
+  m_http_client.set_server(m_wallet->get_daemon_address(), m_wallet->get_daemon_login());
   m_wallet->callback(this);
   return true;
 }
@@ -1536,7 +1537,7 @@ bool simple_wallet::start_mining(const std::vector<std::string>& args)
   }
 
   COMMAND_RPC_START_MINING::response res;
-  bool r = net_utils::invoke_http_json_remote_command2(m_wallet->get_daemon_address() + "/start_mining", req, res, m_http_client);
+  bool r = net_utils::invoke_http_json("/start_mining", req, res, m_http_client);
   std::string err = interpret_rpc_response(r, res.status);
   if (err.empty())
     success_msg_writer() << tr("Mining started in daemon");
@@ -1553,7 +1554,7 @@ bool simple_wallet::stop_mining(const std::vector<std::string>& args)
   assert(m_wallet);
   COMMAND_RPC_STOP_MINING::request req;
   COMMAND_RPC_STOP_MINING::response res;
-  bool r = net_utils::invoke_http_json_remote_command2(m_wallet->get_daemon_address() + "/stop_mining", req, res, m_http_client);
+  bool r = net_utils::invoke_http_json("/stop_mining", req, res, m_http_client);
   std::string err = interpret_rpc_response(r, res.status);
   if (err.empty())
     success_msg_writer() << tr("Mining stopped in daemon");
@@ -1570,7 +1571,7 @@ bool simple_wallet::save_bc(const std::vector<std::string>& args)
   assert(m_wallet);
   COMMAND_RPC_SAVE_BC::request req;
   COMMAND_RPC_SAVE_BC::response res;
-  bool r = net_utils::invoke_http_json_remote_command2(m_wallet->get_daemon_address() + "/save_bc", req, res, m_http_client);
+  bool r = net_utils::invoke_http_json("/save_bc", req, res, m_http_client);
   std::string err = interpret_rpc_response(r, res.status);
   if (err.empty())
     success_msg_writer() << tr("Blockchain saved");
@@ -1899,7 +1900,7 @@ uint64_t simple_wallet::get_daemon_blockchain_height(std::string& err)
 
   COMMAND_RPC_GET_HEIGHT::request req;
   COMMAND_RPC_GET_HEIGHT::response res = boost::value_initialized<COMMAND_RPC_GET_HEIGHT::response>();
-  bool r = net_utils::invoke_http_json_remote_command2(m_wallet->get_daemon_address() + "/getheight", req, res, m_http_client);
+  bool r = net_utils::invoke_http_json("/getheight", req, res, m_http_client);
   err = interpret_rpc_response(r, res.status);
   return res.height;
 }
@@ -3025,7 +3026,7 @@ bool simple_wallet::check_tx_key(const std::vector<std::string> &args_)
   COMMAND_RPC_GET_TRANSACTIONS::request req;
   COMMAND_RPC_GET_TRANSACTIONS::response res;
   req.txs_hashes.push_back(epee::string_tools::pod_to_hex(txid));
-  if (!net_utils::invoke_http_json_remote_command2(m_wallet->get_daemon_address() + "/gettransactions", req, res, m_http_client) ||
+  if (!net_utils::invoke_http_json("/gettransactions", req, res, m_http_client) ||
       (res.txs.size() != 1 && res.txs_as_hex.size() != 1))
   {
     fail_msg_writer() << tr("failed to get transaction from daemon");

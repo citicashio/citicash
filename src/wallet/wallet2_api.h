@@ -366,31 +366,18 @@ struct Wallet
      */
     virtual std::string keysFilename() const = 0;
     /*!
-     * \brief init - initializes wallet with daemon connection params. implicitly connects to the daemon
-     *               and refreshes the wallet. "refreshed" callback will be invoked. if daemon_address is
-     *               local address, "trusted daemon" will be set to true forcibly
+     * \brief init - initializes wallet with daemon connection params.
+     *               if daemon_address is local address, "trusted daemon" will be set to true forcibly
+     *               startRefresh() should be called when wallet is initialized.
      *
      * \param daemon_address - daemon address in "hostname:port" format
      * \param upper_transaction_size_limit
      * \param enable_ssl - whether SSL should be used in the connections.
      * \param cacerts_path - optional path to a CA certificates file.
-     * \return  - true if initialized and refreshed successfully
+     * \return  - true on success
      */
-    virtual void init(const std::string &daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl=false,
+    virtual bool init(const std::string &daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl=false,
                       const char* cacerts_path=nullptr) = 0;
-
-    /*!
-     * \brief init - initalizes wallet asynchronously. logic is the same as "init" but returns immediately.
-     *               "refreshed" callback will be invoked.
-     *
-     * \param daemon_address - daemon address in "hostname:port" format
-     * \param upper_transaction_size_limit
-     * \param enable_ssl - whether SSL should be used in the connections.
-     * \param cacerts_path - optional path to a CA certificates file.
-     * \return  - true if initialized and refreshed successfully
-     */
-    virtual void initAsync(const std::string &daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl=false,
-                           const char* cacerts_path=nullptr) = 0;
 
    /*!
     * \brief setRefreshFromBlockHeight - start refresh from block height on recover

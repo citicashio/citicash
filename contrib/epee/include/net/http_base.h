@@ -29,6 +29,10 @@
 #pragma once
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
+#include <boost/utility/string_ref.hpp>
+#include <string>
+#include <utility>
+
 
 #include "string_tools.h"
 namespace epee
@@ -86,7 +90,13 @@ namespace net_utils
 			return std::string();
 		}
 
-
+		static inline void add_field(std::string& out, const boost::string_ref name, const boost::string_ref value) {
+			out.append(name.data(), name.size()).append(": ");
+			out.append(value.data(), value.size()).append("\r\n");
+		}
+		static inline void add_field(std::string& out, const std::pair<std::string, std::string>& field) {
+			add_field(out, field.first, field.second);
+		}
 
 		struct http_header_info
 		{
