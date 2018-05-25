@@ -527,7 +527,7 @@ namespace tools
     dst.is_subaddress = false;
     dst.amount = 1;
     
-  // append alias, wallet_address and signature into extra
+    // append alias, wallet_address and signature into extra
     std::vector<uint8_t> extra;
     if (!cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ALIAS + req.alias)
       || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ADDRESS + wallet_address)
@@ -540,7 +540,8 @@ namespace tools
 
     try {
       std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions({dst}, DEFAULT_MIXIN, req.unlock_time, req.priority, extra, 0/*req.account_index, LUKAS TODO prolly subaddress index*/, std::set<uint32_t>()/*LUKAS TODO I didn't check this parameter at all*/, false);
-      m_wallet.commit_tx(ptx_vector.back());
+      if (!req.do_not_relay)
+        m_wallet.commit_tx(ptx_vector.back());
 
       // populate response with tx hash
       res.tx_hash = epee::string_tools::pod_to_hex(cryptonote::get_transaction_hash(ptx_vector.back().tx));
@@ -629,7 +630,8 @@ namespace tools
         return false;
       }
 
-      m_wallet.commit_tx(ptx_vector);
+      if (!req.do_not_relay)
+        m_wallet.commit_tx(ptx_vector);
 
       res.tx_hash = epee::string_tools::pod_to_hex(cryptonote::get_transaction_hash(ptx_vector.back().tx));
       if (req.get_tx_key)
@@ -694,7 +696,8 @@ namespace tools
       std::vector<wallet2::pending_tx> ptx_vector;
       ptx_vector = m_wallet.create_transactions(dsts, mixin, req.unlock_time, req.priority, extra, req.account_index, req.subaddr_indices, req.trusted_daemon);
 
-      m_wallet.commit_tx(ptx_vector);
+      if (!req.do_not_relay)
+        m_wallet.commit_tx(ptx_vector);
 
       // populate response with tx hashes
       for (auto & ptx : ptx_vector)
@@ -760,7 +763,8 @@ namespace tools
     {
       std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_unmixable_sweep_transactions(req.trusted_daemon);
 
-      m_wallet.commit_tx(ptx_vector);
+      if (!req.do_not_relay)
+        m_wallet.commit_tx(ptx_vector);
 
       // populate response with tx hashes
       for (auto & ptx : ptx_vector)
@@ -823,7 +827,8 @@ namespace tools
     {
       std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions_all(req.below_amount, dsts[0].addr, req.mixin, req.unlock_time, req.priority, extra, dsts[0].is_subaddress, req.account_index, req.subaddr_indices, req.trusted_daemon);
 
-      m_wallet.commit_tx(ptx_vector);
+      if (!req.do_not_relay)
+        m_wallet.commit_tx(ptx_vector);
 
       // populate response with tx hashes
       for (auto & ptx : ptx_vector)
