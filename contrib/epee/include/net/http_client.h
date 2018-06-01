@@ -304,7 +304,6 @@ using namespace std;
 
       bool connect(std::chrono::milliseconds timeout) {
         CRITICAL_REGION_LOCAL(m_lock);
-        // LUKAS TODO check return m_net_client.connect(host,  port, timeout, timeout, m_ssl);
 		return m_net_client.connect(m_host_buff, m_port, timeout, m_ssl);
       }
 			//---------------------------------------------------------------------------
