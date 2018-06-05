@@ -141,6 +141,7 @@ namespace cryptonote
     res.incoming_connections_count = total_conn - res.outgoing_connections_count;
     res.white_peerlist_size = m_p2p.get_peerlist_manager().get_white_peers_count();
     res.grey_peerlist_size = m_p2p.get_peerlist_manager().get_gray_peers_count();
+    res.hash_rate = res.difficulty/res.target;
     res.testnet = m_testnet;
     res.cumulative_difficulty = m_core.get_blockchain_storage().get_db().get_block_cumulative_difficulty(res.height - 1);
     res.status = CORE_RPC_STATUS_OK;
@@ -1198,6 +1199,7 @@ namespace cryptonote
     res.grey_peerlist_size = m_p2p.get_peerlist_manager().get_gray_peers_count();
     res.testnet = m_testnet;
     res.cumulative_difficulty = m_core.get_blockchain_storage().get_db().get_block_cumulative_difficulty(res.height - 1);
+    res.hash_rate = res.difficulty/res.target;
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }
