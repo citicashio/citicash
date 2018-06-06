@@ -38,15 +38,15 @@ accelerated in the next few years before declined and depleted). However, the em
 
 ![](http://www.sumokoin.org/images/emission_speed_sumo_vs_btc.png)
 
-\* The emulated algorithm of Sumokoin block-reward emission can be found in Python and C++ scripts at [scripts](scripts) directory.
+\* The emulated algorithm of Citicash block-reward emission can be found in Python and C++ scripts at [scripts](scripts) directory.
 
 ## About this Project
 
-This is the core implementation of Sumokoin. It is open source and completely free to use without restrictions, except for those specified in the license agreement below. There are no restrictions on anyone creating an alternative implementation of Sumokoin that uses the protocol and network in a compatible manner.
+This is the core implementation of Citicash. It is open source and completely free to use without restrictions, except for those specified in the license agreement below. There are no restrictions on anyone creating an alternative implementation of Citicash that uses the protocol and network in a compatible manner.
 
 As with many development projects, the repository on Github is considered to be the "staging" area for the latest changes. Before changes are merged into that branch on the main repository, they are tested by individual developers in their own branches, submitted as a pull request, and then subsequently tested by contributors who focus on testing and code reviews. That having been said, the repository should be carefully considered before using it in a production environment, unless there is a patch in the repository for a particular show-stopping issue you are experiencing. It is generally a better idea to use a tagged release for stability.
 
-**Anyone is welcome to contribute to Sumokoin's codebase!** If you have a fix or code change, feel free to submit is as a pull request directly to the "master" branch. In cases where the change is relatively small or does not affect other parts of the codebase it may be merged in immediately by any one of the collaborators. On the other hand, if the change is particularly large or complex, it is expected that it will be discussed at length either well in advance of the pull request being submitted, or even directly on the pull request.
+**Anyone is welcome to contribute to Citicash codebase!** If you have a fix or code change, feel free to submit is as a pull request directly to the "master" branch. In cases where the change is relatively small or does not affect other parts of the codebase it may be merged in immediately by any one of the collaborators. On the other hand, if the change is particularly large or complex, it is expected that it will be discussed at length either well in advance of the pull request being submitted, or even directly on the pull request.
 
 ## License
 
@@ -54,7 +54,7 @@ Please view [LICENSE](LICENSE)
 
 [![License](https://img.shields.io/badge/license-BSD3-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
-## Compiling Sumokoin from Source
+## Compiling Citicash from Source
 
 ### Dependencies
 
@@ -90,7 +90,7 @@ build the library binary manually. This can be done with the following command `
 
 ### Build instructions
 
-Sumokoin uses the CMake build system and a top-level [Makefile](Makefile) that
+Citicash uses the CMake build system and a top-level [Makefile](Makefile) that
 invokes cmake commands as needed.
 
 #### On Linux and OS X
@@ -103,7 +103,7 @@ invokes cmake commands as needed.
     
 * Change to the root of the source code directory and build:
 
-        cd sumokoin
+        cd citicash
         make
 
     *Optional*: If your machine has several cores and enough memory, enable
@@ -113,9 +113,9 @@ invokes cmake commands as needed.
 
 * The resulting executables can be found in `build/release/bin`
 
-* Add `PATH="$PATH:$HOME/sumokoin/build/release/bin"` to `.profile`
+* Add `PATH="$PATH:$HOME/citicash/build/release/bin"` to `.profile`
 
-* Run Sumokoin with `sumokoind --detach`
+* Run Citicash with `citicashd --detach`
 
 * **Optional**: build and run the test suite to verify the binaries:
 
@@ -141,7 +141,7 @@ Tested on a Raspberry Pi 2 with a clean install of minimal Debian Jessie from ht
 
 * `apt-get update && apt-get upgrade` to install all of the latest software
 
-* Install the dependencies for Sumokoin except libunwind and libboost-all-dev
+* Install the dependencies for Citicash except libunwind and libboost-all-dev
 
 * Increase the system swap size:
 ```	
@@ -167,16 +167,16 @@ Tested on a Raspberry Pi 2 with a clean install of minimal Debian Jessie from ht
 
 * Change to the root of the source code directory and build:
 
-        cd sumokoin
+        cd citicash
         make release
 
 * Wait ~4 hours
 
 * The resulting executables can be found in `build/release/bin`
 
-* Add `PATH="$PATH:$HOME/sumokoin/build/release/bin"` to `.profile`
+* Add `PATH="$PATH:$HOME/citicash/build/release/bin"` to `.profile`
 
-* Run Sumokoin with `sumokoind --detach`
+* Run Citicash with `citicash --detach`
 
 * You may wish to reduce the size of the swap file after the build has finished, and delete the boost directory from your home directory
 
@@ -239,7 +239,7 @@ application.
 
 * Clone source code, change to the root of the source code directory and build:
 
-        git clone https://github.com/sumoprojects/sumokoin; cd sumokoin; make release-static;
+        git clone https://github.com/sumoprojects/citicash; cd sumokoin; make release-static;
 
 
 ### On OpenBSD:
@@ -253,7 +253,7 @@ The doxygen and graphviz packages are optional and require the xbase set.
 The Boost package has a bug that will prevent librpc.a from building correctly. In order to fix this, you will have to Build boost yourself from scratch. Follow the directions here (under "Building Boost"):
 https://github.com/bitcoin/bitcoin/blob/master/doc/build-openbsd.md
 
-You will have to add the serialization, date_time, and regex modules to Boost when building as they are needed by Sumokoin.
+You will have to add the serialization, date_time, and regex modules to Boost when building as they are needed by citicash.
 
 To build: `env CC=egcc CXX=eg++ CPP=ecpp DEVELOPER_LOCAL_TOOLS=1 BOOST_ROOT=/path/to/the/boost/you/built make release-static-64`
 
@@ -269,15 +269,15 @@ By default, in either dynamically or statically linked builds, binaries target t
 * ```make release-static-win64``` builds binaries on 64-bit Windows portable across 64-bit Windows systems
 * ```make release-static-win32``` builds binaries on 64-bit or 32-bit Windows portable across 32-bit Windows systems
 
-## Running sumokoind
+## Running citicashd
 
 The build places the binary in `bin/` sub-directory within the build directory
 from which cmake was invoked (repository root by default). To run in
 foreground:
 
-    ./bin/sumokoind
+    ./bin/citicashd
 
-To list all available options, run `./bin/sumokoind --help`.  Options can be
+To list all available options, run `./bin/citicashd --help`.  Options can be
 specified either on the command line or in a configuration file passed by the
 `--config-file` argument.  To specify an option in the configuration file, add
 a line with the syntax `argumentname=value`, where `argumentname` is the name
@@ -285,17 +285,17 @@ of the argument without the leading dashes, for example `log-level=1`.
 
 To run in background:
 
-    ./bin/sumokoind --log-file sumokoind.log --detach
+    ./bin/citicashd --log-file citicashd.log --detach
 
 To run as a systemd service, copy
-[sumokoind.service](utils/systemd/sumokoind.service) to `/etc/systemd/system/` and
-[sumokoind.conf](utils/conf/sumokoind.conf) to `/etc/`. The [example
-service](utils/systemd/sumokoind.service) assumes that the user `sumokoin` exists
+[citicashd.service](utils/systemd/citicashd.service) to `/etc/systemd/system/` and
+[citicashd.conf](utils/conf/citicashd.conf) to `/etc/`. The [example
+service](utils/systemd/citicashd.service) assumes that the user `citicash` exists
 and its home is the data directory specified in the [example
-config](utils/conf/sumokoind.conf).
+config](utils/conf/citicashd.conf).
 
 If you're on Mac, you may need to add the `--max-concurrency 1` option to
-citicash-wallet-cli, and possibly sumokoind, if you get crashes refreshing.
+citicash-wallet-cli, and possibly citicashd, if you get crashes refreshing.
 
 ## Internationalization
 
@@ -315,13 +315,13 @@ TAILS ships with a very restrictive set of firewall rules. Therefore, you need t
 
 `sudo iptables -I OUTPUT 2 -p tcp -d 127.0.0.1 -m tcp --dport 18081 -j ACCEPT`
 
-`DNS_PUBLIC=tcp torsocks ./sumokoind --p2p-bind-ip 127.0.0.1 --no-igd --rpc-bind-ip 127.0.0.1 --data-dir /home/your/directory/to/the/blockchain`
+`DNS_PUBLIC=tcp torsocks ./citicashd --p2p-bind-ip 127.0.0.1 --no-igd --rpc-bind-ip 127.0.0.1 --data-dir /home/your/directory/to/the/blockchain`
 
 `./citicash-wallet-cli`
 
 ## Using readline
 
-While `sumokoind` and `citicash-wallet-cli` do not use readline directly, most of the functionality can be obtained by running them via `rlwrap`. This allows command recall, edit capabilities, etc. It does not give autocompletion without an extra completion file, however. To use rlwrap, simply prepend `rlwrap` to the command line, eg:
+While `citicashd` and `citicash-wallet-cli` do not use readline directly, most of the functionality can be obtained by running them via `rlwrap`. This allows command recall, edit capabilities, etc. It does not give autocompletion without an extra completion file, however. To use rlwrap, simply prepend `rlwrap` to the command line, eg:
 
 `rlwrap bin/citicash-wallet-cli --wallet-file /path/to/wallet`
 
@@ -329,7 +329,7 @@ Note: rlwrap will save things like your seed and private keys, if you supply the
 
 # Debugging
 
-This section contains general instructions for debugging failed installs or problems encountered with Sumokoin. First ensure you are running the latest version built from the github repo.
+This section contains general instructions for debugging failed installs or problems encountered with Citicash. First ensure you are running the latest version built from the github repo.
 
 ## LMDB
 
@@ -337,7 +337,7 @@ Instructions for debugging suspected blockchain corruption as per @HYC
 
 There is an `mdb_stat` command in the LMDB source that can print statistics about the database but it's not routinely built. This can be built with the following command:
 
-`cd ~/sumokoin/external/db_drivers/liblmdb && make`
+`cd ~/citicash/external/db_drivers/liblmdb && make`
 
 The output of `mdb_stat -ea <path to blockchain dir>` will indicate inconsistencies in the blocks, block_heights and block_info table.
 
