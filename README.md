@@ -32,7 +32,7 @@ About 13.5% (~135 million) was premined to reserve for future development, i.e. 
 - **Emission scheme**: CitiCash's block reward changes _every 6-months_ as the following "Camel" distribution* (inspired by _real-world mining production_ like of crude oil, coal etc. that is often slow at first, 
 accelerated in the next few years before declined and depleted). However, the emission path of CitiCash is generally not far apart from what of Bitcoin (view charts below).
 
-![](http://www.sumokoin.org/images/block_reward_by_calendar_year.png)
+![](http://www.sumokoin.org/images/block_reward_by_calendar_year.png) //TODO fix
 
 ![](http://www.sumokoin.org/images/block_reward_by_calendar_month.png)
 
@@ -239,7 +239,7 @@ application.
 
 * Clone source code, change to the root of the source code directory and build:
 
-        git clone https://github.com/sumoprojects/citicash; cd sumokoin; make release-static;
+        git clone https://github.com/sumoprojects/citicash; cd citicash; make release-static;
 
 
 ### On OpenBSD:
@@ -261,13 +261,14 @@ To build: `env CC=egcc CXX=eg++ CPP=ecpp DEVELOPER_LOCAL_TOOLS=1 BOOST_ROOT=/pat
 
 By default, in either dynamically or statically linked builds, binaries target the specific host processor on which the build happens and are not portable to other processors. Portable binaries can be built using the following targets:
 
-* ```make release-static-64``` builds binaries on Linux on x86_64 portable across POSIX systems on x86_64 processors
+*```make release-static-64``` builds binaries on Linux on x86_64 portable across POSIX systems on x86_64 processors
 * ```make release-static-32``` builds binaries on Linux on x86_64 or i686 portable across POSIX systems on i686 processors
 * ```make release-static-armv8``` builds binaries on Linux portable across POSIX systems on armv8 processors
 * ```make release-static-armv7``` builds binaries on Linux portable across POSIX systems on armv7 processors
 * ```make release-static-armv6``` builds binaries on Linux portable across POSIX systems on armv6 processors
 * ```make release-static-win64``` builds binaries on 64-bit Windows portable across 64-bit Windows systems
 * ```make release-static-win32``` builds binaries on 64-bit or 32-bit Windows portable across 32-bit Windows systems
+
 
 ## Running citicashd
 
@@ -303,13 +304,13 @@ Please see [README.i18n](README.i18n)
 
 ## Using Tor
 
-While Sumokoin isn't made to integrate with Tor, it can be used wrapped with torsocks, if you add --p2p-bind-ip 127.0.0.1 to the sumokoind command line. You also want to set DNS requests to go over TCP, so they'll be routed through Tor, by setting DNS_PUBLIC=tcp. You may also disable IGD (UPnP port forwarding negotiation), which is pointless with Tor. To allow local connections from the wallet, you might have to add TORSOCKS_ALLOW_INBOUND=1, some OSes need it and some don't. Example:
+While Citicash isn't made to integrate with Tor, it can be used wrapped with torsocks, if you add --p2p-bind-ip 127.0.0.1 to the citicashd command line. You also want to set DNS requests to go over TCP, so they'll be routed through Tor, by setting DNS_PUBLIC=tcp. You may also disable IGD (UPnP port forwarding negotiation), which is pointless with Tor. To allow local connections from the wallet, you might have to add TORSOCKS_ALLOW_INBOUND=1, some OSes need it and some don't. Example:
 
-`DNS_PUBLIC=tcp torsocks sumokoind --p2p-bind-ip 127.0.0.1 --no-igd`
+`DNS_PUBLIC=tcp torsocks citicashd --p2p-bind-ip 127.0.0.1 --no-igd`
 
 or:
 
-`DNS_PUBLIC=tcp TORSOCKS_ALLOW_INBOUND=1 torsocks sumokoind --p2p-bind-ip 127.0.0.1 --no-igd`
+`DNS_PUBLIC=tcp TORSOCKS_ALLOW_INBOUND=1 torsocks citicashd --p2p-bind-ip 127.0.0.1 --no-igd`
 
 TAILS ships with a very restrictive set of firewall rules. Therefore, you need to add a rule to allow this connection too, in addition to telling torsocks to allow inbound connections. Full example:
 
