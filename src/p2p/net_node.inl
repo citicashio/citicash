@@ -1318,7 +1318,7 @@ namespace nodetool
     if(!node_data.my_port)
       return false;
 
-    uint32_t actual_ip =  context.m_remote_ip;
+    uint32_t actual_ip = context.m_remote_ip;
     if(!m_peerlist.is_ip_allowed(actual_ip))
       return false;
     std::string ip = epee::string_tools::get_ip_string_from_int32(actual_ip);

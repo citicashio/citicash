@@ -378,7 +378,7 @@ namespace net_utils
   template<class t_connection_context>
 	bool simple_http_connection_handler<t_connection_context>::analize_cached_request_header_and_invoke_state(size_t pos)
 	{ 
-		//LOG_PRINT_L4("HTTP HEAD:\r\n" << m_cache.substr(0, pos));
+		LOG_PRINT_L3("HTTP HEAD:\r\n" << m_cache.substr(0, pos));
 
 		LOG_FRAME("simple_http_connection_handler<t_connection_context>::analize_cached_request_header_and_invoke_state(*)", LOG_LEVEL_3);
 
@@ -553,6 +553,7 @@ namespace net_utils
 		m_psnd_hndlr->do_send((void*)response_data.data(), response_data.size());
 		if(response.m_body.size())
 			m_psnd_hndlr->do_send((void*)response.m_body.data(), response.m_body.size());
+		m_psnd_hndlr->send_done();
 		return res;
 	}
 	//-----------------------------------------------------------------------------------
