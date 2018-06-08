@@ -744,13 +744,14 @@ uint64_t BlockchainLMDB::add_transaction_data(const crypto::hash& blk_hash, cons
       CURSOR(aliases)
       MDB_val_copy<const char*> k(alias.nonce.data());
       address.nonce.erase(address.nonce.begin());
-      MDB_val_copy<const char*> v(address.nonce.data());
+      std::string value{std::to_string(m_height) + address.nonce};
+      MDB_val_copy<const char*> v(value.data());
       result = mdb_cursor_put(m_cur_aliases, &k, &v, MDB_NOOVERWRITE);
       if (result == MDB_KEYEXIST)
         throw0(DB_ERROR(("Alias " + alias.nonce + " already exists in database.").data())); // this should never happen
       else if (result)
         throw0(DB_ERROR(lmdb_error("Failed to add alias-address pair to db aliases: ", result).c_str()));
-      else if (!m_alias_bimap.insert(alias_bimap::value_type(alias.nonce, address.nonce)).second)
+      else if (!m_aliases_multi_index.insert({alias.nonce, m_height, address.nonce}).second)
         throw0(DB_ERROR(("Alias " + alias.nonce + " already exists in cache.").data())); // this should never happen, TODO consider unrolling transaction
     }
   }
@@ -836,7 +837,7 @@ void BlockchainLMDB::remove_transaction_data(const crypto::hash& tx_hash, const 
             result = mdb_cursor_del(m_cur_aliases, 0);
             if (result)
               throw1(DB_ERROR(lmdb_error("Failed to add removal of alias-address pair to db transaction: ", result).c_str()));
-            else if (!m_alias_bimap.right.erase(alias.nonce))
+            else if (!m_aliases_multi_index.get<0>().erase(alias.nonce))
               throw1(DB_ERROR(("Alias for removal " + alias.nonce + " not found in cache.").data())); // this should never happen, TODO consider unrolling transaction
           }
         }
@@ -2262,25 +2263,28 @@ void BlockchainLMDB::load_aliases() {
   while (ret != MDB_NOTFOUND) {
     if (ret)
       throw0(DB_ERROR("failed to enumerate aliases"));
-    m_alias_bimap.insert(alias_bimap::value_type(std::string(reinterpret_cast<char*>(k.mv_data), k.mv_size - 1), std::string(reinterpret_cast<char*>(v.mv_data), v.mv_size - 1))); // LUKAS TODO make more neat
+    size_t height_length = v.mv_size - 99/*length of address + '\0'*/;
+    std::string height(reinterpret_cast<char*>(v.mv_data), height_length);
+    std::string address(reinterpret_cast<char*>((char*)v.mv_data + height_length), 98);
+    m_aliases_multi_index.insert({std::string(reinterpret_cast<char*>(k.mv_data), k.mv_size - 1), std::stoull(height), address}); // LUKAS TODO make more neat
     ret = mdb_cursor_get(m_cur_aliases, &k, &v, MDB_NEXT);
   }
 
   TXN_POSTFIX_RDONLY();
 }
 
-std::string BlockchainLMDB::get_alias_address(const std::string& alias) const {
-  auto it = m_alias_bimap.left.find(alias);
-  if (it != m_alias_bimap.left.end())
-    return it->second;
+std::string BlockchainLMDB::get_alias_address(const std::string& alias, bool get_if_premature = true) const {
+  auto it = m_aliases_multi_index.get<0>().find(alias);
+  if (it != m_aliases_multi_index.get<0>().end() && (get_if_premature || m_height >= it->height + CRYPTONOTE_DEFAULT_TX_SPENDABLE_AGE))
+    return it->address;
   return "";
 }
 
-std::vector<std::string> BlockchainLMDB::get_address_aliases(const std::string& address) const {
-  std::vector<std::string> aliases;
-  auto range = m_alias_bimap.right.equal_range(address);
+std::vector<cryptonote::alias> BlockchainLMDB::get_address_aliases(const std::string& address) const {
+  std::vector<cryptonote::alias> aliases;
+  auto range = m_aliases_multi_index.get<1>().equal_range(address);
   for (auto it = range.first; it != range.second; ++it)
-    aliases.push_back(it->second);
+    aliases.push_back({it->alias, it->height});
   return aliases;
 }
 

@@ -2108,9 +2108,9 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
     cryptonote::address_parse_info info;
     cryptonote::tx_destination_entry de;
     if (!cryptonote::get_account_address_from_str_or_url(info, m_wallet->testnet(), local_args[i])) {
-      std::string address = m_wallet->get_alias_address(local_args[i]);
+      std::string address = m_wallet->get_alias_address(local_args[i], false);
       if (address.empty() || !get_account_address_from_str(info, m_wallet->testnet(), address)) {
-        fail_msg_writer() << tr("wrong address: ") << address.empty() ? local_args[i] : address;
+        fail_msg_writer() << tr("wrong address: ") << (address.empty() ? local_args[i] : address);
         return true;
       }
     }
@@ -2490,7 +2490,7 @@ bool simple_wallet::sweep_all(const std::vector<std::string> &args_, bool retry,
 
   cryptonote::address_parse_info info;
   if (!cryptonote::get_account_address_from_str_or_url(info, m_wallet->testnet(), local_args.front())) {
-    std::string address = m_wallet->get_alias_address(local_args.front());
+    std::string address = m_wallet->get_alias_address(local_args.front(), false);
     if (address.empty() || !get_account_address_from_str(info, m_wallet->testnet(), address)) {
       fail_msg_writer() << tr("wrong address: ") << address.empty() ? local_args.front() : address;
       return true;
@@ -4160,14 +4160,13 @@ bool simple_wallet::alias_address(const std::vector<std::string> &args) {
     }
   }
 
-  const std::string wallet_address = m_wallet->get_account().get_public_address_str(m_wallet->testnet()); // LUKAS TODO consider extending to subaddresses via get_subaddress_as_str(const cryptonote::subaddress_index& index)
-
   cryptonote::tx_destination_entry dst;
   dst.addr = m_wallet->get_account().get_keys().m_account_address; // LUKAS TODO consider extending to subaddresses via wallet2::get_subaddress(const cryptonote::subaddress_index& index)
   dst.is_subaddress = false;
   dst.amount = 1;
 
   // append alias, wallet_address and signature into extra
+  const std::string wallet_address = m_wallet->get_account().get_public_address_str(m_wallet->testnet()); // LUKAS TODO consider extending to subaddresses via get_subaddress_as_str(const cryptonote::subaddress_index& index)
   std::vector<uint8_t> extra;
   if (!cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ALIAS + local_args.front())
     || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ADDRESS + wallet_address)
@@ -4270,7 +4269,7 @@ bool simple_wallet::get_aliases(const std::vector<std::string> &args) {
   const std::string wallet_address = m_wallet->get_account().get_public_address_str(m_wallet->testnet()); // LUKAS TODO consider extending to subaddresses via get_subaddress_as_str(const cryptonote::subaddress_index& index)
   success_msg_writer(true) << tr("Aliases:");
   for (auto alias : m_wallet->get_address_aliases(wallet_address))
-    success_msg_writer(false) << tr(" ") << alias;
+    success_msg_writer(false) << tr(" ") << alias.alias << tr("(") << alias.height << tr(")");
   return true;
 }
 

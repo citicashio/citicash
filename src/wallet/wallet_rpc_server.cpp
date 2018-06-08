@@ -392,7 +392,7 @@ namespace tools
       cryptonote::address_parse_info info;
       cryptonote::tx_destination_entry de;
       if (!get_account_address_from_str_or_url(info, m_wallet.testnet(), it->address, false)) {
-        std::string address = m_wallet.get_alias_address(it->address);
+        std::string address = m_wallet.get_alias_address(it->address, false);
         if (address.empty() || !get_account_address_from_str(info, m_wallet.testnet(), address)) {
           er.code = WALLET_RPC_ERROR_CODE_WRONG_ADDRESS;
           er.message = std::string("WALLET_RPC_ERROR_CODE_WRONG_ADDRESS: ") + (address.empty() ? it->address : address);
@@ -485,14 +485,13 @@ namespace tools
       return false;
     }
 
-    const std::string wallet_address = m_wallet.get_account().get_public_address_str(m_wallet.testnet()); // LUKAS TODO consider extending to subaddresses via get_subaddress_as_str(const cryptonote::subaddress_index& index)
-
     cryptonote::tx_destination_entry dst;
     dst.addr = m_wallet.get_account().get_keys().m_account_address; // LUKAS TODO consider extending to subaddresses via wallet2::get_subaddress(const cryptonote::subaddress_index& index)
     dst.is_subaddress = false;
     dst.amount = 1;
     
   // append alias, wallet_address and signature into extra
+    const std::string wallet_address = m_wallet.get_account().get_public_address_str(m_wallet.testnet()); // LUKAS TODO consider extending to subaddresses via get_subaddress_as_str(const cryptonote::subaddress_index& index)
     std::vector<uint8_t> extra;
     if (!cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ALIAS + req.alias)
       || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ADDRESS + wallet_address)
@@ -550,7 +549,7 @@ namespace tools
       return false;
     }
 
-    res.address = m_wallet.get_alias_address(req.alias);
+    res.address = m_wallet.get_alias_address(req.alias, false);
     return true;
   }
 

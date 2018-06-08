@@ -33,9 +33,9 @@
 #include <list>
 #include <string>
 #include <exception>
+
+#include <boost/multi_index/hashed_index.hpp>
 #include <boost/bimap/bimap.hpp>
-#include <boost/bimap/unordered_set_of.hpp>
-#include <boost/bimap/multiset_of.hpp>
 #include "crypto/hash.h"
 #include "cryptonote_core/cryptonote_basic.h"
 #include "cryptonote_core/difficulty.h"
@@ -97,12 +97,21 @@
  *   KEY_IMAGE_EXISTS
  */
 
-struct alias {};
-struct address {};
-typedef boost::bimaps::bimap<
-  boost::bimaps::unordered_set_of<boost::bimaps::tagged<std::string, alias>>, 
-  boost::bimaps::multiset_of<boost::bimaps::tagged<std::string, address>>
-> alias_bimap;
+struct alias { 
+  std::string alias;
+  uint64_t height;
+  std::string address;
+};
+
+namespace bmi = boost::multi_index;
+
+using aliases = boost::multi_index_container<
+  alias,
+  bmi::indexed_by<
+    bmi::hashed_unique<bmi::member<alias, std::string, &alias::alias>>,
+    bmi::ordered_non_unique<bmi::member<alias, std::string, &alias::address>>
+  >
+>;
 
 namespace cryptonote
 {
@@ -1281,8 +1290,8 @@ public:
   virtual bool for_all_outputs(std::function<bool(uint64_t amount, const crypto::hash &tx_hash, size_t tx_idx)> f) const = 0;
 
   virtual void load_aliases() = 0;
-  virtual std::string get_alias_address(const std::string& alias) const = 0;
-  virtual std::vector<std::string> get_address_aliases(const std::string& address) const = 0;
+  virtual std::string get_alias_address(const std::string& alias, bool get_if_premature = true) const = 0;
+  virtual std::vector<cryptonote::alias> get_address_aliases(const std::string& address) const = 0;
 
   //
   // Hard fork related storage

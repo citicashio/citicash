@@ -304,7 +304,7 @@ namespace wallet_rpc
     };
 
     struct response {
-      std::vector<std::string> aliases;
+      std::vector<cryptonote::alias> aliases;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(aliases)

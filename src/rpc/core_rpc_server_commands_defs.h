@@ -637,9 +637,11 @@ namespace cryptonote
   struct COMMAND_RPC_GETALIASADDRESS {
     struct request {
       std::string alias;
+      bool get_if_premature;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(alias)
+        KV_SERIALIZE(get_if_premature)
       END_KV_SERIALIZE_MAP()
     };
 
@@ -664,7 +666,7 @@ namespace cryptonote
     };
 
     struct response {
-      std::vector<std::string> aliases;
+      std::vector<cryptonote::alias> aliases;
       std::string status;
 
       BEGIN_KV_SERIALIZE_MAP()

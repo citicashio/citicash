@@ -753,7 +753,7 @@ namespace cryptonote
       error_resp.message = "Core is busy";
       return false;
     }
-    res.address = m_core.get_blockchain_storage().get_db().get_alias_address(req.alias);
+    res.address = m_core.get_blockchain_storage().get_db().get_alias_address(req.alias, req.get_if_premature);
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }

@@ -2946,43 +2946,30 @@ void wallet2::rescan_blockchain(bool refresh)
   if (refresh)
     this->refresh();
 }
-//----------------------------------------------------------------------------------------------------
-bool wallet2::is_transfer_unlocked(const transfer_details& td) const
-{
-  if(!is_tx_spendtime_unlocked(td.m_tx.unlock_time, td.m_block_height))
+
+bool wallet2::is_transfer_unlocked(const transfer_details& td) const {
+  if (!is_tx_spendtime_unlocked(td.m_tx.unlock_time, td.m_block_height))
     return false;
 
-  if(td.m_block_height + CRYPTONOTE_DEFAULT_TX_SPENDABLE_AGE > m_blockchain.size())
+  if (td.m_block_height + CRYPTONOTE_DEFAULT_TX_SPENDABLE_AGE > m_blockchain.size())
     return false;
 
   return true;
 }
-//----------------------------------------------------------------------------------------------------
-bool wallet2::is_tx_spendtime_unlocked(uint64_t unlock_time, uint64_t block_height) const
-{
-  if(unlock_time < CRYPTONOTE_MAX_BLOCK_NUMBER)
-  {
-    //interpret as block index
-    if(m_blockchain.size()-1 + CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_BLOCKS >= unlock_time)
-      return true;
-    else
-      return false;
-  }else
-  {
-    //interpret as time
-    uint64_t current_time = static_cast<uint64_t>(time(NULL));
-    // XXX: this needs to be fast, so we'd need to get the starting heights
-    // from the daemon to be correct once voting kicks in
-    uint64_t v2height = m_testnet ? 624634 : 1009827;
-    uint64_t leeway = block_height < CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_SECONDS;
-    if(current_time + leeway >= unlock_time)
-      return true;
-    else
-      return false;
-  }
-  return false;
+
+bool wallet2::is_tx_spendtime_unlocked(uint64_t unlock_time, uint64_t block_height) const {
+  if (unlock_time < CRYPTONOTE_MAX_BLOCK_NUMBER) //interpret as block index
+    return (m_blockchain.size()-1 + CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_BLOCKS >= unlock_time);
+
+  //interpret as time
+  uint64_t current_time = static_cast<uint64_t>(time(NULL));
+  // XXX: this needs to be fast, so we'd need to get the starting heights
+  // from the daemon to be correct once voting kicks in
+  uint64_t v2height = m_testnet ? 624634 : 1009827;
+  uint64_t leeway = block_height < CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_SECONDS;
+  return (current_time + leeway >= unlock_time);
 }
-//----------------------------------------------------------------------------------------------------
+
 namespace
 {
   template<typename T>
@@ -3591,7 +3578,7 @@ uint64_t wallet2::get_per_kb_fee()
   }
 }
 
-std::string wallet2::get_alias_address(const std::string& alias) {
+std::string wallet2::get_alias_address(const std::string& alias, bool get_if_premature) {
   epee::json_rpc::request<cryptonote::COMMAND_RPC_GETALIASADDRESS::request> req_t = AUTO_VAL_INIT(req_t);
   epee::json_rpc::response<cryptonote::COMMAND_RPC_GETALIASADDRESS::response, std::string> resp_t = AUTO_VAL_INIT(resp_t);
 
@@ -3600,6 +3587,7 @@ std::string wallet2::get_alias_address(const std::string& alias) {
   req_t.id = epee::serialization::storage_entry(0);
   req_t.method = "on_get_alias_address";
   req_t.params.alias = alias;
+  req_t.params.get_if_premature = get_if_premature;
   bool r = net_utils::invoke_http_json_remote_command2(m_daemon_address + "/json_rpc", req_t, resp_t, m_http_client);
   m_daemon_rpc_mutex.unlock();
   CHECK_AND_ASSERT_THROW_MES(r, "Failed to connect to daemon");
@@ -3608,7 +3596,7 @@ std::string wallet2::get_alias_address(const std::string& alias) {
   return resp_t.result.address;
 }
 
-std::vector<std::string> wallet2::get_address_aliases(const std::string& address) {
+std::vector<cryptonote::alias> wallet2::get_address_aliases(const std::string& address) {
   epee::json_rpc::request<cryptonote::COMMAND_RPC_GETADDRESSALIASES::request> req_t = AUTO_VAL_INIT(req_t);
   epee::json_rpc::response<cryptonote::COMMAND_RPC_GETADDRESSALIASES::response, std::string> resp_t = AUTO_VAL_INIT(resp_t);
 
