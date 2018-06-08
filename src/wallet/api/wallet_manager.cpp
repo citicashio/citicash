@@ -43,6 +43,15 @@ namespace epee {
     unsigned int g_test_dbg_lock_sleep = 0;
 }
 
+namespace {
+    template<typename Request, typename Response>
+    bool connect_and_invoke(const std::string& address, const std::string& path, const Request& request, Response& response)
+    {
+        epee::net_utils::http::http_simple_client client{};
+        return client.set_server(address, boost::none) && epee::net_utils::invoke_http_json(path, request, response, client);
+    }
+}
+
 namespace Monero {
 
 Wallet *WalletManagerImpl::createWallet(const std::string &path, const std::string &password,
@@ -168,9 +177,7 @@ bool WalletManagerImpl::connected(uint32_t *version = NULL) const
     req_t.jsonrpc = "2.0";
     req_t.id = epee::serialization::storage_entry(0);
     req_t.method = "get_version";
-    epee::net_utils::http::http_simple_client http_client;
-    bool r = epee::net_utils::invoke_http_json_remote_command2(m_daemonAddress + "/json_rpc", req_t, resp_t, http_client);
-    if (!r)
+    if (!connect_and_invoke(m_daemonAddress, "/json_rpc", req_t, resp_t))
       return false;
 
     if (version)
@@ -214,9 +221,8 @@ bool WalletManagerImpl::checkPayment(const std::string &address_text, const std:
   cryptonote::COMMAND_RPC_GET_TRANSACTIONS::request req;
   cryptonote::COMMAND_RPC_GET_TRANSACTIONS::response res;
   req.txs_hashes.push_back(epee::string_tools::pod_to_hex(txid));
-  epee::net_utils::http::http_simple_client http_client;
-  if (!epee::net_utils::invoke_http_json_remote_command2(daemon_address + "/gettransactions", req, res, http_client) ||
-      (res.txs.size() != 1 && res.txs_as_hex.size() != 1))
+  if (!connect_and_invoke(m_daemonAddress, "/gettransactions", req, res) ||
+    (res.txs.size() != 1 && res.txs_as_hex.size() != 1))
   {
     error = tr("failed to get transaction from daemon");
     return false;
@@ -333,8 +339,7 @@ uint64_t WalletManagerImpl::blockchainHeight() const
     cryptonote::COMMAND_RPC_GET_INFO::request ireq;
     cryptonote::COMMAND_RPC_GET_INFO::response ires;
 
-    epee::net_utils::http::http_simple_client http_client;
-    if (!epee::net_utils::invoke_http_json_remote_command2(m_daemonAddress + "/getinfo", ireq, ires, http_client))
+    if (!connect_and_invoke(m_daemonAddress, "/getinfo", ireq, ires))
       return 0;
     return ires.height;
 }
@@ -344,8 +349,7 @@ uint64_t WalletManagerImpl::blockchainTargetHeight() const
     cryptonote::COMMAND_RPC_GET_INFO::request ireq;
     cryptonote::COMMAND_RPC_GET_INFO::response ires;
 
-    epee::net_utils::http::http_simple_client http_client;
-    if (!epee::net_utils::invoke_http_json_remote_command2(m_daemonAddress + "/getinfo", ireq, ires, http_client))
+    if (!connect_and_invoke(m_daemonAddress, "/getinfo", ireq, ires))
       return 0;
     return ires.target_height >= ires.height ? ires.target_height : ires.height;
 }
@@ -355,8 +359,7 @@ uint64_t WalletManagerImpl::networkDifficulty() const
     cryptonote::COMMAND_RPC_GET_INFO::request ireq;
     cryptonote::COMMAND_RPC_GET_INFO::response ires;
 
-    epee::net_utils::http::http_simple_client http_client;
-    if (!epee::net_utils::invoke_http_json_remote_command2(m_daemonAddress + "/getinfo", ireq, ires, http_client))
+    if (!connect_and_invoke(m_daemonAddress, "/getinfo", ireq, ires))
       return 0;
     return ires.difficulty;
 }
@@ -366,8 +369,7 @@ double WalletManagerImpl::miningHashRate() const
     cryptonote::COMMAND_RPC_MINING_STATUS::request mreq;
     cryptonote::COMMAND_RPC_MINING_STATUS::response mres;
 
-    epee::net_utils::http::http_simple_client http_client;
-    if (!epee::net_utils::invoke_http_json_remote_command2(m_daemonAddress + "/getinfo", mreq, mres, http_client))
+    if (!connect_and_invoke(m_daemonAddress, "/getinfo", mreq, mres))
       return 0.0;
     if (!mres.active)
       return 0.0;
@@ -379,10 +381,8 @@ uint64_t WalletManagerImpl::blockTarget() const
     cryptonote::COMMAND_RPC_GET_INFO::request ireq;
     cryptonote::COMMAND_RPC_GET_INFO::response ires;
 
-    epee::net_utils::http::http_simple_client http_client;
-    if (!epee::net_utils::invoke_http_json_remote_command2(m_daemonAddress + "/getinfo", ireq, ires, http_client)) {
-        return 0;
-    }
+    if (!connect_and_invoke(m_daemonAddress, "/getinfo", ireq, ires))
+      return 0;
     return ires.target;
 }
 
@@ -391,10 +391,8 @@ bool WalletManagerImpl::isMining() const
     cryptonote::COMMAND_RPC_MINING_STATUS::request mreq;
     cryptonote::COMMAND_RPC_MINING_STATUS::response mres;
 
-    epee::net_utils::http::http_simple_client http_client;
-    if (!epee::net_utils::invoke_http_json_remote_command2(m_daemonAddress + "/mining_status", mreq, mres, http_client)) {
+    if (!connect_and_invoke(m_daemonAddress, "/mining_status", mreq, mres))
       return false;
-    }
     return mres.active;
 }
 
@@ -406,10 +404,8 @@ bool WalletManagerImpl::startMining(const std::string &address, uint32_t threads
     mreq.miner_address = address;
     mreq.threads_count = threads;
 
-    epee::net_utils::http::http_simple_client http_client;
-    if (!epee::net_utils::invoke_http_json_remote_command2(m_daemonAddress + "/start_mining", mreq, mres, http_client)) {
+    if (!connect_and_invoke(m_daemonAddress, "/start_mining", mreq, mres))
       return false;
-    }
     return mres.status == CORE_RPC_STATUS_OK;
 }
 
@@ -418,10 +414,8 @@ bool WalletManagerImpl::stopMining()
     cryptonote::COMMAND_RPC_STOP_MINING::request mreq;
     cryptonote::COMMAND_RPC_STOP_MINING::response mres;
 
-    epee::net_utils::http::http_simple_client http_client;
-    if (!epee::net_utils::invoke_http_json_remote_command2(m_daemonAddress + "/stop_mining", mreq, mres, http_client)) {
+    if (!connect_and_invoke(m_daemonAddress, "/stop_mining", mreq, mres))
       return false;
-    }
     return mres.status == CORE_RPC_STATUS_OK;
 }
 

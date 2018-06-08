@@ -111,6 +111,7 @@ struct options {
   const command_line::arg_descriptor<std::string> password = {"password", tools::wallet2::tr("Wallet password"), "", true};
   const command_line::arg_descriptor<std::string> password_file = {"password-file", tools::wallet2::tr("Wallet password file"), "", true};
   const command_line::arg_descriptor<int> daemon_port = {"daemon-port", tools::wallet2::tr("Use daemon instance at port <arg> instead of 19733"), 0};
+  const command_line::arg_descriptor<std::string> daemon_login = {"daemon-login", tools::wallet2::tr("Specify username[:password] for daemon RPC client"), "", true};
   const command_line::arg_descriptor<bool> testnet = {"testnet", tools::wallet2::tr("For testnet. Daemon must also be launched with --testnet flag"), false};
   const command_line::arg_descriptor<bool> restricted = {"restricted-rpc", tools::wallet2::tr("Restricts to view-only commands"), false};
 };
@@ -155,6 +156,18 @@ std::unique_ptr<tools::wallet2> make_basic(const boost::program_options::variabl
     return nullptr;
   }
 
+  boost::optional<epee::net_utils::http::login> login{};
+  if (command_line::has_arg(vm, opts.daemon_login))
+  {
+    auto parsed = tools::login::parse(
+      command_line::get_arg(vm, opts.daemon_login), false, "Daemon client password"
+    );
+    if (!parsed)
+      return nullptr;
+
+    login.emplace(std::move(parsed->username), std::move(parsed->password).password());
+  }
+
   if (daemon_host.empty())
     daemon_host = "localhost";
 
@@ -167,7 +180,7 @@ std::unique_ptr<tools::wallet2> make_basic(const boost::program_options::variabl
     daemon_address = std::string("http://") + daemon_host + ":" + std::to_string(daemon_port);
 
   std::unique_ptr<tools::wallet2> wallet(new tools::wallet2(testnet, restricted));
-  wallet->init(daemon_address);
+  wallet->init(std::move(daemon_address), std::move(login));
   return wallet;
 }
 
@@ -399,6 +412,7 @@ namespace tools
 // for now, limit to 30 attempts.  TODO: discuss a good number to limit to.
 const size_t MAX_SPLIT_ATTEMPTS = 30;
 
+constexpr const std::chrono::seconds wallet2::rpc_timeout;
 const char* wallet2::tr(const char* str) { return i18n_translate(str, "tools::wallet2"); }
 
 bool wallet2::has_testnet_option(const boost::program_options::variables_map& vm)
@@ -414,6 +428,7 @@ void wallet2::init_options(boost::program_options::options_description& desc_par
   command_line::add_arg(desc_params, opts.password);
   command_line::add_arg(desc_params, opts.password_file);
   command_line::add_arg(desc_params, opts.daemon_port);
+  command_line::add_arg(desc_params, opts.daemon_login);
   command_line::add_arg(desc_params, opts.testnet);
   command_line::add_arg(desc_params, opts.restricted);
 }
@@ -464,16 +479,17 @@ std::pair<std::unique_ptr<wallet2>, password_container> wallet2::make_new(const 
   return{ make_basic(vm, opts), std::move(*pwd) };
 }
 
-//----------------------------------------------------------------------------------------------------
-void wallet2::init(const std::string& daemon_address, uint64_t upper_transaction_size_limit, bool enable_ssl, const char* cacerts_path)
-{
+bool wallet2::init(std::string daemon_address, boost::optional<epee::net_utils::http::login> daemon_login, uint64_t upper_transaction_size_limit, bool enable_ssl, const char* cacerts_path) {
+  if(m_http_client.is_connected())
+    m_http_client.disconnect();
   m_upper_transaction_size_limit = upper_transaction_size_limit;
-  m_daemon_address = daemon_address;
-  if (enable_ssl) {
+  if (enable_ssl)
     m_http_client.enable_ssl(cacerts_path);
-  }
+  m_daemon_address = std::move(daemon_address);
+  m_daemon_login = std::move(daemon_login);
+  return m_http_client.set_server(get_daemon_address(), get_daemon_login());
 }
-//----------------------------------------------------------------------------------------------------
+
 bool wallet2::is_deterministic() const
 {
   crypto::secret_key second;
@@ -1296,7 +1312,7 @@ void wallet2::pull_blocks(uint64_t start_height, uint64_t &blocks_start_height, 
 
   req.start_height = start_height;
   m_daemon_rpc_mutex.lock();
-  bool r = net_utils::invoke_http_bin_remote_command2(m_daemon_address + "/getblocks.bin", req, res, m_http_client, WALLET_RCP_CONNECTION_TIMEOUT);
+  bool r = net_utils::invoke_http_bin("/getblocks.bin", req, res, m_http_client, rpc_timeout);
   m_daemon_rpc_mutex.unlock();
   THROW_WALLET_EXCEPTION_IF(!r, error::no_connection_to_daemon, "getblocks.bin");
   THROW_WALLET_EXCEPTION_IF(res.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "getblocks.bin");
@@ -1318,7 +1334,7 @@ void wallet2::pull_hashes(uint64_t start_height, uint64_t &blocks_start_height, 
 
   req.start_height = start_height;
   m_daemon_rpc_mutex.lock();
-  bool r = net_utils::invoke_http_bin_remote_command2(m_daemon_address + "/gethashes.bin", req, res, m_http_client, WALLET_RCP_CONNECTION_TIMEOUT);
+  bool r = net_utils::invoke_http_bin("/gethashes.bin", req, res, m_http_client, rpc_timeout);
   m_daemon_rpc_mutex.unlock();
   THROW_WALLET_EXCEPTION_IF(!r, error::no_connection_to_daemon, "gethashes.bin");
   THROW_WALLET_EXCEPTION_IF(res.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "gethashes.bin");
@@ -1480,7 +1496,7 @@ void wallet2::update_pool_state()
   cryptonote::COMMAND_RPC_GET_TRANSACTION_POOL::request req;
   cryptonote::COMMAND_RPC_GET_TRANSACTION_POOL::response res;
   m_daemon_rpc_mutex.lock();
-  bool r = epee::net_utils::invoke_http_json_remote_command2(m_daemon_address + "/get_transaction_pool", req, res, m_http_client, 200000);
+  bool r = epee::net_utils::invoke_http_json("/get_transaction_pool", req, res, m_http_client, rpc_timeout);
   m_daemon_rpc_mutex.unlock();
   THROW_WALLET_EXCEPTION_IF(!r, error::no_connection_to_daemon, "get_transaction_pool");
   THROW_WALLET_EXCEPTION_IF(res.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "get_transaction_pool");
@@ -1600,7 +1616,7 @@ void wallet2::update_pool_state()
           req.txs_hashes.push_back(it.id_hash);
           req.decode_as_json = false;
           m_daemon_rpc_mutex.lock();
-          bool r = epee::net_utils::invoke_http_json_remote_command2(m_daemon_address + "/gettransactions", req, res, m_http_client, 200000);
+          bool r = epee::net_utils::invoke_http_json("/gettransactions", req, res, m_http_client, rpc_timeout);
           m_daemon_rpc_mutex.unlock();
           if (r && res.status == CORE_RPC_STATUS_OK)
           {
@@ -2439,32 +2455,20 @@ bool wallet2::prepare_file_names(const std::string& file_path)
   return true;
 }
 //----------------------------------------------------------------------------------------------------
-bool wallet2::check_connection(uint32_t *version)
+bool wallet2::check_connection(uint32_t *version, uint32_t timeout)
 {
   boost::lock_guard<boost::mutex> lock(m_daemon_rpc_mutex);
 
-  if(!m_http_client.is_connected())
-  {
-    net_utils::http::url_content u;
-    net_utils::parse_url(m_daemon_address, u);
+  if(!m_http_client.is_connected() && !m_http_client.connect(std::chrono::milliseconds(timeout)))
+    return false;
 
-    if(!u.port)
-    {
-      u.port = m_testnet ? config::testnet::RPC_DEFAULT_PORT : config::RPC_DEFAULT_PORT;
-    }
-
-    if (!m_http_client.connect(u.host, std::to_string(u.port), WALLET_RCP_CONNECTION_TIMEOUT))
-      return false;
-  }
-
-  if (version)
-  {
+  if (version) {
     epee::json_rpc::request<cryptonote::COMMAND_RPC_GET_VERSION::request> req_t = AUTO_VAL_INIT(req_t);
     epee::json_rpc::response<cryptonote::COMMAND_RPC_GET_VERSION::response, std::string> resp_t = AUTO_VAL_INIT(resp_t);
     req_t.jsonrpc = "2.0";
     req_t.id = epee::serialization::storage_entry(0);
     req_t.method = "get_version";
-    bool r = net_utils::invoke_http_json_remote_command2(m_daemon_address + "/json_rpc", req_t, resp_t, m_http_client);
+    bool r = net_utils::invoke_http_json("/json_rpc", req_t, resp_t, m_http_client);
     if (!r || resp_t.result.status != CORE_RPC_STATUS_OK)
       *version = 0;
     else
@@ -2891,7 +2895,7 @@ void wallet2::rescan_spent()
     for (size_t n = start_offset; n < start_offset + n_outputs; ++n)
       req.key_images.push_back(string_tools::pod_to_hex(m_transfers[n].m_key_image));
     m_daemon_rpc_mutex.lock();
-    bool r = epee::net_utils::invoke_http_json_remote_command2(m_daemon_address + "/is_key_image_spent", req, daemon_resp, m_http_client, 200000);
+    bool r = epee::net_utils::invoke_http_json("/is_key_image_spent", req, daemon_resp, m_http_client, rpc_timeout);
     m_daemon_rpc_mutex.unlock();
     THROW_WALLET_EXCEPTION_IF(!r, error::no_connection_to_daemon, "is_key_image_spent");
     THROW_WALLET_EXCEPTION_IF(daemon_resp.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "is_key_image_spent");
@@ -3282,7 +3286,7 @@ void wallet2::commit_tx(pending_tx& ptx)
   req.do_not_relay = false;
   COMMAND_RPC_SEND_RAW_TX::response daemon_send_resp;
   m_daemon_rpc_mutex.lock();
-  bool r = epee::net_utils::invoke_http_json_remote_command2(m_daemon_address + "/sendrawtransaction", req, daemon_send_resp, m_http_client, 200000);
+  bool r = epee::net_utils::invoke_http_json("/sendrawtransaction", req, daemon_send_resp, m_http_client, rpc_timeout);
   m_daemon_rpc_mutex.unlock();
   THROW_WALLET_EXCEPTION_IF(!r, error::no_connection_to_daemon, "sendrawtransaction");
   THROW_WALLET_EXCEPTION_IF(daemon_send_resp.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "sendrawtransaction");
@@ -3557,7 +3561,7 @@ uint64_t wallet2::get_dynamic_per_kb_fee_estimate()
   req_t.id = epee::serialization::storage_entry(0);
   req_t.method = "get_fee_estimate";
   req_t.params.grace_blocks = FEE_ESTIMATE_GRACE_BLOCKS;
-  bool r = net_utils::invoke_http_json_remote_command2(m_daemon_address + "/json_rpc", req_t, resp_t, m_http_client);
+  bool r = net_utils::invoke_http_json("/json_rpc", req_t, resp_t, m_http_client);
   m_daemon_rpc_mutex.unlock();
   CHECK_AND_ASSERT_THROW_MES(r, "Failed to connect to daemon");
   CHECK_AND_ASSERT_THROW_MES(resp_t.result.status != CORE_RPC_STATUS_BUSY, "Failed to connect to daemon");
@@ -3588,7 +3592,7 @@ std::string wallet2::get_alias_address(const std::string& alias, bool get_if_pre
   req_t.method = "on_get_alias_address";
   req_t.params.alias = alias;
   req_t.params.get_if_premature = get_if_premature;
-  bool r = net_utils::invoke_http_json_remote_command2(m_daemon_address + "/json_rpc", req_t, resp_t, m_http_client);
+  bool r = net_utils::invoke_http_json("/json_rpc", req_t, resp_t, m_http_client);
   m_daemon_rpc_mutex.unlock();
   CHECK_AND_ASSERT_THROW_MES(r, "Failed to connect to daemon");
   CHECK_AND_ASSERT_THROW_MES(resp_t.result.status != CORE_RPC_STATUS_BUSY, "Failed to connect to daemon");
@@ -3605,7 +3609,7 @@ std::vector<cryptonote::alias> wallet2::get_address_aliases(const std::string& a
   req_t.id = epee::serialization::storage_entry(0);
   req_t.method = "on_get_address_aliases";
   req_t.params.address = address;
-  bool r = net_utils::invoke_http_json_remote_command2(m_daemon_address + "/json_rpc", req_t, resp_t, m_http_client);
+  bool r = net_utils::invoke_http_json("/json_rpc", req_t, resp_t, m_http_client);
   m_daemon_rpc_mutex.unlock();
   CHECK_AND_ASSERT_THROW_MES(r, "Failed to connect to daemon");
   CHECK_AND_ASSERT_THROW_MES(resp_t.result.status != CORE_RPC_STATUS_BUSY, "Failed to connect to daemon");
@@ -3633,7 +3637,7 @@ void wallet2::get_outs(std::vector<std::vector<tools::wallet2::get_outs_entry>> 
     req_t.params.amounts.resize(std::distance(req_t.params.amounts.begin(), end));
     req_t.params.unlocked = true;
     req_t.params.recent_cutoff = time(NULL) - RECENT_OUTPUT_ZONE;
-    bool r = net_utils::invoke_http_json_remote_command2(m_daemon_address + "/json_rpc", req_t, resp_t, m_http_client);
+    bool r = net_utils::invoke_http_json("/json_rpc", req_t, resp_t, m_http_client);
     m_daemon_rpc_mutex.unlock();
     THROW_WALLET_EXCEPTION_IF(!r, error::no_connection_to_daemon, "transfer_selected_rct");
     THROW_WALLET_EXCEPTION_IF(resp_t.result.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "get_output_histogram");
@@ -3779,7 +3783,7 @@ void wallet2::get_outs(std::vector<std::vector<tools::wallet2::get_outs_entry>> 
 
     // get the keys for those
     m_daemon_rpc_mutex.lock();
-    r = epee::net_utils::invoke_http_bin_remote_command2(m_daemon_address + "/get_outs.bin", req, daemon_resp, m_http_client, 200000);
+    r = epee::net_utils::invoke_http_bin("/get_outs.bin", req, daemon_resp, m_http_client, rpc_timeout);
     m_daemon_rpc_mutex.unlock();
     THROW_WALLET_EXCEPTION_IF(!r, error::no_connection_to_daemon, "get_outs.bin");
     THROW_WALLET_EXCEPTION_IF(daemon_resp.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "get_outs.bin");
@@ -4638,7 +4642,7 @@ void wallet2::get_hard_fork_info(uint8_t version, uint64_t &earliest_height)
   req_t.id = epee::serialization::storage_entry(0);
   req_t.method = "hard_fork_info";
   req_t.params.version = version;
-  bool r = net_utils::invoke_http_json_remote_command2(m_daemon_address + "/json_rpc", req_t, resp_t, m_http_client);
+  bool r = net_utils::invoke_http_json("/json_rpc", req_t, resp_t, m_http_client);
   m_daemon_rpc_mutex.unlock();
   CHECK_AND_ASSERT_THROW_MES(r, "Failed to connect to daemon");
   CHECK_AND_ASSERT_THROW_MES(resp_t.result.status != CORE_RPC_STATUS_BUSY, "Failed to connect to daemon");
@@ -4653,7 +4657,7 @@ bool wallet2::use_fork_rules(uint8_t version, int64_t early_blocks)
   cryptonote::COMMAND_RPC_GET_HEIGHT::response res = AUTO_VAL_INIT(res);
 
   m_daemon_rpc_mutex.lock();
-  bool r = net_utils::invoke_http_json_remote_command2(m_daemon_address + "/getheight", req, res, m_http_client);
+  bool r = net_utils::invoke_http_json("/getheight", req, res, m_http_client);
   m_daemon_rpc_mutex.unlock();
   CHECK_AND_ASSERT_MES(r, false, "Failed to connect to daemon");
   CHECK_AND_ASSERT_MES(res.status != CORE_RPC_STATUS_BUSY, false, "Failed to connect to daemon");
@@ -4724,7 +4728,7 @@ std::vector<size_t> wallet2::select_available_outputs_from_histogram(uint64_t co
   req_t.params.min_count = count;
   req_t.params.max_count = 0;
   req_t.params.unlocked = unlocked;
-  bool r = net_utils::invoke_http_json_remote_command2(m_daemon_address + "/json_rpc", req_t, resp_t, m_http_client);
+  bool r = net_utils::invoke_http_json("/json_rpc", req_t, resp_t, m_http_client);
   m_daemon_rpc_mutex.unlock();
   THROW_WALLET_EXCEPTION_IF(!r, error::no_connection_to_daemon, "select_available_unmixable_outputs");
   THROW_WALLET_EXCEPTION_IF(resp_t.result.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "get_output_histogram");
@@ -4763,7 +4767,7 @@ uint64_t wallet2::get_num_rct_outputs()
   req_t.params.amounts.push_back(0);
   req_t.params.min_count = 0;
   req_t.params.max_count = 0;
-  bool r = net_utils::invoke_http_json_remote_command2(m_daemon_address + "/json_rpc", req_t, resp_t, m_http_client);
+  bool r = net_utils::invoke_http_json("/json_rpc", req_t, resp_t, m_http_client);
   m_daemon_rpc_mutex.unlock();
   THROW_WALLET_EXCEPTION_IF(!r, error::no_connection_to_daemon, "get_num_rct_outputs");
   THROW_WALLET_EXCEPTION_IF(resp_t.result.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "get_output_histogram");
@@ -4854,7 +4858,7 @@ uint64_t wallet2::get_daemon_blockchain_height(string &err)
   COMMAND_RPC_GET_HEIGHT::request req;
   COMMAND_RPC_GET_HEIGHT::response res = boost::value_initialized<COMMAND_RPC_GET_HEIGHT::response>();
   m_daemon_rpc_mutex.lock();
-  bool ok = net_utils::invoke_http_json_remote_command2(m_daemon_address + "/getheight", req, res, m_http_client);
+  bool ok = net_utils::invoke_http_json("/getheight", req, res, m_http_client);
   m_daemon_rpc_mutex.unlock();
   // XXX: DRY violation. copy-pasted from simplewallet.cpp:interpret_rpc_response()
   if (ok)
@@ -4887,7 +4891,7 @@ uint64_t wallet2::get_daemon_blockchain_target_height(string &err)
   req_t.jsonrpc = "2.0";
   req_t.id = epee::serialization::storage_entry(0);
   req_t.method = "get_info";
-  bool ok = net_utils::invoke_http_json_remote_command2(m_daemon_address + "/json_rpc", req_t, resp_t, m_http_client);
+  bool ok = net_utils::invoke_http_json("/json_rpc", req_t, resp_t, m_http_client);
   m_daemon_rpc_mutex.unlock();
   if (ok)
   {
@@ -5109,7 +5113,7 @@ uint64_t wallet2::import_key_images(const std::vector<std::pair<crypto::key_imag
   }
 
   m_daemon_rpc_mutex.lock();
-  bool r = epee::net_utils::invoke_http_json_remote_command2(m_daemon_address + "/is_key_image_spent", req, daemon_resp, m_http_client, 200000);
+  bool r = epee::net_utils::invoke_http_json("/is_key_image_spent", req, daemon_resp, m_http_client, rpc_timeout);
   m_daemon_rpc_mutex.unlock();
   THROW_WALLET_EXCEPTION_IF(!r, error::no_connection_to_daemon, "is_key_image_spent");
   THROW_WALLET_EXCEPTION_IF(daemon_resp.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "is_key_image_spent");

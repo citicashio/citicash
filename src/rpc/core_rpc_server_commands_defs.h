@@ -516,6 +516,7 @@ namespace cryptonote
       bool testnet;
       std::string top_block_hash;
       uint64_t cumulative_difficulty;
+      uint64_t hash_rate;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
@@ -533,6 +534,7 @@ namespace cryptonote
         KV_SERIALIZE(testnet)
         KV_SERIALIZE(top_block_hash)
         KV_SERIALIZE(cumulative_difficulty)
+        KV_SERIALIZE(hash_rate)
       END_KV_SERIALIZE_MAP()
     };
   };

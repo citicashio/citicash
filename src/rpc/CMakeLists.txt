@@ -27,9 +27,11 @@
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 set(rpc_sources
-  core_rpc_server.cpp)
+  core_rpc_server.cpp
+  rpc_args.cpp)
 
-set(rpc_headers)
+set(rpc_headers
+  rpc_args.h)
 
 set(rpc_private_headers
   core_rpc_server.h
@@ -44,8 +46,10 @@ sumokoin_add_library(rpc
   ${rpc_private_headers})
 target_link_libraries(rpc
   PUBLIC
+    common
     cryptonote_core
     cryptonote_protocol
+    epee
     ${Boost_THREAD_LIBRARY}
   PRIVATE
     ${EXTRA_LIBRARIES})

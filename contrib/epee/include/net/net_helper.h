@@ -38,6 +38,7 @@
 #include <string>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <boost/preprocessor/selection/min.hpp>
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/lambda.hpp>
@@ -133,7 +134,7 @@ namespace net_utils
 			// No deadline is required until the first socket operation is started. We
 			// set the deadline to positive infinity so that the actor takes no action
 			// until a specific deadline is set.
-			m_deadline.expires_at(boost::posix_time::pos_infin);
+			m_deadline.expires_at(std::chrono::steady_clock::time_point::max());
 
 			// Start the persistent actor that checks for deadline expiry.
 			check_deadline();
@@ -146,30 +147,21 @@ namespace net_utils
 			shutdown();
 		}
 
-		inline void set_recv_timeout(int reciev_timeout)
-		{
-			m_reciev_timeout = reciev_timeout;
-		}
-
 		inline void set_ssl_cacerts(const char* cacerts_path) {
       m_cacerts_path = cacerts_path;
 		}
 
     inline
-      bool connect(const std::string& addr, int port, unsigned int connect_timeout, unsigned int reciev_timeout, bool ssl = false, const std::string& bind_ip = "0.0.0.0")
+      bool connect(const std::string& addr, int port, std::chrono::milliseconds timeout, bool ssl = false, const std::string& bind_ip = "0.0.0.0")
     {
-      return connect(addr, std::to_string(port), connect_timeout, reciev_timeout, ssl, bind_ip);
+      return connect(addr, std::to_string(port), timeout, ssl, bind_ip);
     }
 
     inline
-			bool connect(const std::string& addr, const std::string& port, unsigned int connect_timeout, unsigned int reciev_timeout, bool ssl = false, const std::string& bind_ip = "0.0.0.0")
+			bool connect(const std::string& addr, const std::string& port, std::chrono::milliseconds timeout, bool ssl = false, const std::string& bind_ip = "0.0.0.0")
 		{
-			m_connect_timeout = connect_timeout;
-			m_reciev_timeout = reciev_timeout;
       m_connected = false;
       m_ssl = ssl;
-			if(!m_reciev_timeout)
-				m_reciev_timeout = m_connect_timeout;
 
 			try
 			{
@@ -215,7 +207,7 @@ namespace net_utils
 				}
 
 
-				m_deadline.expires_from_now(boost::posix_time::milliseconds(m_connect_timeout));
+				m_deadline.expires_from_now(timeout);
 
 				boost::system::error_code ec = boost::asio::error::would_block;
 
@@ -227,7 +219,7 @@ namespace net_utils
 
 				if (!ec && m_ssl_socket.next_layer().is_open())
 				{
-					m_deadline.expires_at(boost::posix_time::pos_infin);
+					m_deadline.expires_from_now(timeout);
           if(m_ssl) {
             m_ssl_socket.set_verify_mode(boost::asio::ssl::verify_peer);
             m_ssl_socket.set_verify_callback(make_verbose_verification(boost::asio::ssl::rfc2818_verification(addr)));
@@ -289,12 +281,12 @@ namespace net_utils
 
 
 		inline
-		bool send(const std::string& buff)
+		bool send(const std::string& buff, std::chrono::milliseconds timeout)
 		{
 
 			try
 			{
-				m_deadline.expires_from_now(boost::posix_time::milliseconds(m_reciev_timeout));
+				m_deadline.expires_from_now(timeout);
 
 				// Set up the variable that receives the result of the asynchronous
 				// operation. The error code is set to would_block to signal that the
@@ -323,7 +315,7 @@ namespace net_utils
 					return false;
 				}else
 				{
-					m_deadline.expires_at(boost::posix_time::pos_infin);
+					m_deadline.expires_at(std::chrono::steady_clock::time_point::max());
 				}
 			}
 
@@ -380,7 +372,7 @@ namespace net_utils
 					return false;
 				}else
 				{
-					m_deadline.expires_at(boost::posix_time::pos_infin);
+					m_deadline.expires_at(std::chrono::steady_clock::time_point::max());
 				}
 			}
 
@@ -408,7 +400,7 @@ namespace net_utils
 		}
 
 		inline
-		bool recv(std::string& buff)
+		bool recv(std::string& buff, std::chrono::milliseconds timeout)
 		{
 
 			try
@@ -416,7 +408,7 @@ namespace net_utils
 				// Set a deadline for the asynchronous operation. Since this function uses
 				// a composed operation (async_read_until), the deadline applies to the
 				// entire operation, rather than individual reads from the socket.
-				m_deadline.expires_from_now(boost::posix_time::milliseconds(m_reciev_timeout));
+				m_deadline.expires_from_now(timeout);
 
 				// Set up the variable that receives the result of the asynchronous
 				// operation. The error code is set to would_block to signal that the
@@ -461,7 +453,7 @@ namespace net_utils
 				}else
 				{
                     LOG_PRINT_L4("READ ENDS: Success. bytes_tr: " << bytes_transfered);
-					m_deadline.expires_at(boost::posix_time::pos_infin);
+					m_deadline.expires_at(std::chrono::steady_clock::time_point::max());
 				}
 
 				/*if(!bytes_transfered)
@@ -489,7 +481,7 @@ namespace net_utils
 
 		}
 
-		inline bool recv_n(std::string& buff, int64_t sz)
+		inline bool recv_n(std::string& buff, int64_t sz, std::chrono::milliseconds timeout)
 		{
 
 			try
@@ -497,7 +489,7 @@ namespace net_utils
 				// Set a deadline for the asynchronous operation. Since this function uses
 				// a composed operation (async_read_until), the deadline applies to the
 				// entire operation, rather than individual reads from the socket.
-				m_deadline.expires_from_now(boost::posix_time::milliseconds(m_reciev_timeout));
+				m_deadline.expires_from_now(timeout);
 
 				// Set up the variable that receives the result of the asynchronous
 				// operation. The error code is set to would_block to signal that the
@@ -534,7 +526,7 @@ namespace net_utils
 					return false;
 				}else
 				{
-					m_deadline.expires_at(boost::posix_time::pos_infin);
+					m_deadline.expires_at(std::chrono::steady_clock::time_point::max());
 				}
 
 				if(bytes_transfered != buff.size())
@@ -611,7 +603,7 @@ namespace net_utils
 			// Check whether the deadline has passed. We compare the deadline against
 			// the current time since a new asynchronous operation may have moved the
 			// deadline before this actor had a chance to run.
-			if (m_deadline.expires_at() <= boost::asio::deadline_timer::traits_type::now())
+			if (m_deadline.expires_at() <= std::chrono::steady_clock::now())
 			{
 				// The deadline has passed. The socket is closed so that any outstanding
 				// asynchronous operations are cancelled. This allows the blocked
@@ -622,7 +614,7 @@ namespace net_utils
 
 				// There is no longer an active deadline. The expiry is set to positive
 				// infinity so that the actor takes no action until a new deadline is set.
-				m_deadline.expires_at(boost::posix_time::pos_infin);
+				m_deadline.expires_at(std::chrono::steady_clock::time_point::max());
 			}
 
 			// Put the actor back to sleep.
@@ -632,7 +624,7 @@ namespace net_utils
 		void shutdown_ssl() {
 			// ssl socket shutdown blocks if server doesn't respond. We close after 2 secs
 			boost::system::error_code ec = boost::asio::error::would_block;
-			m_deadline.expires_from_now(boost::posix_time::milliseconds(2000));
+			m_deadline.expires_from_now(std::chrono::seconds(2));
 			m_ssl_socket.async_shutdown(boost::lambda::var(ec) = boost::lambda::_1);
 			while (ec == boost::asio::error::would_block)
 			{
@@ -679,13 +671,11 @@ namespace net_utils
 		boost::asio::ip::tcp::socket m_socket;
 		boost::asio::ssl::context m_ctx;
     boost::asio::ssl::stream<boost::asio::ip::tcp::socket> m_ssl_socket;
-		int m_connect_timeout;
-		int m_reciev_timeout;
 		bool m_initialized;
 		bool m_connected;
     bool m_ssl;
     const char* m_cacerts_path;
-		boost::asio::deadline_timer m_deadline;
+		boost::asio::steady_timer m_deadline;
 		volatile uint32_t m_shutdowned;
 	};
 

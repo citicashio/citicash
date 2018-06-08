@@ -278,11 +278,13 @@ namespace wallet_rpc
       std::string alias;
       uint32_t priority;
       uint64_t unlock_time;
+      bool do_not_relay;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(alias)
         KV_SERIALIZE(priority)
         KV_SERIALIZE(unlock_time)
+        KV_SERIALIZE(do_not_relay)
       END_KV_SERIALIZE_MAP()
     };
 
@@ -341,6 +343,7 @@ namespace wallet_rpc
       std::string payment_id;
       bool get_tx_key;
       bool trusted_daemon;
+      bool do_not_relay;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(destinations)
@@ -352,6 +355,7 @@ namespace wallet_rpc
         KV_SERIALIZE(payment_id)
         KV_SERIALIZE(get_tx_key)
         KV_SERIALIZE(trusted_daemon)
+        KV_SERIALIZE(do_not_relay)
       END_KV_SERIALIZE_MAP()
     };
 
@@ -384,6 +388,7 @@ namespace wallet_rpc
       std::string payment_id;
       bool get_tx_keys;
       bool trusted_daemon;
+      bool do_not_relay;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(destinations)
@@ -395,6 +400,7 @@ namespace wallet_rpc
         KV_SERIALIZE(payment_id)
         KV_SERIALIZE(get_tx_keys)
         KV_SERIALIZE(trusted_daemon)
+        KV_SERIALIZE(do_not_relay)
       END_KV_SERIALIZE_MAP()
     };
 
@@ -429,10 +435,12 @@ namespace wallet_rpc
     {
       bool get_tx_keys;
       bool trusted_daemon;
+      bool do_not_relay;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(get_tx_keys)
         KV_SERIALIZE(trusted_daemon)
+        KV_SERIALIZE(do_not_relay)
       END_KV_SERIALIZE_MAP()
     };
 
@@ -473,6 +481,7 @@ namespace wallet_rpc
       bool get_tx_keys;
       bool trusted_daemon;
       uint64_t below_amount;
+      bool do_not_relay;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(address)
@@ -485,6 +494,7 @@ namespace wallet_rpc
         KV_SERIALIZE(get_tx_keys)
         KV_SERIALIZE(trusted_daemon)
         KV_SERIALIZE(below_amount)
+        KV_SERIALIZE(do_not_relay)
       END_KV_SERIALIZE_MAP()
     };
 
