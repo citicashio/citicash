@@ -2092,6 +2092,7 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
 
   //bool is_subaddress = false;
   vector<cryptonote::tx_destination_entry> dsts;
+  size_t num_subaddresses = 0;
   for (size_t i = 0; i < local_args.size(); i += 2)
   {
     cryptonote::address_parse_info info;
@@ -2106,8 +2107,9 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
       }
     }
 
-    de.is_subaddress = info.is_subaddress;
     de.addr = info.address;
+    de.is_subaddress = info.is_subaddress;
+    num_subaddresses += info.is_subaddress;
 
     if (info.has_payment_id)
     {
@@ -2140,7 +2142,7 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
   }
 
   // prompt is there is no payment id and confirmation is required
-  if (!retry && !payment_id_seen && m_wallet->confirm_missing_payment_id())
+  if (!retry && !payment_id_seen && m_wallet->confirm_missing_payment_id() && dsts.size() > num_subaddresses)
   {
      std::string accepted = command_line::input_line(tr("No payment id is included with this transaction. Is this okay?  (Y/Yes/N/No): "));
      if (std::cin.eof())
@@ -2496,7 +2498,7 @@ bool simple_wallet::sweep_all(const std::vector<std::string> &args_, bool retry,
   }
 
   // prompt is there is no payment id and confirmation is required
-  if (!retry && !payment_id_seen && m_wallet->confirm_missing_payment_id())
+  if (!retry && !payment_id_seen && m_wallet->confirm_missing_payment_id() && !info.is_subaddress)
   {
      std::string accepted = command_line::input_line(tr("No payment id is included with this transaction. Is this okay?  (Y/Yes/N/No): "));
      if (std::cin.eof())
