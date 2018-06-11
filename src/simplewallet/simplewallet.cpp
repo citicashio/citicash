@@ -2237,12 +2237,12 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
         if (dust_in_fee != 0) prompt << boost::format(tr(", of which %s is dust from change")) % print_money(dust_in_fee);
         if (dust_not_in_fee != 0)  prompt << tr(".") << ENDL << boost::format(tr("A total of %s from dust change will be sent to dust address"))
                                                    % print_money(dust_not_in_fee);
-        if (transfer_type == TransferLocked)
-        {
+        if (transfer_type == TransferLocked) {
 					// Fixme: Need a better time expression in words
           float days = locked_blocks / 360.0f;
-					float minutes = locked_blocks * 4.0f;
-					prompt << boost::format(tr(".\nThis transaction will unlock on block %llu, in approximately %s minutes or %s days (assuming 4 minutes per block)")) % ((unsigned long long)unlock_block) % minutes % days;
+          double minutes_per_block = DIFFICULTY_TARGET / 60;
+					float minutes = locked_blocks * minutes_per_block;
+					prompt << boost::format(tr(".\nThis transaction will unlock on block %llu, in approximately %s minutes or %s days (assuming %s minutes per block)")) % ((unsigned long long)unlock_block) % minutes % days % minutes_per_block;
         }
         prompt << tr(".") << ENDL << tr("Is this okay?  (Y/Yes/N/No): ");
 
@@ -4181,12 +4181,8 @@ bool simple_wallet::alias_address(const std::vector<std::string> &args) {
     std::vector<tools::wallet2::pending_tx> ptx_vector = m_wallet->create_transactions({dst}, DEFAULT_MIXIN, unlock_time, priority, extra, 0/*req.account_index, LUKAS TODO prolly subaddress index*/, std::set<uint32_t>()/*LUKAS TODO I didn't check this parameter at all*/, false);
 
     if (m_wallet->always_confirm_transfers()) {
-		  // Fixme: Need a better time expression in words
-      float days = unlock_time / 360.0f;
-	    float minutes = unlock_time * 4.0f;
       std::stringstream prompt;
-	    prompt << boost::format(tr(".\nThis transaction will unlock on block %llu, in approximately %s minutes or %s days (assuming 4 minutes per block)")) % ((unsigned long long)unlock_time) % minutes % days;
-      prompt << tr(".") << ENDL << tr("Is this okay?  (Y/Yes/N/No): ");
+      prompt << tr("Do you really want to do it?  (Y/Yes/N/No): ");
 
       std::string accepted = command_line::input_line(prompt.str());
       if (std::cin.eof())
