@@ -707,6 +707,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
   // Don't try to extract tx public key if tx has no ouputs
   size_t pk_index = 0;
   std::vector<tx_scan_info_t> tx_scan_info(tx.vout.size());
+  std::unordered_set<crypto::public_key> public_keys_seen;
   while (!tx.vout.empty())
   {
     // if tx.vout is not empty, we loop through all tx pubkeys
@@ -722,6 +723,13 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
       return;
     }
 
+    if (public_keys_seen.find(pub_key_field.pub_key) != public_keys_seen.end())
+    {
+      LOG_PRINT_L0("The same transaction pubkey is present more than once, ignoring extra instance");
+      continue;
+    }
+    public_keys_seen.insert(pub_key_field.pub_key);
+
     int num_vouts_received = 0;
     tx_pub_key = pub_key_field.pub_key;
     bool r = true;
@@ -731,16 +739,23 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
     int threads = tools::get_max_concurrency();
     const cryptonote::account_keys& keys = m_account.get_keys();
     crypto::key_derivation derivation;
-    generate_key_derivation(tx_pub_key, keys.m_view_secret_key, derivation);
+    if (!generate_key_derivation(tx_pub_key, keys.m_view_secret_key, derivation)) {
+      LOG_PRINT_L0("Failed to generate key derivation from tx pubkey, skipping");
+      static_assert(sizeof(derivation) == sizeof(rct::key), "Mismatched sizes of key_derivation and rct::key");
+      memcpy(&derivation, rct::identity().bytes, sizeof(derivation));
+    }
 
     // additional tx pubkeys and derivations for multi-destination transfers involving one or more subaddresses
     std::vector<crypto::public_key> additional_tx_pub_keys = get_additional_tx_pub_keys_from_extra(tx);
     std::vector<crypto::key_derivation> additional_derivations;
-    for (size_t i = 0; i < additional_tx_pub_keys.size(); ++i)
-    {
-      additional_derivations.push_back({});
-      generate_key_derivation(additional_tx_pub_keys[i], keys.m_view_secret_key, additional_derivations.back());
-    }
+    if (pk_index == 1)
+      for (size_t i = 0; i < additional_tx_pub_keys.size(); ++i) {
+        additional_derivations.push_back({});
+        if (!generate_key_derivation(additional_tx_pub_keys[i], keys.m_view_secret_key, additional_derivations.back())) {
+          LOG_PRINT_L0("Failed to generate key derivation from tx pubkey, skipping");
+          additional_derivations.pop_back();
+        }
+      }
 
     if (miner_tx && m_refresh_type == RefreshNoCoinbase)
     {
