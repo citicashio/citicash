@@ -191,7 +191,7 @@ bool t_rpc_command_executor::show_hash_rate() {
   cryptonote::COMMAND_RPC_SET_LOG_HASH_RATE::response res;
   req.visible = true;
 
-  std::string fail_message = "Unsuccessful";
+  std::string fail_message = "Unsuccessful. Not mining on this node?";
 
   if (m_is_rpc)
   {
