@@ -300,7 +300,7 @@ mPid2Number_Biggest(0)
 {
 	mStream = & std::cout;
 	mStreamBrokenDebug = & std::cerr; // the backup stream
-	*mStreamBrokenDebug << "Creating the logger system" << endl;
+	*mStream << "Creating the logger system" << endl;
 	mIsBroken=false; // ok, constr. succeeded, so string is not broken now
 
 	// this is here, because it could be using logging itself to log creation of first thread/PID etc
