@@ -4146,7 +4146,7 @@ bool simple_wallet::alias_address(const std::vector<std::string> &args) {
     }
   }
   
-  unsigned int priority = 0;
+  unsigned int priority = 3;
   if (local_args.size() == 3) {
     try {
       priority = boost::lexical_cast<unsigned int>(local_args[2]);
