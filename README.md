@@ -21,7 +21,7 @@ CitiCash, therefore, is a new Sumokoin without its legacy, a _truely fungible_ c
 
 ## Coin Supply & Emission
 
-- **Total supply**: **1,000,000,000** coins in first 20 years, then **XXX,XXX** coins each year for inflation. 
+- **Total supply**: **1,000,000,000** coins in first 20 years, then **XXX,XXX** coins each year for inflation.
 About 13.5% (~135 million) was premined to reserve for future development, i.e. **865 million coins available** for community mining.
 - **Coin symbol**: **CCH**
 - **Coin Units**:
@@ -29,7 +29,7 @@ About 13.5% (~135 million) was premined to reserve for future development, i.e. 
   + 1 CityCashun = 0.000001 **CCH** (10<sup>-6</sup>)
   + 1 CityCashan = 0.001 **CCH** (10<sup>-3</sup>)
 - **Hash algorithm**: CryptoNight (Proof-Of-Work)
-- **Emission scheme**: CitiCash's block reward changes _every 6-months_ as the following "Camel" distribution* (inspired by _real-world mining production_ like of crude oil, coal etc. that is often slow at first, 
+- **Emission scheme**: CitiCash's block reward changes _every 6-months_ as the following "Camel" distribution* (inspired by _real-world mining production_ like of crude oil, coal etc. that is often slow at first,
 accelerated in the next few years before declined and depleted). However, the emission path of CitiCash is generally not far apart from what of Bitcoin (view charts below).
 
 ![](http://www.sumokoin.org/images/block_reward_by_calendar_year.png) //TODO fix
@@ -73,7 +73,7 @@ library archives (`.a`).
 | CMake          | 3.0.0         | NO       | `cmake`            | `cmake`        | `cmake`           |  NO      |                |
 | pkg-config     | any           | NO       | `pkg-config`       | `base-devel`   | `pkg-config`      |  NO      |                |
 | Boost          | 1.58          | NO       | `libboost-all-dev` | `boost`        | `boost`           |  NO      |                |
-| OpenSSL      	 | basically any | NO       | `libssl-dev`       | `openssl`      | `openssl`         |  NO      | sha256 sum     |
+| OpenSSL        | basically any | NO       | `libssl-dev`       | `openssl`      | `openssl`         |  NO      | sha256 sum     |
 | BerkeleyDB     | 4.8           | NO       | `libdb{,++}-dev`   | `db`           | NA                |  NO      |                |
 | libevent       | 2.0           | NO       | `libevent-dev`     | `libevent`     | NA                |  NO      |                |
 | libunbound     | 1.4.16        | YES      | `libunbound-dev`   | `unbound`      | NA                |  NO      |                |
@@ -99,8 +99,8 @@ invokes cmake commands as needed.
 
     \- On Ubuntu 16.04, essential dependencies can be installed with the following command:
 
-    	sudo apt install build-essential cmake libboost-all-dev libssl-dev pkg-config
-    
+        sudo apt install build-essential cmake libboost-all-dev libssl-dev pkg-config
+
     \- On Mac OS X, install Homebrew first.
 
         ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
@@ -159,24 +159,24 @@ Tested on a Raspberry Pi 2 with a clean install of minimal Debian Jessie from ht
 * Install the dependencies for Citicash except libunwind and libboost-all-dev
 
 * Increase the system swap size:
-```	
-	sudo /etc/init.d/dphys-swapfile stop  
-	sudo nano /etc/dphys-swapfile  
-	CONF_SWAPSIZE=1024  
-	sudo /etc/init.d/dphys-swapfile start  
+```
+    sudo /etc/init.d/dphys-swapfile stop
+    sudo nano /etc/dphys-swapfile
+    CONF_SWAPSIZE=1024
+    sudo /etc/init.d/dphys-swapfile start
 ```
 * Install the latest version of boost (this may first require invoking `apt-get remove --purge libboost*` to remove a previous version if you're not using a clean install):
 ```
-	cd  
-	wget https://sourceforge.net/projects/boost/files/boost/1.62.0/boost_1_62_0.tar.bz2  
-	tar xvfo boost_1_62_0.tar.bz2  
-	cd boost_1_62_0  
-	./bootstrap.sh  
-	sudo ./b2  
+    cd
+    wget https://sourceforge.net/projects/boost/files/boost/1.62.0/boost_1_62_0.tar.bz2
+    tar xvfo boost_1_62_0.tar.bz2
+    cd boost_1_62_0
+    ./bootstrap.sh
+    sudo ./b2
 ```
 * Wait ~8 hours
 
-	sudo ./bjam install
+    sudo ./bjam install
 
 * Wait ~4 hours
 
@@ -207,15 +207,15 @@ application.
 
 * Download and install the [MSYS2 installer](http://msys2.github.io), either the 64-bit or the 32-bit package, depending on your system.
 * Open the MSYS shell via the `MSYS2 Shell` shortcut
-* Update packages using pacman:  
+* Update packages using pacman:
 
-        pacman -Syuu  
+        pacman -Syuu
 
-* Exit the MSYS shell using Alt+F4  
+* Exit the MSYS shell using Alt+F4
 * Edit the properties for the `MSYS2 Shell` shortcut changing "msys2_shell.bat" to "msys2_shell.cmd -mingw64" for 64-bit builds or "msys2_shell.cmd -mingw32" for 32-bit builds
-* Restart MSYS shell via modified shortcut and update packages again using pacman:  
+* Restart MSYS shell via modified shortcut and update packages again using pacman:
 
-        pacman -Syuu  
+        pacman -Syuu
 
 
 * Install dependencies:
@@ -225,7 +225,7 @@ application.
         pacman -S mingw-w64-x86_64-toolchain make mingw-w64-x86_64-cmake mingw-w64-x86_64-boost mingw-w64-x86_64-openssl
 
     To build for 32-bit Windows:
- 
+
         pacman -S mingw-w64-i686-toolchain make mingw-w64-i686-cmake mingw-w64-i686-boost mingw-w64-i686-openssl
 
 * Open the MingW shell via `MinGW-w64-Win64 Shell` shortcut on 64-bit Windows
@@ -249,8 +249,8 @@ application.
 ### On FreeBSD:
 
 * Update packages and install the dependencies (on FreeBSD 11.0 x64):
-		
-		pkg update; pkg install wget git pkgconf gcc49 cmake db6 icu libevent unbound googletest ldns expat bison boost-libs;
+
+        pkg update; pkg install wget git pkgconf gcc49 cmake db6 icu libevent unbound googletest ldns expat bison boost-libs;
 
 * Clone source code, change to the root of the source code directory and build:
 
