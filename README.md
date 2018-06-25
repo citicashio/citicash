@@ -67,23 +67,23 @@ sources are also used for statically-linked builds because distribution
 packages often include only shared library binaries (`.so`) but not static
 library archives (`.a`).
 
-| Dep            | Min. Version  | Vendored | Debian/Ubuntu Pkg  | Arch Pkg       | Optional | Purpose        |
-| -------------- | ------------- | ---------| ------------------ | -------------- | -------- | -------------- |
-| GCC            | 4.7.3         | NO       | `build-essential`  | `base-devel`   | NO       |                |
-| CMake          | 3.0.0         | NO       | `cmake`            | `cmake`        | NO       |                |
-| pkg-config     | any           | NO       | `pkg-config`       | `base-devel`   | NO       |                |
-| Boost          | 1.58          | NO       | `libboost-all-dev` | `boost`        | NO       |                |
-| OpenSSL      	 | basically any | NO       | `libssl-dev`       | `openssl`      | NO       | sha256 sum     |
-| BerkeleyDB     | 4.8           | NO       | `libdb{,++}-dev`   | `db`           | NO       |                |
-| libevent       | 2.0           | NO       | `libevent-dev`     | `libevent`     | NO       |                |
-| libunbound     | 1.4.16        | YES      | `libunbound-dev`   | `unbound`      | NO       |                |
-| libminiupnpc   | 2.0           | YES      | `libminiupnpc-dev` | `miniupnpc`    | YES      | NAT punching   |
-| libunwind      | any           | NO       | `libunwind8-dev`   | `libunwind`    | YES      | stack traces   |
-| ldns           | 1.6.17        | NO       | `libldns-dev`      | `ldns`         | YES      | ?              |
-| expat          | 1.1           | NO       | `libexpat1-dev`    | `expat`        | YES      | ?              |
-| GTest          | 1.5           | YES      | `libgtest-dev`^    | `gtest`        | YES      | test suite     |
-| Doxygen        | any           | NO       | `doxygen`          | `doxygen`      | YES      | documentation  |
-| Graphviz       | any           | NO       | `graphviz`         | `graphviz`     | YES      | documentation  |
+| Dep            | Min. Version  | Vendored | Debian/Ubuntu Pkg  | Arch Pkg       | Homebrew formulae | Optional | Purpose        |
+| -------------- | ------------- | ---------| ------------------ | -------------- | ----------------- | -------- | -------------- |
+| GCC            | 4.7.3         | NO       | `build-essential`  | `base-devel`   | NA                |  NO      |                |
+| CMake          | 3.0.0         | NO       | `cmake`            | `cmake`        | `cmake`           |  NO      |                |
+| pkg-config     | any           | NO       | `pkg-config`       | `base-devel`   | `pkg-config`      |  NO      |                |
+| Boost          | 1.58          | NO       | `libboost-all-dev` | `boost`        | `boost`           |  NO      |                |
+| OpenSSL      	 | basically any | NO       | `libssl-dev`       | `openssl`      | `openssl`         |  NO      | sha256 sum     |
+| BerkeleyDB     | 4.8           | NO       | `libdb{,++}-dev`   | `db`           | NA                |  NO      |                |
+| libevent       | 2.0           | NO       | `libevent-dev`     | `libevent`     | NA                |  NO      |                |
+| libunbound     | 1.4.16        | YES      | `libunbound-dev`   | `unbound`      | NA                |  NO      |                |
+| libminiupnpc   | 2.0           | YES      | `libminiupnpc-dev` | `miniupnpc`    | NA                |  YES     | NAT punching   |
+| libunwind      | any           | NO       | `libunwind8-dev`   | `libunwind`    | NA                |  YES     | stack traces   |
+| ldns           | 1.6.17        | NO       | `libldns-dev`      | `ldns`         | `ldns`            |  YES     | ?              |
+| expat          | 1.1           | NO       | `libexpat1-dev`    | `expat`        | `expat`           |  YES     | ?              |
+| GTest          | 1.5           | YES      | `libgtest-dev`^    | `gtest`        | NA                |  YES     | test suite     |
+| Doxygen        | any           | NO       | `doxygen`          | `doxygen`      | `doxygen`         |  YES     | documentation  |
+| Graphviz       | any           | NO       | `graphviz`         | `graphviz`     | NA                |  YES     | documentation  |
 
 [^] On Debian/Ubuntu `libgtest-dev` only includes sources and headers. You must
 build the library binary manually. This can be done with the following command ```sudo apt-get install libgtest-dev && cd /usr/src/gtest && sudo cmake . && sudo make && sudo mv libg* /usr/lib/ ```
@@ -101,6 +101,21 @@ invokes cmake commands as needed.
 
     	sudo apt install build-essential cmake libboost-all-dev libssl-dev pkg-config
     
+    \- On Mac OS X, install Homebrew first.
+
+        ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+    Then use it instead of apt or apt-get without sudo.
+
+        brew install cmake pkg-config openssl
+
+    If needed install previous version of boost and force it to link.
+
+        brew install boost@1.60
+        brew link --force boost@1.60
+
+    Works with clang too.
+
 * Change to the root of the source code directory and build:
 
         cd citicash
