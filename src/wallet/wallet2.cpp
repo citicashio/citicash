@@ -4908,19 +4908,16 @@ uint64_t wallet2::get_daemon_blockchain_target_height(string &err)
   return resp_t.result.target_height;
 }
 
-uint64_t wallet2::get_approximate_blockchain_height() const
-{
-  if (m_testnet) return 0;
-  // time of v2 fork
-  const time_t fork_time = 1458748658;
-  // v2 fork block
-  const uint64_t fork_block = 1009827;
-  // avg seconds per block
-  const int seconds_per_block = DIFFICULTY_TARGET;
+uint64_t wallet2::get_approximate_blockchain_height() const {
+  if (m_testnet)
+    return 0;
+  /*LUKAS TODO remove this function or insert correct release_time into calculation*/
+  /*const int seconds_per_block = DIFFICULTY_TARGET;
   // Calculated blockchain height
-  uint64_t approx_blockchain_height = fork_block + (time(NULL) - fork_time)/seconds_per_block;
+  uint64_t approx_blockchain_height = (time(NULL) - release_time)/seconds_per_block;
   LOG_PRINT_L2("Calculated blockchain height: " << approx_blockchain_height);
-  return approx_blockchain_height;
+  return approx_blockchain_height;*/
+  return 0;
 }
 
 void wallet2::set_tx_note(const crypto::hash &txid, const std::string &note)

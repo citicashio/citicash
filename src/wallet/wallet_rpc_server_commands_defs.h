@@ -256,7 +256,7 @@ namespace wallet_rpc
 
       struct response
       {
-        uint64_t  height;
+        uint64_t height;
         BEGIN_KV_SERIALIZE_MAP()
           KV_SERIALIZE(height)
         END_KV_SERIALIZE_MAP()
@@ -276,7 +276,7 @@ namespace wallet_rpc
   struct COMMAND_RPC_ALIAS_ADDRESS {
     struct request {
       std::string alias;
-      uint32_t priority;
+      uint32_t priority {3};
       uint64_t unlock_time;
       bool do_not_relay;
 

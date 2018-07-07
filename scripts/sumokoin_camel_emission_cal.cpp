@@ -5,19 +5,8 @@
 #include <iomanip>
 #include <string>
 #include <math.h>
-
-#define MONEY_SUPPLY                                    ((uint64_t)88888888000000000)
-#define EMISSION_SPEED_FACTOR                           19
-#define FINAL_SUBSIDY                                   ((uint64_t)4000000000) // 4 * pow(10, 9)
-#define GENESIS_BLOCK_REWARD                            ((uint64_t)8800000000000000)
-
-#define DIFFICULTY_TARGET                               240  // seconds
-
-#define COIN_EMISSION_MONTH_INTERVAL                    6
-#define COIN_EMISSION_HEIGHT_INTERVAL                   ((uint64_t) (COIN_EMISSION_MONTH_INTERVAL * 30.4375 * 24 * 3600 / DIFFICULTY_TARGET))
-#define HEIGHT_PER_YEAR                                 ((uint64_t) ((12 * 30.4375 * 24 * 3600)/DIFFICULTY_TARGET))
-#define PEAK_COIN_EMISSION_YEAR                         4
-#define PEAK_COIN_EMISSION_HEIGHT                       ((uint64_t) (HEIGHT_PER_YEAR * PEAK_COIN_EMISSION_YEAR))
+#include <stdint.h>
+#include "../src/cryptonote_config.h"
 
 int main()
 {
