@@ -1325,23 +1325,23 @@ namespace tools
       max_height = req.max_height;
     }
 
-    if (req.in)
-    {
+    std::list<std::pair<int, tools::wallet_rpc::transfer_entry>> transfer_entries;
+
+    if (req.in) {
       std::list<std::pair<crypto::hash, tools::wallet2::payment_details>> payments;
       m_wallet.get_payments(payments, min_height, max_height, req.account_index, req.subaddr_indices);
       for (std::list<std::pair<crypto::hash, tools::wallet2::payment_details>>::const_iterator i = payments.begin(); i != payments.end(); ++i) {
-        res.in.push_back(wallet_rpc::transfer_entry());
-        fill_transfer_entry(res.in.back(), i->second.m_tx_hash, i->first, i->second);
+        transfer_entries.emplace_back(0, wallet_rpc::transfer_entry());
+        fill_transfer_entry(transfer_entries.back().second, i->second.m_tx_hash, i->first, i->second);
       }
     }
 
-    if (req.out)
-    {
+    if (req.out) {
       std::list<std::pair<crypto::hash, tools::wallet2::confirmed_transfer_details>> payments;
       m_wallet.get_payments_out(payments, min_height, max_height, req.account_index, req.subaddr_indices);
       for (std::list<std::pair<crypto::hash, tools::wallet2::confirmed_transfer_details>>::const_iterator i = payments.begin(); i != payments.end(); ++i) {
-        res.out.push_back(wallet_rpc::transfer_entry());
-        fill_transfer_entry(res.out.back(), i->first, i->second);
+        transfer_entries.emplace_back(1, wallet_rpc::transfer_entry());
+        fill_transfer_entry(transfer_entries.back().second, i->first, i->second);
       }
     }
 
@@ -1353,23 +1353,45 @@ namespace tools
         bool is_failed = pd.m_state == tools::wallet2::unconfirmed_transfer_details::failed;
         if (!((req.failed && is_failed) || (!is_failed && req.pending)))
           continue;
-        std::list<wallet_rpc::transfer_entry> &entries = is_failed ? res.failed : res.pending;
-        entries.push_back(wallet_rpc::transfer_entry());
-        fill_transfer_entry(entries.back(), i->first, i->second);
+        transfer_entries.emplace_back(is_failed ? 2 : 3, wallet_rpc::transfer_entry());
+        fill_transfer_entry(transfer_entries.back().second, i->first, i->second);
       }
     }
 
-    if (req.pool)
-    {
+    if (req.pool) {
       m_wallet.update_pool_state();
 
       std::list<std::pair<crypto::hash, tools::wallet2::payment_details>> payments;
       m_wallet.get_unconfirmed_payments(payments, req.account_index, req.subaddr_indices);
       for (std::list<std::pair<crypto::hash, tools::wallet2::payment_details>>::const_iterator i = payments.begin(); i != payments.end(); ++i) {
-        res.pool.push_back(wallet_rpc::transfer_entry());
-        fill_transfer_entry(res.pool.back(), i->first, i->second);
+        transfer_entries.emplace_back(4, wallet_rpc::transfer_entry());
+        fill_transfer_entry(transfer_entries.back().second, i->first, i->second);
       }
     }
+
+    res.total_count = transfer_entries.size();
+
+    if (req.pagination) {
+      if (req.offset >= transfer_entries.size())
+        return true;
+      transfer_entries.sort(
+        [](const std::pair<int, tools::wallet_rpc::transfer_entry>& first, const std::pair<int, tools::wallet_rpc::transfer_entry>& second) {
+          return first.second.timestamp > second.second.timestamp; 
+        });
+      transfer_entries.assign(std::next(transfer_entries.begin(), req.offset), std::next(transfer_entries.begin(), std::min(req.offset + req.limit, transfer_entries.size())));
+    }
+    for (const auto& transfer_entry : transfer_entries)
+      switch (transfer_entry.first) {
+        case 0: res.in.push_back(transfer_entry.second); // LUKAS TODO consider moving (std::move or something, if possible)
+                break;
+        case 1: res.out.push_back(transfer_entry.second);
+                break;
+        case 2: res.failed.push_back(transfer_entry.second);
+                break;
+        case 3: res.pending.push_back(transfer_entry.second);
+                break;
+        case 4: res.pool.push_back(transfer_entry.second);
+      }
 
     return true;
   }

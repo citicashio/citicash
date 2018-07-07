@@ -838,6 +838,9 @@ namespace wallet_rpc
       uint64_t max_height;
       uint32_t account_index;
       std::set<uint32_t> subaddr_indices;
+      bool pagination;
+      uint64_t offset;
+      uint64_t limit;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(in);
@@ -848,6 +851,9 @@ namespace wallet_rpc
         KV_SERIALIZE(filter_by_height);
         KV_SERIALIZE(min_height);
         KV_SERIALIZE(max_height);
+        KV_SERIALIZE(pagination);
+        KV_SERIALIZE(offset);
+        KV_SERIALIZE(limit);
         KV_SERIALIZE(account_index);
         KV_SERIALIZE(subaddr_indices);
       END_KV_SERIALIZE_MAP()
@@ -860,6 +866,7 @@ namespace wallet_rpc
       std::list<transfer_entry> pending;
       std::list<transfer_entry> failed;
       std::list<transfer_entry> pool;
+      uint64_t total_count;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(in);
@@ -867,6 +874,7 @@ namespace wallet_rpc
         KV_SERIALIZE(pending);
         KV_SERIALIZE(failed);
         KV_SERIALIZE(pool);
+        KV_SERIALIZE(total_count);
       END_KV_SERIALIZE_MAP()
     };
   };
