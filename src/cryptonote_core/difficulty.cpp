@@ -189,7 +189,7 @@ namespace cryptonote {
       return 0;
     }
 
-    uint64_t next_diff = (low + adjusted_total_timespan - 1) / adjusted_total_timespan;
+    uint64_t next_diff = (low + adjusted_total_timespan - 1) / std::max(adjusted_total_timespan,uint64_t(1));
     if (next_diff < 1) next_diff = 1;
     LOG_PRINT_L2("Total timespan: " << total_timespan << ", Adjusted total timespan: " << adjusted_total_timespan << ", Total work: " << total_work << ", Next diff: " << next_diff << ", Hashrate (H/s): " << next_diff / target_seconds);
 
