@@ -689,14 +689,7 @@ void wallet2::check_acc_out_precomp(const tx_out &o, const crypto::key_derivatio
     return;
   }
   tx_scan_info.received = is_out_to_acc_precomp(m_subaddresses, boost::get<txout_to_key>(o.target).key, derivation, additional_derivations, i);
-  if (tx_scan_info.received)
-  {
-    tx_scan_info.money_transfered = o.amount; // may be 0 for ringct outputs
-  }
-  else
-  {
-    tx_scan_info.money_transfered = 0;
-  }
+  tx_scan_info.money_transfered = (tx_scan_info.received ? o.amount /* may be 0 for ringct outputs */ : 0);
   tx_scan_info.error = false;
 }
 //----------------------------------------------------------------------------------------------------

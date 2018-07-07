@@ -114,9 +114,8 @@ namespace cryptonote
 
     keypair txkey = keypair::generate();
     add_tx_pub_key_to_extra(tx, txkey.pub);
-    if(!extra_nonce.empty())
-      if(!add_extra_nonce_to_tx_extra(tx.extra, extra_nonce))
-        return false;
+    if (!extra_nonce.empty() && !add_extra_nonce_to_tx_extra(tx.extra, extra_nonce))
+      return false;
 
     txin_gen in;
     in.height = height;
@@ -175,7 +174,6 @@ namespace cryptonote
     CHECK_AND_ASSERT_MES(summary_amounts == block_reward, false, "Failed to construct miner tx, summary_amounts = " << summary_amounts << " not equal block_reward = " << block_reward);
 
     tx.version = CURRENT_TRANSACTION_VERSION;
-    //lock
     tx.unlock_time = height + CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW;
     tx.vin.push_back(in);
     //LOG_PRINT("MINER_TX generated ok, block_reward=" << print_money(block_reward) << "("  << print_money(block_reward - fee) << "+" << print_money(fee)

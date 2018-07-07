@@ -40,7 +40,6 @@
 #include "ringct/rctOps.h"
 #include <unordered_map>
 
-
 namespace cryptonote
 {
   //---------------------------------------------------------------

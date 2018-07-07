@@ -124,7 +124,8 @@ namespace cryptonote
   bool miner::on_idle()
   {
     m_update_block_template_interval.do_call([&](){
-      if(is_mining())request_block_template();
+      if (is_mining())
+        request_block_template();
       return true;
     });
 

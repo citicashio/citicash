@@ -77,7 +77,6 @@ namespace cryptonote {
   }
   //-----------------------------------------------------------------------------------------------
   bool get_block_reward(size_t median_size, size_t current_block_size, uint64_t already_generated_coins, uint64_t &reward, uint64_t height) {
-    
     uint64_t base_reward;
     uint64_t round_factor = 10000000; // 1 * pow(10, 7)
     if (height > 0)

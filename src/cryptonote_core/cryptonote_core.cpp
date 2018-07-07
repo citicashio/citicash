@@ -577,7 +577,7 @@ namespace cryptonote
       return false;
     }
 
-    std::vector<tx_extra_field> tx_extra_fields; // LUKAS TODO kontrolu presunout jinam
+    std::vector<tx_extra_field> tx_extra_fields;
     if (parse_tx_extra(tx.extra, tx_extra_fields)) {
       tx_extra_nonce alias, address, signature;
       if (find_tx_extra_field_by_type(tx_extra_fields, alias, 0) && !alias.nonce.empty() && alias.nonce.front() == (char)TX_EXTRA_NONCE_ALIAS
