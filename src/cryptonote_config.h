@@ -64,9 +64,9 @@
 // COIN - number of smallest units in one coin
 #define COIN                                            ((uint64_t)1000000000) // pow(10, 9)
 
-#define FEE_PER_KB                                      ((uint64_t)500000) 
-#define DYNAMIC_FEE_PER_KB_BASE_FEE                     ((uint64_t)500000) // 0.0005 * pow(10, 9)
-#define DYNAMIC_FEE_PER_KB_BASE_BLOCK_REWARD            ((uint64_t)64000000000) // 64 * pow(10, 9)
+#define FEE_PER_KB                                      ((uint64_t)5750000) 
+#define DYNAMIC_FEE_PER_KB_BASE_FEE                     ((uint64_t)5750000) // 0.0005 * pow(10, 9) * 11.5
+#define DYNAMIC_FEE_PER_KB_BASE_BLOCK_REWARD            ((uint64_t)736000000000) // 64 * pow(10, 9) * 11.5
 
 #define ORPHANED_BLOCKS_MAX_COUNT                       100
 
@@ -138,7 +138,6 @@
 // New constants are intended to go here
 namespace config
 {
-  uint64_t const DEFAULT_FEE_ATOMIC_XMR_PER_KB = 500; // Just a placeholder!  Change me!
   uint8_t const FEE_CALCULATION_MAX_RETRIES = 10;
   uint64_t const DEFAULT_DUST_THRESHOLD = ((uint64_t)10000000); // pow(10, 7)
   uint64_t const BASE_REWARD_CLAMP_THRESHOLD = ((uint64_t)100000); // pow(10, 5)
