@@ -522,7 +522,7 @@ namespace cryptonote
 
   void convert_alias(std::string& alias) {
     for (char& c : alias) {
-      if (c == '-' || c == '_' || c == '.' || c == '@' || c >= '0' && c <= '9' || c >= 'a' && c <= 'z')
+      if (c == '-' || c == '_' || c == '.' || c == '@' || (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z'))
         continue;
       if (c >= 'A' && c <= 'Z') {
         c = std::tolower(c);
