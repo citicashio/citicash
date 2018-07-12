@@ -888,6 +888,7 @@ namespace boost
         return;
       a & x.m_dests;
       a & x.m_payment_id;
+      a & x.m_alias;
       if (ver < 2)
         return;
       a & x.m_state;
@@ -924,6 +925,7 @@ namespace boost
         return;
       a & x.m_dests;
       a & x.m_payment_id;
+      a & x.m_alias;
       if (ver < 2)
         return;
       a & x.m_timestamp;
