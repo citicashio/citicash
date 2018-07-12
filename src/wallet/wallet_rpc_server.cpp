@@ -1378,7 +1378,7 @@ namespace tools
         [](const std::pair<int, tools::wallet_rpc::transfer_entry>& first, const std::pair<int, tools::wallet_rpc::transfer_entry>& second) {
           return first.second.timestamp > second.second.timestamp; 
         });
-      transfer_entries.assign(std::next(transfer_entries.begin(), req.offset), std::next(transfer_entries.begin(), std::min(req.offset + req.limit, transfer_entries.size())));
+      transfer_entries.assign(std::next(transfer_entries.begin(), req.offset), std::next(transfer_entries.begin(), std::min(req.offset + req.limit, static_cast<uint64_t>(transfer_entries.size()))));
     }
     for (const auto& transfer_entry : transfer_entries)
       switch (transfer_entry.first) {
