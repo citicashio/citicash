@@ -165,11 +165,9 @@ void TransactionHistoryImpl::refresh()
         uint64_t change = pd.m_change == (uint64_t)-1 ? 0 : pd.m_change; // change may not be known
         uint64_t fee = pd.m_amount_in - pd.m_amount_out;
 
-
         std::string payment_id = string_tools::pod_to_hex(i->second.m_payment_id);
         if (payment_id.substr(16).find_first_not_of('0') == std::string::npos)
             payment_id = payment_id.substr(0,16);
-
 
         TransactionInfoImpl * ti = new TransactionInfoImpl();
         ti->m_paymentid = payment_id;
@@ -183,7 +181,6 @@ void TransactionHistoryImpl::refresh()
         ti->m_label = pd.m_subaddr_indices.size() == 1 ? m_wallet->m_wallet->get_subaddress_label({ pd.m_subaddr_account, *pd.m_subaddr_indices.begin() }) : "";
         ti->m_timestamp = pd.m_timestamp;
         ti->m_confirmations = (wallet_height > pd.m_block_height) ? wallet_height - pd.m_block_height : 0;
-
 
         // single output transaction might contain multiple transfers
         for (const auto &d: pd.m_dests) {

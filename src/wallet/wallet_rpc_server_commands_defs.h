@@ -836,6 +836,9 @@ namespace wallet_rpc
       bool filter_by_height;
       uint64_t min_height;
       uint64_t max_height;
+      bool filter_by_timestamp;
+      uint64_t min_timestamp;
+      uint64_t max_timestamp;
       uint32_t account_index;
       std::set<uint32_t> subaddr_indices;
       bool pagination;
@@ -851,6 +854,9 @@ namespace wallet_rpc
         KV_SERIALIZE(filter_by_height);
         KV_SERIALIZE(min_height);
         KV_SERIALIZE(max_height);
+        KV_SERIALIZE(filter_by_timestamp);
+        KV_SERIALIZE(min_timestamp);
+        KV_SERIALIZE(max_timestamp);
         KV_SERIALIZE(pagination);
         KV_SERIALIZE(offset);
         KV_SERIALIZE(limit);

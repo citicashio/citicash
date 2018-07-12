@@ -1324,12 +1324,18 @@ namespace tools
       min_height = req.min_height;
       max_height = req.max_height;
     }
+    uint64_t min_timestamp = 0, max_timestamp = (uint64_t)-1;
+    if (req.filter_by_timestamp)
+    {
+      min_timestamp = req.min_timestamp;
+      max_timestamp = req.max_timestamp;
+    }
 
     std::list<std::pair<int, tools::wallet_rpc::transfer_entry>> transfer_entries;
 
     if (req.in) {
       std::list<std::pair<crypto::hash, tools::wallet2::payment_details>> payments;
-      m_wallet.get_payments(payments, min_height, max_height, req.account_index, req.subaddr_indices);
+      m_wallet.get_payments(payments, min_height, max_height, min_timestamp, max_timestamp, req.account_index, req.subaddr_indices);
       for (std::list<std::pair<crypto::hash, tools::wallet2::payment_details>>::const_iterator i = payments.begin(); i != payments.end(); ++i) {
         transfer_entries.emplace_back(0, wallet_rpc::transfer_entry());
         fill_transfer_entry(transfer_entries.back().second, i->second.m_tx_hash, i->first, i->second);
@@ -1338,7 +1344,7 @@ namespace tools
 
     if (req.out) {
       std::list<std::pair<crypto::hash, tools::wallet2::confirmed_transfer_details>> payments;
-      m_wallet.get_payments_out(payments, min_height, max_height, req.account_index, req.subaddr_indices);
+      m_wallet.get_payments_out(payments, min_height, max_height, min_timestamp, max_timestamp, req.account_index, req.subaddr_indices);
       for (std::list<std::pair<crypto::hash, tools::wallet2::confirmed_transfer_details>>::const_iterator i = payments.begin(); i != payments.end(); ++i) {
         transfer_entries.emplace_back(1, wallet_rpc::transfer_entry());
         fill_transfer_entry(transfer_entries.back().second, i->first, i->second);

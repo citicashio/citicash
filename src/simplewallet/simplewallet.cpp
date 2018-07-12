@@ -3254,7 +3254,7 @@ bool simple_wallet::show_transfers(const std::vector<std::string> &args_)
 
   if (in) {
     std::list<std::pair<crypto::hash, tools::wallet2::payment_details>> payments;
-    m_wallet->get_payments(payments, min_height, max_height, m_current_subaddress_account, subaddr_indices);
+    m_wallet->get_payments(payments, min_height, max_height, 0, (uint64_t)-1, m_current_subaddress_account, subaddr_indices);
     for (std::list<std::pair<crypto::hash, tools::wallet2::payment_details>>::const_iterator i = payments.begin(); i != payments.end(); ++i) {
       const tools::wallet2::payment_details &pd = i->second;
       std::string payment_id = string_tools::pod_to_hex(i->first);
@@ -3279,7 +3279,7 @@ bool simple_wallet::show_transfers(const std::vector<std::string> &args_)
 
   if (out) {
     std::list<std::pair<crypto::hash, tools::wallet2::confirmed_transfer_details>> payments;
-    m_wallet->get_payments_out(payments, min_height, max_height, m_current_subaddress_account, subaddr_indices);
+    m_wallet->get_payments_out(payments, min_height, max_height, 0, (uint64_t)-1, m_current_subaddress_account, subaddr_indices);
     for (std::list<std::pair<crypto::hash, tools::wallet2::confirmed_transfer_details>>::const_iterator i = payments.begin(); i != payments.end(); ++i) {
       const tools::wallet2::confirmed_transfer_details &pd = i->second;
       uint64_t change = pd.m_change == (uint64_t)-1 ? 0 : pd.m_change; // change may not be known
