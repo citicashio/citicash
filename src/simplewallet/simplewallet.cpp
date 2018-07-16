@@ -2083,7 +2083,7 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
     }
     if (locked_blocks > 1000000)
     {
-      fail_msg_writer() << tr("Locked blocks too high, max 1000000 (about 8 years)");
+      fail_msg_writer() << tr("Locked blocks too high, max 1000000 (about 2 years)");
       return true;
     }
     local_args.pop_back();
@@ -2226,8 +2226,8 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
                                                    % print_money(dust_not_in_fee);
         if (transfer_type == TransferLocked) {
 					// Fixme: Need a better time expression in words
-          float days = locked_blocks / 360.0f;
           double minutes_per_block = DIFFICULTY_TARGET / 60;
+          float days = locked_blocks / (24 * 60 / minutes_per_block);
 					float minutes = locked_blocks * minutes_per_block;
 					prompt << boost::format(tr(".\nThis transaction will unlock on block %llu, in approximately %s minutes or %s days (assuming %s minutes per block)")) % ((unsigned long long)unlock_block) % minutes % days % minutes_per_block;
         }
