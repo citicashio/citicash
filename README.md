@@ -15,13 +15,14 @@ Portions Copyright (c) 2012-2013, The Cryptonote developers
 
 ## Introduction
 
-CitiCash is a fork from Sumokoin, one of the most respectable cryptocurrency well-known for **security, privacy, untraceability** and **active development**. Starting as an educational project, we found that it would be great to create a new coin with high level of privacy by (1) moving forward right away to **Ring Confidential Transactions (RingCT)**, (2) setting **minimum transaction _mixin_ to 12** that would greatly reduce chance of being attacked, traced or identified by (blockchain) statistical analysis.
+CitiCash is a fork from Sumokoin, one of the most respectable cryptocurrency well-known for **security, privacy, untraceability** and **active development**. Starting as an educational project, we found that it would be great to create a new coin with high level of privacy by (1) moving forward right away to **Ring Confidential Transactions (RingCT)**, (2) setting **minimum transaction _mixin_ to 6** that would greatly reduce chance of being attacked, traced or identified by (blockchain) statistical analysis.
 
 CitiCash, therefore, is a new Sumokoin without its legacy, a _truely fungible_ cryptocurrency among just a few ones in the market.
 
 ## Coin Supply & Emission
 
-- **Total supply**: **1,000,000,000** coins in first 20 years, then **XXX,XXX** coins each year for inflation.
+- **Total supply**: **1,000,000,000** coins in first 20 years.
+About 13.5% (~135 million) was premined to reserve for future development, i.e. **865 million coins available** for community mining.
 - **Coin symbol**: **CCH**
 - **Coin Units**:
   + 1 NanoCash &nbsp;= 0.000000001 **CCH** (10<sup>-9</sup> - _the smallest coin unit_)
