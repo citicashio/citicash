@@ -2229,7 +2229,7 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
           double minutes_per_block = DIFFICULTY_TARGET / 60;
           float days = locked_blocks / (24 * 60 / minutes_per_block);
 					float minutes = locked_blocks * minutes_per_block;
-					prompt << boost::format(tr(".\nThis transaction will unlock on block %llu, in approximately %s minutes or %s days (assuming %s minutes per block)")) % ((unsigned long long)unlock_block) % minutes % days % minutes_per_block;
+					prompt << boost::format(tr(".\nThis transaction will unlock on block %llu, in approximately %s minutes or %s days (assuming %s minute(s) per block)")) % ((unsigned long long)unlock_block) % minutes % days % minutes_per_block;
         }
         prompt << tr(".") << ENDL << tr("Is this okay?  (Y/Yes/N/No): ");
 
