@@ -129,7 +129,10 @@ namespace nodetool
       "node2.citicash.io",
       "node3.citicash.io",
       "node4.citicash.io",
-      "node5.citicash.io"
+      "node5.citicash.io",
+      "node6.citicash.io",
+      "node7.citicash.io",
+      "node8.citicash.io"
 	};
 
     bool islimitup=false;
