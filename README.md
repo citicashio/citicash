@@ -11,7 +11,7 @@ Portions Copyright (c) 2012-2013, The Cryptonote developers
 ## Development Resources
 
 - Web: [www.citicash.io](https://www.citicash.io)
-- Mail: [contact@citicash.io](mailto:contact@citicash.io)
+- Mail: [dev@citicash.io](mailto:dev@citicash.io)
 
 ## Introduction
 
