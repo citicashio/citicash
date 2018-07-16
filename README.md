@@ -25,9 +25,9 @@ CitiCash, therefore, is a new Sumokoin without its legacy, a _truely fungible_ c
 About 13.5% (~135 million) was premined to reserve for future development, i.e. **865 million coins available** for community mining.
 - **Coin symbol**: **CCH**
 - **Coin Units**:
-  + 1 CityCashi &nbsp;= 0.000000001 **CCH** (10<sup>-9</sup> - _the smallest coin unit_)
-  + 1 CityCashun = 0.000001 **CCH** (10<sup>-6</sup>)
-  + 1 CityCashan = 0.001 **CCH** (10<sup>-3</sup>)
+  + 1 NanoCash &nbsp;= 0.000000001 **CCH** (10<sup>-9</sup> - _the smallest coin unit_)
+  + 1 MicroCash = 0.000001 **CCH** (10<sup>-6</sup>)
+  + 1 MilliCash = 0.001 **CCH** (10<sup>-3</sup>)
 - **Hash algorithm**: CryptoNight (Proof-Of-Work)
 - **Emission scheme**: CitiCash's block reward changes _every 6-months_ as the following "Camel" distribution* (inspired by _real-world mining production_ like of crude oil, coal etc. that is often slow at first,
 accelerated in the next few years before declined and depleted). However, the emission path of CitiCash is generally not far apart from what of Bitcoin (view charts below).
