@@ -32,11 +32,6 @@ About 13.5% (~135 million) was premined to reserve for future development, i.e. 
 - **Emission scheme**: CitiCash's block reward changes _every 6-months_ as the following "Camel" distribution* (inspired by _real-world mining production_ like of crude oil, coal etc. that is often slow at first,
 accelerated in the next few years before declined and depleted). However, the emission path of CitiCash is generally not far apart from what of Bitcoin (view charts below).
 
-![](http://www.sumokoin.org/images/block_reward_by_calendar_year.png) //TODO fix
-
-![](http://www.sumokoin.org/images/block_reward_by_calendar_month.png)
-
-![](http://www.sumokoin.org/images/emission_speed_sumo_vs_btc.png)
 
 \* The emulated algorithm of Citicash block-reward emission can be found in Python and C++ scripts at [scripts](scripts) directory.
 
