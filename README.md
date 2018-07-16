@@ -22,7 +22,6 @@ CitiCash, therefore, is a new Sumokoin without its legacy, a _truely fungible_ c
 ## Coin Supply & Emission
 
 - **Total supply**: **1,000,000,000** coins in first 20 years, then **XXX,XXX** coins each year for inflation.
-About 13.5% (~135 million) was premined to reserve for future development, i.e. **865 million coins available** for community mining.
 - **Coin symbol**: **CCH**
 - **Coin Units**:
   + 1 NanoCash &nbsp;= 0.000000001 **CCH** (10<sup>-9</sup> - _the smallest coin unit_)
