@@ -70,7 +70,7 @@ namespace cryptonote {
     account_public_address address;
     bool is_subaddress;
     bool has_payment_id;
-    crypto::hash8 payment_id;
+    std::string payment_id;
   };
 
 
@@ -93,7 +93,7 @@ namespace cryptonote {
       bool testnet
     , bool subaddress
     , const account_public_address& adr
-    , const crypto::hash8& payment_id
+    , const std::string& payment_id
     );
 
   bool get_account_address_from_str(

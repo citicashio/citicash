@@ -198,7 +198,7 @@ namespace tools
       uint64_t m_change;
       time_t m_sent_time;
       std::vector<cryptonote::tx_destination_entry> m_dests;
-      crypto::hash m_payment_id;
+      std::string m_payment_id;
       std::string m_alias;
       enum { pending, pending_not_in_pool, failed } m_state;
       uint64_t m_timestamp;
@@ -214,14 +214,14 @@ namespace tools
       uint64_t m_change;
       uint64_t m_block_height;
       std::vector<cryptonote::tx_destination_entry> m_dests;
-      crypto::hash m_payment_id;
+      std::string m_payment_id;
       std::string m_alias;
       uint64_t m_timestamp;
       bool m_dest_subaddr;          // true if this is a transfer to a subaddress
       uint32_t m_subaddr_account;   // subaddress account of your wallet to be used in this transfer
       std::set<uint32_t> m_subaddr_indices;  // set of address indices used as inputs in this transfer
 
-      confirmed_transfer_details() : m_amount_in(0), m_amount_out(0), m_change((uint64_t)-1), m_block_height(0), m_payment_id(cryptonote::null_hash), m_alias(""), m_dest_subaddr(false), m_subaddr_account((uint32_t)-1) {}
+      confirmed_transfer_details() : m_amount_in(0), m_amount_out(0), m_change((uint64_t)-1), m_block_height(0), m_payment_id(""), m_alias(""), m_dest_subaddr(false), m_subaddr_account((uint32_t)-1) {}
       confirmed_transfer_details(const unconfirmed_transfer_details &utd, uint64_t height):
         m_amount_in(utd.m_amount_in), m_amount_out(utd.m_amount_out), m_change(utd.m_change), m_block_height(height), m_dests(utd.m_dests), m_payment_id(utd.m_payment_id), m_alias(utd.m_alias), m_timestamp(utd.m_timestamp), m_dest_subaddr(utd.m_dest_subaddr), m_subaddr_account(utd.m_subaddr_account), m_subaddr_indices(utd.m_subaddr_indices) {}
     };
@@ -252,7 +252,7 @@ namespace tools
     };
 
     typedef std::vector<transfer_details> transfer_container;
-    typedef std::unordered_multimap<crypto::hash, payment_details> payment_container;
+    typedef std::unordered_multimap<std::string, payment_details> payment_container;
 
     // The convention for destinations is:
     // dests does not include change
@@ -332,7 +332,7 @@ namespace tools
     struct address_book_row
     {
       cryptonote::account_public_address m_address;
-      crypto::hash m_payment_id;
+      std::string m_payment_id;
       std::string m_description;
       bool m_is_subaddress;
     };
@@ -430,7 +430,7 @@ namespace tools
     cryptonote::account_public_address get_subaddress(const cryptonote::subaddress_index& index) const;
     crypto::public_key get_subaddress_spend_public_key(const cryptonote::subaddress_index& index) const;
     std::string get_subaddress_as_str(const cryptonote::subaddress_index& index) const;
-    std::string get_integrated_subaddress_as_str(const cryptonote::subaddress_index& index, const crypto::hash8& payment_id) const;
+    std::string get_integrated_subaddress_as_str(const cryptonote::subaddress_index& index, const std::string& payment_id) const;
     void add_subaddress_account(const std::string& label);
     size_t get_num_subaddress_accounts() const { return m_subaddress_labels.size(); }
     size_t get_num_subaddresses(uint32_t index_major) const { return index_major < m_subaddress_labels.size() ? m_subaddress_labels[index_major].size() : 0; }
@@ -485,11 +485,11 @@ namespace tools
     std::vector<pending_tx> create_unmixable_sweep_transactions(bool trusted_daemon);
     bool check_connection(uint32_t *version = NULL, uint32_t timeout = 200000);
     void get_transfers(wallet2::transfer_container& incoming_transfers) const;
-    void get_payments(const crypto::hash& payment_id, std::list<wallet2::payment_details>& payments, uint64_t min_height = 0, const boost::optional<uint32_t>& subaddr_account = boost::none, const std::set<uint32_t>& subaddr_indices = {}) const;
-    void get_payments(std::list<std::pair<crypto::hash, wallet2::payment_details>>& payments, uint64_t min_height, uint64_t max_height = (uint64_t)-1, uint64_t min_timestamp = 0, uint64_t max_timestamp = (uint64_t)-1, const boost::optional<uint32_t>& subaddr_account = boost::none, const std::set<uint32_t>& subaddr_indices = {}) const;
+    void get_payments(const std::string& payment_id, std::list<wallet2::payment_details>& payments, uint64_t min_height = 0, const boost::optional<uint32_t>& subaddr_account = boost::none, const std::set<uint32_t>& subaddr_indices = {}) const;
+    void get_payments(std::list<std::pair<std::string, wallet2::payment_details>>& payments, uint64_t min_height, uint64_t max_height = (uint64_t)-1, uint64_t min_timestamp = 0, uint64_t max_timestamp = (uint64_t)-1, const boost::optional<uint32_t>& subaddr_account = boost::none, const std::set<uint32_t>& subaddr_indices = {}) const;
     void get_payments_out(std::list<std::pair<crypto::hash, wallet2::confirmed_transfer_details>>& confirmed_payments, uint64_t min_height, uint64_t max_height = (uint64_t)-1, uint64_t min_timestamp = 0, uint64_t max_timestamp = (uint64_t)-1, const boost::optional<uint32_t>& subaddr_account = boost::none, const std::set<uint32_t>& subaddr_indices = {}) const;
     void get_unconfirmed_payments_out(std::list<std::pair<crypto::hash, wallet2::unconfirmed_transfer_details>>& unconfirmed_payments, const boost::optional<uint32_t>& subaddr_account = boost::none, const std::set<uint32_t>& subaddr_indices = {}) const;
-    void get_unconfirmed_payments(std::list<std::pair<crypto::hash, wallet2::payment_details>>& unconfirmed_payments, const boost::optional<uint32_t>& subaddr_account = boost::none, const std::set<uint32_t>& subaddr_indices = {}) const;
+    void get_unconfirmed_payments(std::list<std::pair<std::string, wallet2::payment_details>>& unconfirmed_payments, const boost::optional<uint32_t>& subaddr_account = boost::none, const std::set<uint32_t>& subaddr_indices = {}) const;
 
     uint64_t get_blockchain_current_height() const { return m_local_bc_height; }
     void rescan_spent();
@@ -571,10 +571,7 @@ namespace tools
      * \return                Whether path is valid format
      */
     static bool wallet_valid_path_format(const std::string& file_path);
-    static bool parse_long_payment_id(const std::string& payment_id_str, crypto::hash& payment_id);
-    static bool parse_short_payment_id(const std::string& payment_id_str, crypto::hash8& payment_id);
-    static bool parse_payment_id(const std::string& payment_id_str, crypto::hash& payment_id);
-
+    static bool parse_payment_note (const std::string& payment_id_str, std::string& payment_id);
     static std::vector<std::string> addresses_from_url(const std::string& url, bool& dnssec_valid);
 
     static std::string address_from_txt_record(const std::string& s);
@@ -598,7 +595,7 @@ namespace tools
     * \brief GUI Address book get/store
     */
     std::vector<address_book_row> get_address_book() const { return m_address_book; }
-    bool add_address_book_row(const cryptonote::account_public_address &address, const crypto::hash &payment_id, const std::string &description, bool is_subaddress);
+    bool add_address_book_row(const cryptonote::account_public_address &address, const std::string &payment_id, const std::string &description, bool is_subaddress);
     bool delete_address_book_row(std::size_t row_id);
         
     uint64_t get_num_rct_outputs();
@@ -680,11 +677,11 @@ namespace tools
     bool prepare_file_names(const std::string& file_path);
     void process_unconfirmed(const cryptonote::transaction& tx, uint64_t height);
     void process_outgoing(const crypto::hash &txid, const cryptonote::transaction& tx, uint64_t height, uint64_t ts, uint64_t spent, uint64_t received, uint32_t subaddr_account, const std::set<uint32_t>& subaddr_indices);
-    void add_unconfirmed_tx(const cryptonote::transaction& tx, uint64_t amount_in, const std::vector<cryptonote::tx_destination_entry> &dests, const crypto::hash &payment_id, const std::string &alias, uint64_t change_amount, uint32_t subaddr_account, const std::set<uint32_t>& subaddr_indices);
+    void add_unconfirmed_tx(const cryptonote::transaction& tx, uint64_t amount_in, const std::vector<cryptonote::tx_destination_entry>& dests, const std::string& payment_id, const std::string& alias, uint64_t change_amount, uint32_t subaddr_account, const std::set<uint32_t>& subaddr_indices);
     void generate_genesis(cryptonote::block& b);
     void check_genesis(const crypto::hash& genesis_hash) const; //throws
     bool generate_chacha8_key_from_secret_keys(crypto::chacha8_key &key) const;
-    crypto::hash get_payment_id(const pending_tx &ptx) const;
+    std::string get_payment_id(const pending_tx &ptx) const;
     void check_acc_out_precomp(const cryptonote::tx_out &o, const crypto::key_derivation &derivation, const std::vector<crypto::key_derivation> &additional_derivations, size_t i, tx_scan_info_t &tx_scan_info) const;
     void parse_block_round(const cryptonote::blobdata &blob, cryptonote::block &bl, crypto::hash &bl_id, bool &error) const;
     uint64_t get_upper_transaction_size_limit();
@@ -710,7 +707,7 @@ namespace tools
     std::atomic<uint64_t> m_local_bc_height; //temporary workaround
     std::unordered_map<crypto::hash, unconfirmed_transfer_details> m_unconfirmed_txs;
     std::unordered_map<crypto::hash, confirmed_transfer_details> m_confirmed_txs;
-    std::unordered_map<crypto::hash, payment_details> m_unconfirmed_payments;
+    std::unordered_map<std::string, payment_details> m_unconfirmed_payments;
     std::unordered_map<crypto::hash, crypto::secret_key> m_tx_keys;
 
     transfer_container m_transfers;

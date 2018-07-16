@@ -48,8 +48,8 @@ namespace cryptonote
   bool parse_and_validate_tx_from_blob(const blobdata& tx_blob, transaction& tx, crypto::hash& tx_hash, crypto::hash& tx_prefix_hash);
   bool parse_and_validate_tx_from_blob(const blobdata& tx_blob, transaction& tx);
   bool construct_miner_tx(size_t height, size_t median_size, uint64_t already_generated_coins, size_t current_block_size, uint64_t fee, const account_public_address &miner_address, transaction& tx, const blobdata& extra_nonce = blobdata(), size_t max_outs = 1, uint8_t hard_fork_version = 1);
-  bool encrypt_payment_id(crypto::hash8 &payment_id, const crypto::public_key &public_key, const crypto::secret_key &secret_key);
-  bool decrypt_payment_id(crypto::hash8 &payment_id, const crypto::public_key &public_key, const crypto::secret_key &secret_key);
+  bool encrypt_payment_id(std::string& payment_id, const crypto::public_key& public_key, const crypto::secret_key& secret_key);
+  bool decrypt_payment_id(std::string& payment_id, const crypto::public_key& public_key, const crypto::secret_key& secret_key);
 
   struct tx_source_entry
   {
@@ -118,10 +118,10 @@ namespace cryptonote
   bool add_additional_tx_pub_keys_to_extra(std::vector<uint8_t>& tx_extra, const std::vector<crypto::public_key>& additional_pub_keys);
   bool add_extra_nonce_to_tx_extra(std::vector<uint8_t>& tx_extra, const blobdata& extra_nonce);
   bool remove_field_from_tx_extra(std::vector<uint8_t>& tx_extra, const std::type_info &type);
-  void set_payment_id_to_tx_extra_nonce(blobdata& extra_nonce, const crypto::hash& payment_id);
-  void set_encrypted_payment_id_to_tx_extra_nonce(blobdata& extra_nonce, const crypto::hash8& payment_id);
-  bool get_payment_id_from_tx_extra_nonce(const blobdata& extra_nonce, crypto::hash& payment_id);
-  bool get_encrypted_payment_id_from_tx_extra_nonce(const blobdata& extra_nonce, crypto::hash8& payment_id);
+  void set_payment_id_to_tx_extra_nonce(blobdata& extra_nonce, const std::string& payment_id);
+  void set_encrypted_payment_id_to_tx_extra_nonce(blobdata& extra_nonce, const std::string& payment_id);
+  bool get_payment_id_from_tx_extra_nonce(const blobdata& extra_nonce, std::string& payment_id);
+  bool get_encrypted_payment_id_from_tx_extra_nonce(const blobdata& extra_nonce, std::string& payment_id);
   void convert_alias(std::string& alias);
   bool is_out_to_acc(const account_keys& acc, const txout_to_key& out_key, const crypto::public_key& tx_pub_key, const std::vector<crypto::public_key>& additional_tx_pub_keys, size_t output_index);
   struct subaddress_receive_info

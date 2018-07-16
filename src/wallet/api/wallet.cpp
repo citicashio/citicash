@@ -160,19 +160,13 @@ uint64_t Wallet::amountFromDouble(double amount)
 std::string Wallet::genPaymentId()
 {
     crypto::hash8 payment_id = crypto::rand<crypto::hash8>();
-    return epee::string_tools::pod_to_hex(payment_id);
-
+    return epee::string_tools::pod_to_str(payment_id);
 }
 
-bool Wallet::paymentIdValid(const string &paiment_id)
+bool Wallet::paymentIdValid(const string &payment_id)
 {
-    crypto::hash8 pid8;
-    if (tools::wallet2::parse_short_payment_id(paiment_id, pid8))
-        return true;
-    crypto::hash pid;
-    if (tools::wallet2::parse_long_payment_id(paiment_id, pid))
-        return true;
-    return false;
+    string pid;
+    return tools::wallet2::parse_payment_note(payment_id, pid);
 }
 
 bool Wallet::addressValid(const std::string &str, bool testnet)
@@ -181,14 +175,14 @@ bool Wallet::addressValid(const std::string &str, bool testnet)
   return get_account_address_from_str(info, testnet, str);
 }
 
-std::string Wallet::paymentIdFromAddress(const std::string &str, bool testnet)
+std::string Wallet::paymentIdFromAddress(const std::string& str, bool testnet)
 {
   cryptonote::address_parse_info info;
   if (!get_account_address_from_str(info, testnet, str))
     return "";
   if (!info.has_payment_id)
     return "";
-  return epee::string_tools::pod_to_hex(info.payment_id);
+  return info.payment_id;
 }
 
 uint64_t Wallet::maximumAllowedAmount()
@@ -501,12 +495,8 @@ std::string WalletImpl::address(uint32_t accountIndex, uint32_t addressIndex) co
   return m_wallet->get_subaddress_as_str({ accountIndex, addressIndex });
 }
 
-std::string WalletImpl::integratedAddress(uint32_t accountIndex, uint32_t addressIndex, const std::string &payment_id) const
-{
-  crypto::hash8 pid;
-  if (!tools::wallet2::parse_short_payment_id(payment_id, pid)) {
-    return "";
-  }
+std::string WalletImpl::integratedAddress(uint32_t accountIndex, uint32_t addressIndex, const std::string& payment_id) const {
+  std::string pid;
   return m_wallet->get_integrated_subaddress_as_str({ accountIndex, addressIndex }, pid);
 }
 
@@ -748,26 +738,16 @@ PendingTransaction *WalletImpl::createTransaction(const string &dst_addr, const 
   std::vector<uint8_t> extra;
   bool payment_id_seen = false;
   if (!payment_id.empty()) {
-    std::string payment_id_str = payment_id;
-
-    crypto::hash hash_payment_id;
-    bool r = tools::wallet2::parse_long_payment_id(payment_id_str, hash_payment_id);
+    std::string hash_payment_id;
+    bool r = tools::wallet2::parse_payment_note(payment_id, hash_payment_id);
     if(r) {
       std::string extra_nonce;
-      set_payment_id_to_tx_extra_nonce(extra_nonce, hash_payment_id);
+      set_payment_id_to_tx_extra_nonce(extra_nonce, payment_id);
       r = add_extra_nonce_to_tx_extra(extra, extra_nonce);
-    } else {
-      crypto::hash8 payment_id8;
-      r = tools::wallet2::parse_short_payment_id(payment_id_str, payment_id8);
-      if(r) {
-        std::string extra_nonce;
-        set_encrypted_payment_id_to_tx_extra_nonce(extra_nonce, payment_id8);
-        r = add_extra_nonce_to_tx_extra(extra, extra_nonce);
-      }
     }
 
     if(!r) {
-      LOG_ERROR("payment id has invalid format, expected 16 or 64 character hex string: " << payment_id_str);
+      LOG_ERROR("payment id has invalid format, expected 1-32 character string: " << payment_id);
       return nullptr;
     }
     payment_id_seen = true;

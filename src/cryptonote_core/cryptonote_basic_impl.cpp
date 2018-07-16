@@ -49,7 +49,7 @@ namespace cryptonote {
 
   struct integrated_address {
     account_public_address adr;
-    crypto::hash8 payment_id;
+    std::string payment_id;
 
     BEGIN_SERIALIZE_OBJECT()
       FIELD(adr)
@@ -183,7 +183,7 @@ namespace cryptonote {
       bool testnet
     , bool subaddress
     , account_public_address const & adr
-    , crypto::hash8 const & payment_id
+    , std::string const & payment_id
     )
   {
     uint64_t integrated_address_prefix = testnet ? config::testnet::CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX : config::CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;

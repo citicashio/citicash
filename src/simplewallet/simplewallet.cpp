@@ -1855,8 +1855,8 @@ bool simple_wallet::show_payments(const std::vector<std::string> &args)
   bool payments_found = false;
   for(std::string arg : args)
   {
-    crypto::hash payment_id;
-    if(tools::wallet2::parse_payment_id(arg, payment_id))
+    std::string payment_id;
+    if(tools::wallet2::parse_payment_note(arg, payment_id))
     {
       std::list<tools::wallet2::payment_details> payments;
       m_wallet->get_payments(payment_id, payments);
@@ -2049,37 +2049,24 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
   std::vector<uint8_t> extra;
   bool payment_id_seen = false;
   bool expect_even = (transfer_type == TransferLocked);
-  if ((expect_even ? 0 : 1) == local_args.size() % 2)
-  {
-    std::string payment_id_str = local_args.back();
-    local_args.pop_back();
+  if ((expect_even ? 0 : 1) == local_args.size() % 2) {
+      std::string payment_id_str = local_args.back();
+      local_args.pop_back();
 
-    crypto::hash payment_id;
-    bool r = tools::wallet2::parse_long_payment_id(payment_id_str, payment_id);
-    if(r)
-    {
-      std::string extra_nonce;
-      set_payment_id_to_tx_extra_nonce(extra_nonce, payment_id);
-      r = add_extra_nonce_to_tx_extra(extra, extra_nonce);
-    }
-    else
-    {
-      crypto::hash8 payment_id8;
-      r = tools::wallet2::parse_short_payment_id(payment_id_str, payment_id8);
-      if(r)
-      {
-        std::string extra_nonce;
-        set_encrypted_payment_id_to_tx_extra_nonce(extra_nonce, payment_id8);
-        r = add_extra_nonce_to_tx_extra(extra, extra_nonce);
+      std::string payment_id;
+
+      bool r = tools::wallet2::parse_payment_note(payment_id_str, payment_id);
+      if (r) {
+          std::string extra_nonce;
+          set_payment_id_to_tx_extra_nonce(extra_nonce, payment_id);
+          r = add_extra_nonce_to_tx_extra(extra, extra_nonce);
       }
-    }
 
-    if(!r)
-    {
-      fail_msg_writer() << tr("payment id has invalid format, expected 16 or 64 character hex string: ") << payment_id_str;
-      return true;
-    }
-    payment_id_seen = true;
+      if (!r) {
+          fail_msg_writer() << tr("payment id has invalid format, expected 1-32 character string ") << payment_id_str;
+          return true;
+      }
+      payment_id_seen = true;
   }
 
   uint64_t locked_blocks = 0;
@@ -2452,26 +2439,14 @@ bool simple_wallet::sweep_all(const std::vector<std::string> &args_, bool retry,
   {
     std::string payment_id_str = local_args.back();
 
-    crypto::hash payment_id;
-    bool r = tools::wallet2::parse_long_payment_id(payment_id_str, payment_id);
+    std::string payment_id;
+    bool r = tools::wallet2::parse_payment_note(payment_id_str, payment_id);
     if(r)
     {
       std::string extra_nonce;
       set_payment_id_to_tx_extra_nonce(extra_nonce, payment_id);
       r = add_extra_nonce_to_tx_extra(extra, extra_nonce);
       payment_id_seen = true;
-    }
-    else
-    {
-      crypto::hash8 payment_id8;
-      r = tools::wallet2::parse_short_payment_id(payment_id_str, payment_id8);
-      if(r)
-      {
-        std::string extra_nonce;
-        set_encrypted_payment_id_to_tx_extra_nonce(extra_nonce, payment_id8);
-        r = add_extra_nonce_to_tx_extra(extra, extra_nonce);
-        payment_id_seen = true;
-      }
     }
 
     if (!r && local_args.size() == 3)
@@ -3253,15 +3228,12 @@ bool simple_wallet::show_transfers(const std::vector<std::string> &args_)
   std::multimap<uint64_t, std::pair<bool,std::string>> output;
 
   if (in) {
-    std::list<std::pair<crypto::hash, tools::wallet2::payment_details>> payments;
+    std::list<std::pair<std::string, tools::wallet2::payment_details>> payments;
     m_wallet->get_payments(payments, min_height, max_height, 0, (uint64_t)-1, m_current_subaddress_account, subaddr_indices);
-    for (std::list<std::pair<crypto::hash, tools::wallet2::payment_details>>::const_iterator i = payments.begin(); i != payments.end(); ++i) {
+    for (std::list<std::pair<std::string, tools::wallet2::payment_details>>::const_iterator i = payments.begin(); i != payments.end(); ++i) {
       const tools::wallet2::payment_details &pd = i->second;
-      std::string payment_id = string_tools::pod_to_hex(i->first);
-      if (payment_id.substr(16).find_first_not_of('0') == std::string::npos)
-        payment_id = payment_id.substr(0,16);
       std::string note = m_wallet->get_tx_note(pd.m_tx_hash);
-      output.insert(std::make_pair(pd.m_block_height, std::make_pair(true, (boost::format("%16.16s %20.20s %s %s %d %s %s") % get_human_readable_timestamp(pd.m_timestamp) % print_money(pd.m_amount) % string_tools::pod_to_hex(pd.m_tx_hash) % payment_id % pd.m_subaddr_index.minor % "-" % note).str())));
+      output.insert(std::make_pair(pd.m_block_height, std::make_pair(true, (boost::format("%16.16s %20.20s %s %s %d %s %s") % get_human_readable_timestamp(pd.m_timestamp) % print_money(pd.m_amount) % string_tools::pod_to_hex(pd.m_tx_hash) % i->first % pd.m_subaddr_index.minor % "-" % note).str())));
     }
   }
 
@@ -3290,11 +3262,8 @@ bool simple_wallet::show_transfers(const std::vector<std::string> &args_)
           dests += ", ";
         dests += get_account_address_as_str(m_wallet->testnet(), pd.m_dest_subaddr, d.addr) + ": " + print_money(d.amount);
       }
-      std::string payment_id = string_tools::pod_to_hex(i->second.m_payment_id);
-      if (payment_id.substr(16).find_first_not_of('0') == std::string::npos)
-        payment_id = payment_id.substr(0,16);
       std::string note = m_wallet->get_tx_note(i->first);
-      output.insert(std::make_pair(pd.m_block_height, std::make_pair(false, (boost::format("%16.16s %20.20s %s %s %14.14s %s %s - %s") % get_human_readable_timestamp(pd.m_timestamp) % print_money(pd.m_amount_in - change - fee) % string_tools::pod_to_hex(i->first) % payment_id % print_money(fee) % dests % print_subaddr_indices(pd.m_subaddr_indices) % note).str())));
+      output.insert(std::make_pair(pd.m_block_height, std::make_pair(false, (boost::format("%16.16s %20.20s %s %s %14.14s %s %s - %s") % get_human_readable_timestamp(pd.m_timestamp) % print_money(pd.m_amount_in - change - fee) % string_tools::pod_to_hex(i->first) % i->second.m_payment_id % print_money(fee) % dests % print_subaddr_indices(pd.m_subaddr_indices) % note).str())));
     }
   }
 
@@ -3309,15 +3278,12 @@ bool simple_wallet::show_transfers(const std::vector<std::string> &args_)
     try
     {
       m_wallet->update_pool_state();
-      std::list<std::pair<crypto::hash, tools::wallet2::payment_details>> payments;
+      std::list<std::pair<std::string, tools::wallet2::payment_details>> payments;
       m_wallet->get_unconfirmed_payments(payments, m_current_subaddress_account, subaddr_indices);
-      for (std::list<std::pair<crypto::hash, tools::wallet2::payment_details>>::const_iterator i = payments.begin(); i != payments.end(); ++i) {
+      for (std::list<std::pair<std::string, tools::wallet2::payment_details>>::const_iterator i = payments.begin(); i != payments.end(); ++i) {
         const tools::wallet2::payment_details &pd = i->second;
-        std::string payment_id = string_tools::pod_to_hex(i->first);
-        if (payment_id.substr(16).find_first_not_of('0') == std::string::npos)
-          payment_id = payment_id.substr(0,16);
         std::string note = m_wallet->get_tx_note(pd.m_tx_hash);
-        message_writer() << (boost::format("%8.8s %6.6s %16.16s %20.20s %s %s %d %s %s") % "pool" % "in" % get_human_readable_timestamp(pd.m_timestamp) % print_money(pd.m_amount) % string_tools::pod_to_hex(pd.m_tx_hash) % payment_id % pd.m_subaddr_index.minor % "-" % note).str();
+        message_writer() << (boost::format("%8.8s %6.6s %16.16s %20.20s %s %s %d %s %s") % "pool" % "in" % get_human_readable_timestamp(pd.m_timestamp) % print_money(pd.m_amount) % string_tools::pod_to_hex(pd.m_tx_hash) % i->first % pd.m_subaddr_index.minor % "-" % note).str();
       }
     }
     catch (const std::exception& e)
@@ -3334,13 +3300,10 @@ bool simple_wallet::show_transfers(const std::vector<std::string> &args_)
       const tools::wallet2::unconfirmed_transfer_details &pd = i->second;
       uint64_t amount = pd.m_amount_in;
       uint64_t fee = amount - pd.m_amount_out;
-      std::string payment_id = string_tools::pod_to_hex(i->second.m_payment_id);
-      if (payment_id.substr(16).find_first_not_of('0') == std::string::npos)
-        payment_id = payment_id.substr(0,16);
       std::string note = m_wallet->get_tx_note(i->first);
       bool is_failed = pd.m_state == tools::wallet2::unconfirmed_transfer_details::failed;
       if ((failed && is_failed) || (!is_failed && pending)) {
-        message_writer() << (boost::format("%8.8s %6.6s %16.16s %20.20s %s %s %14.14s %s - %s") % (is_failed ? tr("failed") : tr("pending")) % tr("out") % get_human_readable_timestamp(pd.m_timestamp) % print_money(amount - pd.m_change - fee) % string_tools::pod_to_hex(i->first) % payment_id % print_money(fee) % print_subaddr_indices(pd.m_subaddr_indices) % note).str();
+        message_writer() << (boost::format("%8.8s %6.6s %16.16s %20.20s %s %s %14.14s %s - %s") % (is_failed ? tr("failed") : tr("pending")) % tr("out") % get_human_readable_timestamp(pd.m_timestamp) % print_money(amount - pd.m_change - fee) % string_tools::pod_to_hex(i->first) % i->second.m_payment_id % print_money(fee) % print_subaddr_indices(pd.m_subaddr_indices) % note).str();
       }
     }
   }
@@ -3612,21 +3575,14 @@ bool simple_wallet::print_address(const std::vector<std::string> &args/* = std::
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::print_integrated_address(const std::vector<std::string> &args/* = std::vector<std::string>()*/)
 {
-  crypto::hash8 payment_id;
+  std::string payment_id;
   if (args.size() > 2)
   {
     fail_msg_writer() << tr("usage: integrated_address [<index>] [<payment_id>]");
     return true;
   }
   auto local_args = args;
-  if (!local_args.empty() && tools::wallet2::parse_short_payment_id(local_args.back(), payment_id))
-  {
-    local_args.pop_back();
-  }
-  else
-  {
-    payment_id = crypto::rand<crypto::hash8>();
-  }
+  payment_id = "";
   if (local_args.size() > 1)
   {
     fail_msg_writer() << tr("failed to parse payment id");
@@ -3650,7 +3606,7 @@ bool simple_wallet::print_integrated_address(const std::vector<std::string> &arg
   }
 
   success_msg_writer() << m_wallet->get_integrated_subaddress_as_str({ m_current_subaddress_account, index_minor }, payment_id);
-  success_msg_writer() << tr("Integrated payment ID: ") << epee::string_tools::pod_to_hex(payment_id);
+  success_msg_writer() << tr("Integrated payment ID: ") << payment_id;
   success_msg_writer() << tr("Address index: ") << index_minor;
   return true;
 }
@@ -3671,7 +3627,7 @@ bool simple_wallet::parse_address(const std::vector<std::string> &args/* = std::
     success_msg_writer() << tr("Type: ") << (info.is_subaddress ? tr("Subaddress") : tr("Standard address"));
     if (info.has_payment_id)
     {
-      success_msg_writer() << tr("Integrated payment ID: ") << epee::string_tools::pod_to_hex(info.payment_id);
+      success_msg_writer() << tr("Integrated payment ID: ") << info.payment_id;
     }
   }
   else
