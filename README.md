@@ -11,23 +11,23 @@ Portions Copyright (c) 2012-2013, The Cryptonote developers
 ## Development Resources
 
 - Web: [www.citicash.io](https://www.citicash.io)
-- Mail: [contact@citicash.io](mailto:contact@citicash.io)
+- Mail: [dev@citicash.io](mailto:dev@citicash.io)
 
 ## Introduction
 
-CitiCash is a fork from Sumokoin, one of the most respectable cryptocurrency well-known for **security, privacy, untraceability** and **active development**. Starting as an educational project, we found that it would be great to create a new coin with high level of privacy by (1) moving forward right away to **Ring Confidential Transactions (RingCT)**, (2) setting **minimum transaction _mixin_ to 12** that would greatly reduce chance of being attacked, traced or identified by (blockchain) statistical analysis.
+CitiCash is a fork from Sumokoin, one of the most respectable cryptocurrency well-known for **security, privacy, untraceability** and **active development**. Starting as an educational project, we found that it would be great to create a new coin with high level of privacy by (1) moving forward right away to **Ring Confidential Transactions (RingCT)**, (2) setting **minimum transaction _mixin_ to 6** that would greatly reduce chance of being attacked, traced or identified by (blockchain) statistical analysis.
 
 CitiCash, therefore, is a new Sumokoin without its legacy, a _truely fungible_ cryptocurrency among just a few ones in the market.
 
 ## Coin Supply & Emission
 
-- **Total supply**: **1,000,000,000** coins in first 20 years, then **XXX,XXX** coins each year for inflation.
+- **Total supply**: **1,000,000,000** coins in first 20 years.
 About 13.5% (~135 million) was premined to reserve for future development, i.e. **865 million coins available** for community mining.
 - **Coin symbol**: **CCH**
 - **Coin Units**:
-  + 1 CityCashi &nbsp;= 0.000000001 **CCH** (10<sup>-9</sup> - _the smallest coin unit_)
-  + 1 CityCashun = 0.000001 **CCH** (10<sup>-6</sup>)
-  + 1 CityCashan = 0.001 **CCH** (10<sup>-3</sup>)
+  + 1 NanoCash &nbsp;= 0.000000001 **CCH** (10<sup>-9</sup> - _the smallest coin unit_)
+  + 1 MicroCash = 0.000001 **CCH** (10<sup>-6</sup>)
+  + 1 MilliCash = 0.001 **CCH** (10<sup>-3</sup>)
 - **Hash algorithm**: CryptoNight (Proof-Of-Work)
 - **Emission scheme**: CitiCash's block reward changes _every 6-months_ as the following "Camel" distribution* (inspired by _real-world mining production_ like of crude oil, coal etc. that is often slow at first,
 accelerated in the next few years before declined and depleted). However, the emission path of CitiCash is generally not far apart from what of Bitcoin (view charts below).
