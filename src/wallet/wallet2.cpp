@@ -3489,7 +3489,7 @@ std::string wallet2::get_alias_address(const std::string& alias, bool get_if_pre
   m_daemon_rpc_mutex.lock();
   req_t.jsonrpc = "2.0";
   req_t.id = epee::serialization::storage_entry(0);
-  req_t.method = "on_get_alias_address";
+  req_t.method = "get_alias_address";
   req_t.params.alias = alias;
   req_t.params.get_if_premature = get_if_premature;
   bool r = net_utils::invoke_http_json("/json_rpc", req_t, resp_t, m_http_client);
@@ -3507,7 +3507,7 @@ std::vector<cryptonote::alias> wallet2::get_address_aliases(const std::string& a
   m_daemon_rpc_mutex.lock();
   req_t.jsonrpc = "2.0";
   req_t.id = epee::serialization::storage_entry(0);
-  req_t.method = "on_get_address_aliases";
+  req_t.method = "get_address_aliases";
   req_t.params.address = address;
   bool r = net_utils::invoke_http_json("/json_rpc", req_t, resp_t, m_http_client);
   m_daemon_rpc_mutex.unlock();
