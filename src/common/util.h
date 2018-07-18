@@ -56,9 +56,6 @@ namespace tools
     }
   };
 
-  //! \return File only readable by owner. nullptr if `filename` exists.
-  std::unique_ptr<std::FILE, close_file> create_private_file(const std::string& filename);
-
   /*! \brief Returns the default data directory.
    *
    * \details Windows < Vista: C:\\Documents and Settings\\Username\\Application Data\\CRYPTONOTE_NAME

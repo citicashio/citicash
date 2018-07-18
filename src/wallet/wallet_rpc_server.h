@@ -157,7 +157,6 @@ namespace tools
       bool not_open(epee::json_rpc::error& er);
 
       wallet2& m_wallet;
-      std::string rpc_login_filename;
       std::atomic<bool> m_stop;
   };
 }

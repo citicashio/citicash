@@ -39,6 +39,7 @@ using namespace epee;
 #include "wallet_rpc_server.h"
 #include "wallet/wallet_args.h"
 #include "common/command_line.h"
+#include "common/scoped_message_writer.h"
 #include "common/i18n.h"
 #include "common/util.h"
 #include "cryptonote_core/cryptonote_format_utils.h"
@@ -64,17 +65,10 @@ namespace tools
   {
     return i18n_translate(str, "tools::wallet_rpc_server");
   }
-
   
-  wallet_rpc_server::wallet_rpc_server(wallet2& w):m_wallet(w), rpc_login_filename(), m_stop(false) {}
+  wallet_rpc_server::wallet_rpc_server(wallet2& w):m_wallet(w), m_stop(false) {}
 
-  wallet_rpc_server::~wallet_rpc_server() {
-    try {
-      boost::system::error_code ec{};
-      boost::filesystem::remove(rpc_login_filename, ec);
-    }
-    catch (...) {}
-  }
+  wallet_rpc_server::~wallet_rpc_server() {}
   
   bool wallet_rpc_server::run()
   {
@@ -121,34 +115,14 @@ namespace tools
       if (!rpc_config->login) {
         std::array<std::uint8_t, 16> rand_128bit{{}};
         crypto::rand(rand_128bit.size(), rand_128bit.data());
-        http_login.emplace(default_rpc_username, string_encoding::base64_encode(rand_128bit.data(), rand_128bit.size())
-        );
+        http_login.emplace(default_rpc_username, string_encoding::base64_encode(rand_128bit.data(), rand_128bit.size()));
       }
-      else {
-        http_login.emplace(
-          std::move(rpc_config->login->username), std::move(rpc_config->login->password).password()
-        );
-      }
+      else
+        http_login.emplace(std::move(rpc_config->login->username), std::move(rpc_config->login->password).password());
+      
       assert(bool(http_login));
-
-      std::string temp = "citicash-wallet-rpc." + bind_port + ".login";
-      const auto cookie = tools::create_private_file(temp);
-      if (!cookie) {
-        LOG_ERROR(tr("Failed to create file ") << temp << tr(". Check permissions or remove file"));
-        return false;
-      }
-      rpc_login_filename.swap(temp); // nothrow guarantee destructor cleanup
-      temp = rpc_login_filename;
-      std::fputs(http_login->username.c_str(), cookie.get());
-      std::fputc(':', cookie.get());
-      std::fputs(http_login->password.c_str(), cookie.get());
-      std::fflush(cookie.get());
-      if (std::ferror(cookie.get())) {
-        LOG_ERROR(tr("Error writing to file ") << temp);
-        return false;
-      }
-      LOG_PRINT_L0(tr("RPC username/password is stored in file ") << temp);
-    } // end auth enabled
+      tools::scoped_message_writer(epee::log_space::console_color_white, true) << "rpc-login: " << http_login->username << ":" << http_login->password;
+    }
 
     m_net_server.set_threads_prefix("RPC");
     return epee::http_server_impl_base<wallet_rpc_server, connection_context>::init(
