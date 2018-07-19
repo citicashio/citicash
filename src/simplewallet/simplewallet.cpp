@@ -1801,7 +1801,7 @@ bool simple_wallet::show_incoming_transfers(const std::vector<std::string>& args
         std::string verbose_string;
         if (verbose)
           verbose_string = (boost::format("%68s%68s") % tr("pubkey") % tr("key image")).str();
-        message_writer() << boost::format("%21s%8s%12s%8s%16s%68s%16s%s") % tr("amount") % tr("spent") % tr("unlocked") % tr("ringct") % tr("global index") % tr("tx id") % tr("addr index") % verbose_string;
+        message_writer() << boost::format("%21s%8s%12s%8s%16s%68s%16s%s") % tr("amount") % tr("spent") % tr("locking") % tr("ringct") % tr("global index") % tr("tx id") % tr("addr index") % verbose_string;
         transfers_found = true;
       }
       std::string verbose_string;
@@ -1811,7 +1811,7 @@ bool simple_wallet::show_incoming_transfers(const std::vector<std::string>& args
         boost::format("%21s%8s%12s%8s%16u%68s%16u%s") %
         print_money(td.amount()) %
         (td.m_spent ? tr("T") : tr("F")) %
-        (m_wallet->is_transfer_unlocked(td) ? tr("unlocked") : tr("locked")) %
+        (m_wallet->is_transfer_unlocked(td) ? tr("unlocked") : to_string(td.m_tx.unlock_time)) %
         (td.is_rct() ? tr("RingCT") : tr("-")) %
         td.m_global_output_index %
         td.m_txid %

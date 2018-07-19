@@ -201,6 +201,7 @@ namespace tools
       std::string m_payment_id;
       std::string m_alias;
       enum { pending, pending_not_in_pool, failed } m_state;
+      uint64_t m_unlock_time;
       uint64_t m_timestamp;
       bool m_dest_subaddr;          // true if this is a transfer to a subaddress
       uint32_t m_subaddr_account;   // subaddress account of your wallet to be used in this transfer
@@ -216,6 +217,7 @@ namespace tools
       std::vector<cryptonote::tx_destination_entry> m_dests;
       std::string m_payment_id;
       std::string m_alias;
+      uint64_t m_unlock_time;
       uint64_t m_timestamp;
       bool m_dest_subaddr;          // true if this is a transfer to a subaddress
       uint32_t m_subaddr_account;   // subaddress account of your wallet to be used in this transfer
@@ -223,7 +225,7 @@ namespace tools
 
       confirmed_transfer_details() : m_amount_in(0), m_amount_out(0), m_change((uint64_t)-1), m_block_height(0), m_payment_id(""), m_alias(""), m_dest_subaddr(false), m_subaddr_account((uint32_t)-1) {}
       confirmed_transfer_details(const unconfirmed_transfer_details &utd, uint64_t height):
-        m_amount_in(utd.m_amount_in), m_amount_out(utd.m_amount_out), m_change(utd.m_change), m_block_height(height), m_dests(utd.m_dests), m_payment_id(utd.m_payment_id), m_alias(utd.m_alias), m_timestamp(utd.m_timestamp), m_dest_subaddr(utd.m_dest_subaddr), m_subaddr_account(utd.m_subaddr_account), m_subaddr_indices(utd.m_subaddr_indices) {}
+        m_amount_in(utd.m_amount_in), m_amount_out(utd.m_amount_out), m_change(utd.m_change), m_block_height(height), m_dests(utd.m_dests), m_payment_id(utd.m_payment_id), m_alias(utd.m_alias), m_unlock_time(utd.m_unlock_time), m_timestamp(utd.m_timestamp), m_dest_subaddr(utd.m_dest_subaddr), m_subaddr_account(utd.m_subaddr_account), m_subaddr_indices(utd.m_subaddr_indices) {}
     };
 
     struct tx_construction_data
@@ -890,6 +892,7 @@ namespace boost
       a & x.m_state;
       if (ver < 3)
         return;
+      a & x.m_unlock_time;
       a & x.m_timestamp;
       if (ver < 4)
         return;
@@ -924,6 +927,7 @@ namespace boost
       a & x.m_alias;
       if (ver < 2)
         return;
+      a & x.m_unlock_time;
       a & x.m_timestamp;
       if (ver < 3)
       {

@@ -543,7 +543,7 @@ namespace wallet_rpc
     std::string tx_hash;
     uint64_t amount;
     uint64_t block_height;
-    uint64_t unlock_time;
+    uint64_t unlock_height;
     cryptonote::subaddress_index subaddr_index;
 
     BEGIN_KV_SERIALIZE_MAP()
@@ -553,7 +553,8 @@ namespace wallet_rpc
       KV_SERIALIZE(tx_hash)
       KV_SERIALIZE(amount)
       KV_SERIALIZE(block_height)
-      KV_SERIALIZE(unlock_time)
+      if (this_ref.unlock_height)
+        KV_SERIALIZE(unlock_height)
       KV_SERIALIZE(subaddr_index)
     END_KV_SERIALIZE_MAP()
   };
@@ -799,6 +800,7 @@ namespace wallet_rpc
     std::string payment_id;
     std::string alias;
     uint64_t height;
+    uint64_t unlock_height;
     uint64_t timestamp;
     uint64_t amount;
     uint64_t fee;
@@ -813,6 +815,8 @@ namespace wallet_rpc
       if (!this_ref.alias.empty())
         KV_SERIALIZE(alias);
       KV_SERIALIZE(height);
+      if (this_ref.unlock_height)
+        KV_SERIALIZE(unlock_height);
       KV_SERIALIZE(timestamp);
       KV_SERIALIZE(amount);
       KV_SERIALIZE(fee);

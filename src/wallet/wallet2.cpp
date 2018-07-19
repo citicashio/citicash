@@ -1193,6 +1193,7 @@ void wallet2::process_outgoing(const crypto::hash &txid, const cryptonote::trans
     entry.first->second.m_subaddr_indices = subaddr_indices;
   }
   entry.first->second.m_block_height = height;
+  entry.first->second.m_unlock_time = tx.unlock_time;
   entry.first->second.m_timestamp = ts;
 }
 
@@ -2877,7 +2878,6 @@ bool wallet2::is_tx_spendtime_unlocked(uint64_t unlock_time, uint64_t block_heig
   uint64_t current_time = static_cast<uint64_t>(time(NULL));
   // XXX: this needs to be fast, so we'd need to get the starting heights
   // from the daemon to be correct once voting kicks in
-  uint64_t v2height = m_testnet ? 624634 : 1009827;
   uint64_t leeway = block_height < CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_SECONDS;
   return (current_time + leeway >= unlock_time);
 }
@@ -3022,9 +3022,10 @@ void wallet2::add_unconfirmed_tx(const cryptonote::transaction& tx, uint64_t amo
 	utd.m_payment_id = payment_id;
   utd.m_alias = alias;
   utd.m_state = wallet2::unconfirmed_transfer_details::pending;
-	utd.m_timestamp = time(NULL);
-	utd.m_subaddr_account = subaddr_account;
-	utd.m_subaddr_indices = subaddr_indices;
+  utd.m_unlock_time = tx.unlock_time;
+  utd.m_timestamp = time(NULL);
+  utd.m_subaddr_account = subaddr_account;
+  utd.m_subaddr_indices = subaddr_indices;
 }
 
 //----------------------------------------------------------------------------------------------------
