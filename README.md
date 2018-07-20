@@ -249,7 +249,7 @@ application.
 
 * Clone source code, change to the root of the source code directory and build:
 
-        git clone https://github.com/sumoprojects/citicash; cd citicash; make release-static;
+        git clone https://github.com/citicashio/citicash; cd citicash; make release-static;
 
 
 ### On OpenBSD:
