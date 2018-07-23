@@ -176,6 +176,7 @@ private:
     
     //utils
     uint64_t get_block_reward(const block& blk);
+    uint64_t get_block_fee(const block& blk);
     bool fill_block_header_response(const block& blk, bool orphan_status, uint64_t height, const crypto::hash& hash, block_header_response& response);
     
     core& m_core;

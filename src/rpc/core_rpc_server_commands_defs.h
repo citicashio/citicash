@@ -740,6 +740,8 @@ namespace cryptonote
       std::string hash;
       difficulty_type difficulty;
       uint64_t reward;
+      uint64_t fee;
+      size_t block_size;
       
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(major_version)
@@ -753,6 +755,8 @@ namespace cryptonote
         KV_SERIALIZE(hash)
         KV_SERIALIZE(difficulty)
         KV_SERIALIZE(reward)
+        KV_SERIALIZE(fee);
+        KV_SERIALIZE(block_size);
       END_KV_SERIALIZE_MAP()
   };
 

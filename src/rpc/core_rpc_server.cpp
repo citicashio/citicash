@@ -908,16 +908,24 @@ namespace cryptonote
     return true;
   }
   
-  uint64_t core_rpc_server::get_block_reward(const block& blk)
-  {
+  uint64_t core_rpc_server::get_block_reward(const block& blk) {
     uint64_t reward = 0;
-    BOOST_FOREACH(const tx_out& out, blk.miner_tx.vout)
-    {
+    BOOST_FOREACH(const tx_out& out, blk.miner_tx.vout) {
       reward += out.amount;
     }
     return reward;
   }
-  //------------------------------------------------------------------------------------------------------------------------------
+
+  uint64_t core_rpc_server::get_block_fee(const block& blk) {
+    std::list<transaction> txs;
+    std::list<crypto::hash> missed_txs;
+    m_core.get_transactions(blk.tx_hashes, txs, missed_txs);
+    uint64_t fee = 0;
+    for (transaction tx : txs)
+      fee += get_tx_fee(tx);
+    return fee;
+  }
+  
   bool core_rpc_server::fill_block_header_response(const block& blk, bool orphan_status, uint64_t height, const crypto::hash& hash, block_header_response& response)
   {
     response.major_version = blk.major_version;
@@ -931,6 +939,8 @@ namespace cryptonote
     response.hash = string_tools::pod_to_hex(hash);
     response.difficulty = m_core.get_blockchain_storage().block_difficulty(height);
     response.reward = get_block_reward(blk);
+    response.fee = get_block_fee(blk);
+    response.block_size = m_core.get_blockchain_storage().get_db().get_block_size(height);
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
