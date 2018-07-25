@@ -2285,6 +2285,10 @@ std::vector<cryptonote::alias> BlockchainLMDB::get_address_aliases(const std::st
   auto range = m_aliases_multi_index.get<1>().equal_range(address);
   for (auto it = range.first; it != range.second; ++it)
     aliases.push_back({it->alias, it->height});
+  std::sort(aliases.begin(), aliases.end(),
+    [](const cryptonote::alias& first, const cryptonote::alias& second) {
+      return first.height < second.height;
+    });
   return aliases;
 }
 
