@@ -413,16 +413,17 @@ namespace cryptonote
       if (req.decode_as_json)
         e.as_json = obj_to_json_str(tx);
       e.in_pool = pool_tx_hashes.find(tx_hash) != pool_tx_hashes.end();
-      if (e.in_pool)
-      {
-        e.block_height = std::numeric_limits<uint64_t>::max();
-      }
-      else
-      {
-        e.block_height = m_core.get_blockchain_storage().get_db().get_tx_block_height(tx_hash);
-      }
+      e.block_height = e.in_pool ? std::numeric_limits<uint64_t>::max() : m_core.get_blockchain_storage().get_db().get_tx_block_height(tx_hash);
+      e.tx_fee = tx.rct_signatures.txnFee;
+      uint64_t amount = get_outs_money_amount(tx);
+      e.tx_amount = e.tx_fee > amount ? amount : amount - e.tx_fee;
+      e.tx_size = blob.size();
+      e.tx_mixin = tx.vin.empty() ? 0 : tx.vin[0].type() == typeid(txin_to_key) ? boost::get<txin_to_key>(tx.vin[0]).key_offsets.size() - 1 : 0;
+      e.vin_count = tx.vin.size();
+      e.vout_count = tx.vout.size();
+      e.unlock_height = tx.unlock_time;
 
-      // fill up old style responses too, in case an old wallet asks
+      // fill up old style responses too, in case an old wallet asks // LUKAS TODO remove in another commit
       res.txs_as_hex.push_back(e.as_hex);
       if (req.decode_as_json)
         res.txs_as_json.push_back(e.as_json);

@@ -173,6 +173,13 @@ namespace cryptonote
       bool in_pool;
       uint64_t block_height;
       std::vector<uint64_t> output_indices;
+      uint64_t tx_fee;
+      uint64_t tx_amount;
+      size_t tx_size;
+      uint64_t tx_mixin;
+      size_t vin_count;
+      size_t vout_count;
+      uint64_t unlock_height;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tx_hash)
@@ -181,6 +188,15 @@ namespace cryptonote
         KV_SERIALIZE(in_pool)
         KV_SERIALIZE(block_height)
         KV_SERIALIZE(output_indices)
+        KV_SERIALIZE(tx_fee)
+        if (this_ref.tx_amount)
+          KV_SERIALIZE(tx_amount)
+        KV_SERIALIZE(tx_size)
+        KV_SERIALIZE(tx_mixin)
+        KV_SERIALIZE(vin_count)
+        KV_SERIALIZE(vout_count)
+        if (this_ref.unlock_height)
+          KV_SERIALIZE(unlock_height)
       END_KV_SERIALIZE_MAP()
     };
 
