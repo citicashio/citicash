@@ -409,9 +409,10 @@ namespace cryptonote
       crypto::hash tx_hash = *vhi++;
       e.tx_hash = *txhi++;
       blobdata blob = t_serializable_object_to_blob(tx);
-      e.as_hex = string_tools::buff_to_hex_nodelimer(blob);
       if (req.decode_as_json)
         e.as_json = obj_to_json_str(tx);
+      else
+        e.as_hex = string_tools::buff_to_hex_nodelimer(blob);
       e.in_pool = pool_tx_hashes.find(tx_hash) != pool_tx_hashes.end();
       e.block_height = e.in_pool ? std::numeric_limits<uint64_t>::max() : m_core.get_blockchain_storage().get_db().get_tx_block_height(tx_hash);
       e.tx_fee = tx.rct_signatures.txnFee;
@@ -422,11 +423,6 @@ namespace cryptonote
       e.vin_count = tx.vin.size();
       e.vout_count = tx.vout.size();
       e.unlock_height = tx.unlock_time;
-
-      // fill up old style responses too, in case an old wallet asks // LUKAS TODO remove in another commit
-      res.txs_as_hex.push_back(e.as_hex);
-      if (req.decode_as_json)
-        res.txs_as_json.push_back(e.as_json);
 
       // output indices too if not in pool
       if (pool_tx_hashes.find(tx_hash) == pool_tx_hashes.end())

@@ -183,8 +183,10 @@ namespace cryptonote
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tx_hash)
-        KV_SERIALIZE(as_hex)
-        KV_SERIALIZE(as_json)
+        if (this_ref.as_json.empty())
+          KV_SERIALIZE(as_hex)
+        else
+          KV_SERIALIZE(as_json)
         KV_SERIALIZE(in_pool)
         KV_SERIALIZE(block_height)
         KV_SERIALIZE(output_indices)
