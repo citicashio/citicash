@@ -1,3 +1,4 @@
+// Copyright (c) 2018, The CitiCash Project
 I (Lukas) use RPC wallet and daemon most of the time and now as we test aliases and I am finishing the development, we have a lot of sync problems. 
 
 There is some help: 

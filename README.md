@@ -1,4 +1,4 @@
-# CitiCash
+# Copyright (c) 2018, The CitiCash Project
 
 Copyright (c) 2018, CitiCash.io
 

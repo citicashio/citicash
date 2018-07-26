@@ -1,3 +1,4 @@
+// Copyright (c) 2018, The CitiCash Project
 /// @file
 /// @author rfree (current maintainer in monero.cc project)
 /// @brief various general utils taken from (and relate to) otshell project, including loggiang/debug

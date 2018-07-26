@@ -1,3 +1,4 @@
+// Copyright (c) 2018, The CitiCash Project
 // Sumokoin Block Reward Emission
 // Short URL: http://cpp.sh/6eeyr
 

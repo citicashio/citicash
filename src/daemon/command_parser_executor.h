@@ -1,3 +1,4 @@
+// Copyright (c) 2018, The CitiCash Project
 /**
 @file
 @details

@@ -1,3 +1,4 @@
+// Copyright (c) 2018, The CitiCash Project
 // Copyright (c) 2017, SUMOKOIN
 //
 // All rights reserved.

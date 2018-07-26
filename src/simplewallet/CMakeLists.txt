@@ -1,6 +1,5 @@
+# Copyright (c) 2018, The CitiCash Project
 # Copyright (c) 2014-2016, The Monero Project
-#
-#Copyright (c) 2018, The Citicash Project
 #
 # All rights reserved.
 #

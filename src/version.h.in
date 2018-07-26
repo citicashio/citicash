@@ -1,3 +1,4 @@
+// Copyright (c) 2018, The CitiCash Project
 #define CITICASH_VERSION_TAG "@VERSIONTAG@"
 #define CITICASH_VERSION "0.0.2.0"
 #define CITICASH_RELEASE_NAME "Adam"
