@@ -284,7 +284,7 @@ Send all unlocked balance to an address.
 - priority - unsigned int; (Optional) Priority for sending the sweep transfer, partially determines fee.
 - mixin - unsigned int; Number of outputs from the blockchain to mix with (0 means no mixing).
 - unlock_time - unsigned int; Number of blocks before the citicash can be spent (0 to not add a lock).
-- payment_id - string; (Optional) Random 32-byte/64-character hex string to identify a transaction.
+- payment_id - string; (Optional) Random string to identify a transaction.
 - get_tx_keys - boolean; (Optional) Return the transaction keys after sending.
 - below_amount - unsigned int; (Optional) Include outputs below this amount.
 - do_not_relay - boolean; (Optional) If true, do not relay this sweep transfer.
@@ -331,7 +331,7 @@ payment_id - string; Payment ID used to find the payments.
 - tx_hash - string; Transaction hash used as the transaction ID.
 - amount - unsigned int; Amount for this payment.
 - block_height - unsigned int; Height of the block that first confirmed this payment.
-- unlock_time - unsigned int; Time (in block height) until this payment is safe to spend.
+- unlock_height - unsigned int; Time (in block height) until this payment is safe to spend.
 - subaddr_index - subaddress index:
 - major - unsigned int; Account index for the subaddress.
 - minor - unsigned int; Index of the subaddress in the account.
@@ -412,15 +412,23 @@ Returns a list of transfers.
 - filter_by_height - boolean; (Optional) Filter transfers by block height.
 - min_height - unsigned int; (Optional) Minimum block height to scan for transfers, if filtering by height is enabled.
 - max_height - unsigned int; (Opional) Maximum block height to scan for transfers, if filtering by height is enabled.
+- filter_by_timestamp - boolean; (Optional) Filter transfers by timestamp.
+- min_timestamp - unsigned int; (Optional) Minimum timestamp to scan for transfers, if filtering by height is enabled.
+- min_timestamp - unsigned int; (Opional) Maximum timestamp to scan for transfers, if filtering by height is enabled.
 - account_index - unsigned int; (Optional) Index of the account to query for transfers.
 - subaddr_indices - array of unsigned int; (Optional) List of subaddress indices to query for transfers.
+- pagination - boolean; (Optional) 
+- offset - unsigned int; (Optional)
+- limit - unsigned int; (Optional)
 
 ####Outputs:
 
 in array of transfers:
 - txid - string; Transaction ID for this transfer.
 - payment_id - string; Payment ID for this transfer.
+- alias; transfer alias
 - height - unsigned int; Height of the first block that confirmed this transfer.
+- unlock_height
 - timestamp - unsigned int; POSIX timestamp for when this transfer was first confirmed in a block.
 - amount - unsigned int; Amount transferred.
 - fee - unsigned int; Transaction fee for this transfer.
@@ -429,9 +437,12 @@ in array of transfers:
 - amount - unsigned int; Amount for this destination.
 - address - string; Address for this destination. Base58 representation of the public keys.
 - type - string; Transfer type: "in"
-- out array of transfers:
+- total_count - unsigned int; total no. of transaction items (for pagination)
+
+out array of transfers:
 - txid - string; Transaction ID for this transfer.
 - payment_id - string; Payment ID for this transfer.
+- alias; transfer alias
 - height - unsigned int; Height of the first block that confirmed this transfer.
 - timestamp - unsigned int; POSIX timestamp for when this transfer was first confirmed in a block.
 - amount - unsigned int; Amount transferred.
@@ -441,9 +452,11 @@ in array of transfers:
 - amount - unsigned int; Amount for this destination.
 - address - string; Address for this destination. Base58 representation of the public keys.
 - type - string; Transfer type: "out"
-- pending array of transfers:
+
+pending array of transfers:
 - txid - string; Transaction ID for this transfer.
 - payment_id - string; Payment ID for this transfer.
+- alias; transfer alias
 - height - unsigned int; 0, this transfer is not yet confirmed in a block.
 - timestamp - unsigned int; POSIX timestamp for when this transfer was sent.
 - amount - unsigned int; Amount transferred.
@@ -453,9 +466,11 @@ in array of transfers:
 - amount - unsigned int; Amount for this destination.
 - address - string; Address for this destination. Base58 representation of the public keys.
 - type - string; Transfer type: "pending"
-- failed array of transfers:
+
+ failed array of transfers:
 - txid - string; Transaction ID for this transfer.
 - payment_id - string; Payment ID for this transfer.
+- alias; transfer alias
 - height - unsigned int; 0, this transfer will not be confirmed in a block.
 - timestamp - unsigned int; POSIX timestamp for when this transfer was sent.
 - amount - unsigned int; Amount transferred.
@@ -465,9 +480,11 @@ in array of transfers:
 - amount - unsigned int; Amount for this destination.
 - address - string; Address for this destination. Base58 representation of the public keys.
 - type - string; Transfer type: "failed"
-- pool array of transfers:
+
+pool array of transfers:
 - txid - string; Transaction ID for this transfer.
 - payment_id - string; Payment ID for this transfer.
+- alias; transfer alias
 - height - unsigned int; 0, this transfer is not yet confirmed in a block.
 - timestamp - unsigned int; POSIX timestamp for when this transfer was last seen in the transaction pool.
 - amount - unsigned int; Amount transferred.
@@ -516,7 +533,8 @@ Show information about a transfer to/from this address.
 - timestamp - unsigned int; POSIX timestamp for the block that confirmed this transfer.
 - txid - string; Transaction ID of this transfer (same as input TXID).
 - type - string; Type of transfer, one of the following: "in", "out", "pending", "failed", "pool"
-- destinations - array of JSON objects containing transfer destinations:
+
+destinations - array of JSON objects containing transfer destinations:
 - amount - unsigned int; Amount transferred to this destination.
 - address - string; Address for this destination. Base58 representation of the public keys.
 - unlock_time - unsigned int; Number of blocks until transfer is safely spendable.
@@ -1173,7 +1191,7 @@ Get all accounts for a wallet. Optionally filter accounts by tag.
 - tag - string; (Optional) Tag for filtering accounts.
 ####Outputs:
 
-- subaddress_accounts - array of subaddress account information:
+subaddress_accounts - array of subaddress account information:
 - account_index - unsigned int; Index of the account.
 - balance - unsigned int; Balance of the account (locked or unlocked).
 - base_address - string; Base64 representation of the first subaddress in the account.
@@ -1306,7 +1324,7 @@ Get a list of user-defined account tags.
 
 ####Outputs:
 
-- account_tags - array of account tag information:
+account_tags - array of account tag information:
 - tag - string; Filter tag.
 - label - string; Label for the tag.
 - accounts - array of int; List of tagged account indices.
@@ -1383,4 +1401,76 @@ Set description for an account tag.
       "result": {
       }
     }
+ ----------------------------------------------------------------------------------------------------
+ ###alias_address
+ Create an alias for the current account address.
+ 
+ ####Inputs:
+ 
+ - alias - string; alias to be created for the address
+ - priority - unsigned int; priority of the alias creation transaction
+ - unlock_time - unsigned int number of blocks to unlock the alias
+ - do_not_relay - bool; if true, do not create the alias, just check if it is free and estimate fee
+ ####Outputs:
+ 
+ - hash - string; transacion hash ov the aliasing transaction 
+ - fee - unsigned int; 
+ ####Example:
+     curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"alias_address", params":{"alias":"send_cash","do_not_relay":true}}' -H 'Content-Type: application/json'  
+     
+     {
+       "id": "0",
+       "jsonrpc": "2.0",
+       "result": {
+         "fee": 300774400,
+         "tx_hash": "64f9994b3a1c8028ee840a176b6061be2e4e0e9420041b141a8689ec2d4f145c"
+       }
+     }
+
+###get_aliases
+ 
+ A list of aliases for the current address
+ 
+ ####Inputs:
+ 
+ none
+ 
+ ####Outputs:
+ 
+ - aliases - list of strings, ordered by time of creation/
+
+ ####Example:
+    curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_aliases"}' -H 'Content-Type: application/json'  
+    
+    {
+      "id": "0",
+      "jsonrpc": "2.0",
+      "result": {
+        "aliases": [{
+          "alias": "send_money",
+          "height": 9334
+        }]
+      }
+    }
+
+  
+###get_alias_address
+
+Get address for a given alias
+
+####Inputs
+- alias - string; the alias
+
+###Output
+- address - string; address of the alias
+
+
+####Example:
+    curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_alias_address", "params":{"alias":"send_money"}}' -H 'Content-Type: application/json'
+    {
+      "id": "0",
+      "jsonrpc": "2.0",
+      "result": {
+        "address": "cczJpzfSeMrj19m8nT9xHv1Gkh8Xc46JQdi5BQDoJceE35WgUR7nTsaM4wW2FJm3cgCs2QnpRxhi94fRjvTUU7VJ244aEMSE7c"
+      }
     }
