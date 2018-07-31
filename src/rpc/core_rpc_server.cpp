@@ -377,7 +377,7 @@ namespace cryptonote
     rct::key mask;
     for (size_t i = 0; i != tx.vout.size(); ++i)
       for (crypto::key_derivation derivation : derivations)
-        decrypted_amounts += decodeRct(tx.rct_signatures, derivation, i, mask); // test
+        decrypted_amounts += decodeRct(tx.rct_signatures, derivation, i, mask, false);
     return decrypted_amounts;
   }
 

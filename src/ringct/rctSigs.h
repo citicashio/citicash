@@ -130,7 +130,7 @@ namespace rct {
     static inline bool verRct(const rctSig & rv) { return verRct(rv, true) && verRct(rv, false); }
     bool verRctSimple(const rctSig & rv, bool semantics);
     static inline bool verRctSimple(const rctSig & rv) { return verRctSimple(rv, true) && verRctSimple(rv, false); }
-    xmr_amount decodeRct(const rctSig & rv, const key & sk, unsigned int i, key & mask);
+    xmr_amount decodeRct(const rctSig & rv, const key & sk, unsigned int i, key & mask, bool enable_errors = true);
     xmr_amount decodeRct(const rctSig & rv, const key & sk, unsigned int i);
     xmr_amount decodeRctSimple(const rctSig & rv, const key & sk, unsigned int i, key & mask);
     xmr_amount decodeRctSimple(const rctSig & rv, const key & sk, unsigned int i);

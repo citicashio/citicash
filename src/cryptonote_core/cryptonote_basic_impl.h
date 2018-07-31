@@ -136,7 +136,7 @@ std::ostream &print64(std::ostream &o, const T &v) {
 
 bool parse_hash256(const std::string str_hash, crypto::hash& hash);
 bool verifyHelper(const std::string &data, const cryptonote::account_public_address &address, const std::string &signature);
-uint64_t decodeRct(const rct::rctSig & rv, const crypto::key_derivation &derivation, unsigned int i, rct::key & mask);
+uint64_t decodeRct(const rct::rctSig & rv, const crypto::key_derivation & derivation, unsigned int i, rct::key & mask, bool enable_errors = true);
 
 namespace crypto {
   inline std::ostream &operator <<(std::ostream &o, const crypto::public_key &v) { return print256(o, v); }

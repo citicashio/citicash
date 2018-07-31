@@ -376,7 +376,7 @@ bool verifyHelper(const std::string &data, const cryptonote::account_public_addr
   return crypto::check_signature(hash, address.m_spend_public_key, s);
 }
 
-uint64_t decodeRct(const rct::rctSig & rv, const crypto::key_derivation &derivation, unsigned int i, rct::key & mask) {
+uint64_t decodeRct(const rct::rctSig & rv, const crypto::key_derivation & derivation, unsigned int i, rct::key & mask, bool enable_errors) {
   crypto::secret_key scalar1;
   crypto::derivation_to_scalar(derivation, i, scalar1);
   try {
@@ -384,14 +384,15 @@ uint64_t decodeRct(const rct::rctSig & rv, const crypto::key_derivation &derivat
       case rct::RCTTypeSimple:
         return rct::decodeRctSimple(rv, rct::sk2rct(scalar1), i, mask);
       case rct::RCTTypeFull:
-        return rct::decodeRct(rv, rct::sk2rct(scalar1), i, mask);
+        return rct::decodeRct(rv, rct::sk2rct(scalar1), i, mask, enable_errors);
       default:
         LOG_ERROR("Unsupported rct type: " << int(rv.type));
       return 0;
     }
   }
   catch (const std::exception &e) {
-    LOG_ERROR("Failed to decode input " << i);
+    if (enable_errors)
+      LOG_ERROR("Failed to decode input " << i);
     return 0;
   }
 }
