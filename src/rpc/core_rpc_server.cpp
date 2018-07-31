@@ -347,6 +347,40 @@ namespace cryptonote
     return true;
   }
   
+  uint64_t get_decrypted_amounts(std::string txs_view_key, transaction tx, crypto::hash tx_hash) {
+    std::vector<tx_extra_field> tx_extra_fields;
+    if (!parse_tx_extra(tx.extra, tx_extra_fields)) // Extra may only be partially parsed, it's OK if tx_extra_fields contains public key
+      LOG_PRINT_L0("Transaction extra has unsupported format: " << tx_hash);
+    tx_extra_pub_key pub_key_field;
+    if (!find_tx_extra_field_by_type(tx_extra_fields, pub_key_field, 0)) // no valid view key here => return or check other keys?
+      LOG_PRINT_L4("Public key wasn't found in the transaction extra." << tx_hash);
+    cryptonote::blobdata tx_key_data;
+    if (!epee::string_tools::parse_hexstr_to_binbuff(txs_view_key, tx_key_data)) {
+      LOG_PRINT_L0("failed to parse tx key");
+      return 0;
+    }
+    const crypto::secret_key view_key = *reinterpret_cast<const crypto::secret_key*>(tx_key_data.data());
+    if (sc_check((const unsigned char*)&view_key)) {
+      LOG_PRINT_L0("failed to parse tx key");
+      return 0;
+    }
+    std::vector<crypto::key_derivation> derivations;
+    derivations.push_back({});
+    generate_key_derivation(pub_key_field.pub_key, view_key, derivations.front());
+    // additional tx pubkeys and derivations for multi-destination transfers involving one or more subaddresses
+    std::vector<crypto::public_key> additional_tx_pub_keys = get_additional_tx_pub_keys_from_extra(tx);
+    for (crypto::public_key key : additional_tx_pub_keys) {
+      derivations.push_back({});
+      generate_key_derivation(key, view_key, derivations.back());
+    }
+    uint64_t decrypted_amounts = 0;
+    rct::key mask;
+    for (size_t i = 0; i != tx.vout.size(); ++i)
+      for (crypto::key_derivation derivation : derivations)
+        decrypted_amounts += tools::wallet2::decodeRct(tx.rct_signatures, derivation, i, mask); // test
+    return decrypted_amounts;
+  }
+
   bool core_rpc_server::on_get_transactions(const COMMAND_RPC_GET_TRANSACTIONS::request& req, COMMAND_RPC_GET_TRANSACTIONS::response& res)
   {
     CHECK_CORE_BUSY();
@@ -419,41 +453,8 @@ namespace cryptonote
       e.block_height = e.in_pool ? std::numeric_limits<uint64_t>::max() : m_core.get_blockchain_storage().get_db().get_tx_block_height(tx_hash);
       e.tx_fee = tx.rct_signatures.txnFee;
 
-      std::vector<tx_extra_field> tx_extra_fields;
-      if (!parse_tx_extra(tx.extra, tx_extra_fields)) // Extra may only be partially parsed, it's OK if tx_extra_fields contains public key
-        LOG_PRINT_L0("Transaction extra has unsupported format: " << tx_hash);
-      tx_extra_pub_key pub_key_field;
-      if (!find_tx_extra_field_by_type(tx_extra_fields, pub_key_field, 0)) {
-        LOG_PRINT_L4("Public key wasn't found in the transaction extra." << tx_hash);
-        // no valid view key here
-      }
-      crypto::secret_key view_key;
-      cryptonote::blobdata tx_key_data;
-      if (!epee::string_tools::parse_hexstr_to_binbuff(req.txs_view_key, tx_key_data))
-        LOG_PRINT_L0("failed to parse tx key");
-      view_key = *reinterpret_cast<const crypto::secret_key*>(tx_key_data.data());
-      crypto::key_derivation derivation;
-      generate_key_derivation(pub_key_field.pub_key, view_key, derivation);
-      // additional tx pubkeys and derivations for multi-destination transfers involving one or more subaddresses
-      std::vector<crypto::public_key> additional_tx_pub_keys = get_additional_tx_pub_keys_from_extra(tx);
-      std::vector<crypto::key_derivation> additional_derivations;
-      for (size_t i = 0; i < additional_tx_pub_keys.size(); ++i) {
-        additional_derivations.push_back({});
-        generate_key_derivation(additional_tx_pub_keys[i], view_key, additional_derivations.back());
-      }
-      std::unordered_map<crypto::public_key, cryptonote::subaddress_index> subaddresses;
-      subaddresses[pub_key_field.pub_key/*sender_account_keys.m_account_address.m_spend_public_key*/] = { 0, 0 }; // LUKAS TODO other pub_keys
-      uint64_t amount = 0/* = get_outs_money_amount(tx)*/;
-      for (size_t i = 0; i != tx.vout.size(); ++i) {
-        boost::optional<cryptonote::subaddress_receive_info> received = is_out_to_acc_precomp(subaddresses, boost::get<txout_to_key>(tx.vout[i].target).key, derivation, additional_derivations, i);
-        //check_acc_out_precomp
-        rct::key mask;
-        if (received)
-          amount += decodeRct(tx.rct_signatures, received->derivation, i, mask);
-      }
-      if (!amount)
-        amount = get_outs_money_amount(tx);
-      e.tx_amount = e.tx_fee > amount ? amount : amount - e.tx_fee;
+      e.tx_amount = get_decrypted_amounts(req.txs_view_key, tx, tx_hash);
+      e.tx_amount += get_outs_money_amount(tx);
 
       e.tx_size = blob.size();
       e.tx_mixin = tx.vin.empty() ? 0 : tx.vin[0].type() == typeid(txin_to_key) ? boost::get<txin_to_key>(tx.vin[0]).key_offsets.size() - 1 : 0;

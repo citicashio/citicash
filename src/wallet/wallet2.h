@@ -55,6 +55,7 @@
 #include "ringct/rctTypes.h"
 #include "ringct/rctOps.h"
 #include "common/base58.h"
+#include "ringct/rctSigs.h"
 
 #include "wallet_errors.h"
 #include "common/password.h"
@@ -649,6 +650,26 @@ namespace tools
 
     std::string get_alias_address(const std::string& alias, bool get_if_premature = true);
     std::vector<cryptonote::alias> get_address_aliases(const std::string& alias);
+
+    static uint64_t decodeRct(const rct::rctSig & rv, const crypto::key_derivation &derivation, unsigned int i, rct::key & mask) {
+      crypto::secret_key scalar1;
+      crypto::derivation_to_scalar(derivation, i, scalar1);
+      try {
+        switch (rv.type) {
+          case rct::RCTTypeSimple:
+            return rct::decodeRctSimple(rv, rct::sk2rct(scalar1), i, mask);
+          case rct::RCTTypeFull:
+            return rct::decodeRct(rv, rct::sk2rct(scalar1), i, mask);
+          default:
+            LOG_ERROR("Unsupported rct type: " << int(rv.type));
+          return 0;
+        }
+      }
+      catch (const std::exception &e) {
+        LOG_ERROR("Failed to decode input " << i);
+        return 0;
+      }
+    }
 
   private:
     /*!
