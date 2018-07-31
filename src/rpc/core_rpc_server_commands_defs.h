@@ -157,10 +157,12 @@ namespace cryptonote
     struct request
     {
       std::list<std::string> txs_hashes;
+      std::string txs_view_key;
       bool decode_as_json;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(txs_hashes)
+        KV_SERIALIZE(txs_view_key)
         KV_SERIALIZE(decode_as_json)
       END_KV_SERIALIZE_MAP()
     };

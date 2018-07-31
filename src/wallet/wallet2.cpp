@@ -680,11 +680,9 @@ void wallet2::set_unspent(size_t idx)
   td.m_spent = false;
   td.m_spent_height = 0;
 }
-//----------------------------------------------------------------------------------------------------
-void wallet2::check_acc_out_precomp(const tx_out &o, const crypto::key_derivation &derivation, const std::vector<crypto::key_derivation> &additional_derivations, size_t i, tx_scan_info_t &tx_scan_info) const
-{
-  if (o.target.type() != typeid(txout_to_key))
-  {
+
+void wallet2::check_acc_out_precomp(const tx_out &o, const crypto::key_derivation &derivation, const std::vector<crypto::key_derivation> &additional_derivations, size_t i, tx_scan_info_t &tx_scan_info) const {
+  if (o.target.type() != typeid(txout_to_key)) {
     tx_scan_info.error = true;
     LOG_ERROR("wrong type id in transaction out");
     return;
@@ -693,31 +691,7 @@ void wallet2::check_acc_out_precomp(const tx_out &o, const crypto::key_derivatio
   tx_scan_info.money_transfered = (tx_scan_info.received ? o.amount /* may be 0 for ringct outputs */ : 0);
   tx_scan_info.error = false;
 }
-//----------------------------------------------------------------------------------------------------
-static uint64_t decodeRct(const rct::rctSig & rv, const crypto::key_derivation &derivation, unsigned int i, rct::key & mask)
-{
-  crypto::secret_key scalar1;
-  crypto::derivation_to_scalar(derivation, i, scalar1);
-  try
-  {
-    switch (rv.type)
-    {
-    case rct::RCTTypeSimple:
-      return rct::decodeRctSimple(rv, rct::sk2rct(scalar1), i, mask);
-    case rct::RCTTypeFull:
-      return rct::decodeRct(rv, rct::sk2rct(scalar1), i, mask);
-    default:
-      LOG_ERROR("Unsupported rct type: " << int(rv.type));
-      return 0;
-    }
-  }
-  catch (const std::exception &e)
-  {
-    LOG_ERROR("Failed to decode input " << i);
-    return 0;
-  }
-}
-//----------------------------------------------------------------------------------------------------
+
 void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote::transaction& tx, const std::vector<uint64_t> &o_indices, uint64_t height, uint64_t ts, bool miner_tx, bool pool)
 {
   if (!miner_tx && !pool)
@@ -791,7 +765,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
 
         outs.push_back(0);
         if (!tx_scan_info[0].money_transfered)
-          money_transfered = tools::decodeRct(tx.rct_signatures, tx_scan_info[0].received->derivation, 0, mask[0]);
+          money_transfered = tools::wallet2::decodeRct(tx.rct_signatures, tx_scan_info[0].received->derivation, 0, mask[0]);
 
         amount[0] = money_transfered;
         tx_money_got_in_outs[tx_scan_info[0].received->index] = money_transfered;
@@ -825,7 +799,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
 
             outs.push_back(i);
             if (money_transfered[i] == 0)
-              money_transfered[i] = tools::decodeRct(tx.rct_signatures, tx_scan_info[i].received->derivation, i, mask[i]);
+              money_transfered[i] = tools::wallet2::decodeRct(tx.rct_signatures, tx_scan_info[i].received->derivation, i, mask[i]);
             
             tx_money_got_in_outs[tx_scan_info[i].received->index] += money_transfered[i];
             amount[i] = money_transfered[i];
@@ -869,7 +843,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
           outs.push_back(i);
           if (money_transfered[i] == 0)
           {
-            money_transfered[i] = tools::decodeRct(tx.rct_signatures, tx_scan_info[i].received->derivation, i, mask[i]);
+            money_transfered[i] = tools::wallet2::decodeRct(tx.rct_signatures, tx_scan_info[i].received->derivation, i, mask[i]);
           }
           tx_money_got_in_outs[tx_scan_info[i].received->index] += money_transfered[i];
           amount[i] = money_transfered[i];
@@ -895,7 +869,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
 
           outs.push_back(i);
           if (!tx_scan_info[i].money_transfered)
-            money_transfered = tools::decodeRct(tx.rct_signatures, tx_scan_info[i].received->derivation, i, mask[i]);
+            money_transfered = tools::wallet2::decodeRct(tx.rct_signatures, tx_scan_info[i].received->derivation, i, mask[i]);
 
           amount[i] = money_transfered;
           tx_money_got_in_outs[tx_scan_info[i].received->index] += money_transfered;
