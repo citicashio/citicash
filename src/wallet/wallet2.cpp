@@ -66,7 +66,6 @@ using namespace epee;
 #include "common/json_util.h"
 #include "common/base58.h"
 #include "common/scoped_message_writer.h"
-#include "ringct/rctSigs.h"
 
 extern "C"
 {
@@ -765,7 +764,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
 
         outs.push_back(0);
         if (!tx_scan_info[0].money_transfered)
-          money_transfered = tools::wallet2::decodeRct(tx.rct_signatures, tx_scan_info[0].received->derivation, 0, mask[0]);
+          money_transfered = decodeRct(tx.rct_signatures, tx_scan_info[0].received->derivation, 0, mask[0]);
 
         amount[0] = money_transfered;
         tx_money_got_in_outs[tx_scan_info[0].received->index] = money_transfered;
@@ -799,7 +798,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
 
             outs.push_back(i);
             if (money_transfered[i] == 0)
-              money_transfered[i] = tools::wallet2::decodeRct(tx.rct_signatures, tx_scan_info[i].received->derivation, i, mask[i]);
+              money_transfered[i] = decodeRct(tx.rct_signatures, tx_scan_info[i].received->derivation, i, mask[i]);
             
             tx_money_got_in_outs[tx_scan_info[i].received->index] += money_transfered[i];
             amount[i] = money_transfered[i];
@@ -843,7 +842,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
           outs.push_back(i);
           if (money_transfered[i] == 0)
           {
-            money_transfered[i] = tools::wallet2::decodeRct(tx.rct_signatures, tx_scan_info[i].received->derivation, i, mask[i]);
+            money_transfered[i] = decodeRct(tx.rct_signatures, tx_scan_info[i].received->derivation, i, mask[i]);
           }
           tx_money_got_in_outs[tx_scan_info[i].received->index] += money_transfered[i];
           amount[i] = money_transfered[i];
@@ -869,7 +868,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
 
           outs.push_back(i);
           if (!tx_scan_info[i].money_transfered)
-            money_transfered = tools::wallet2::decodeRct(tx.rct_signatures, tx_scan_info[i].received->derivation, i, mask[i]);
+            money_transfered = decodeRct(tx.rct_signatures, tx_scan_info[i].received->derivation, i, mask[i]);
 
           amount[i] = money_transfered;
           tx_money_got_in_outs[tx_scan_info[i].received->index] += money_transfered;
@@ -5254,7 +5253,7 @@ bool wallet2::parse_uri(const std::string &uri, std::string &address, std::strin
   }
   return true;
 }
-//----------------------------------------------------------------------------------------------------
+
 void wallet2::generate_genesis(cryptonote::block& b) {
   if (m_testnet)
   {
