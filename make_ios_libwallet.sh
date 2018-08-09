@@ -1,11 +1,11 @@
 #!/bin/bash -e
 
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-BOOST_LIBRARYDIR=${ROOT_DIR}/external/ofxiOSBoost/build/ios/prefix/lib
-BOOST_LIBRARYDIR_x86_64=${ROOT_DIR}/external/ofxiOSBoost/build/libs/boost/lib/x86_64
-BOOST_INCLUDEDIR=${ROOT_DIR}/external/ofxiOSBoost/build/ios/prefix/include
-OPENSSL_INCLUDE_DIR=${ROOT_DIR}/external/OpenSSL/include
-OPENSSL_ROOT_DIR=${ROOT_DIR}/external/OpenSSL
+BOOST_LIBRARYDIR=${ROOT_DIR}/../ofxiOSBoost/build/ios/prefix/lib
+BOOST_LIBRARYDIR_x86_64=${ROOT_DIR}/../ofxiOSBoost/build/libs/boost/lib/x86_64
+BOOST_INCLUDEDIR=${ROOT_DIR}/../ofxiOSBoost/build/ios/prefix/include
+OPENSSL_INCLUDE_DIR=${ROOT_DIR}/../OpenSSL/include
+OPENSSL_ROOT_DIR=${ROOT_DIR}/../OpenSSL
 INSTALL_PREFIX=${ROOT_DIR}
 
 #mkdir -p build-ios/release
