@@ -177,10 +177,10 @@ namespace cryptonote
       std::vector<uint64_t> output_indices;
       uint64_t tx_fee;
       uint64_t tx_amount;
-      size_t tx_size;
+      uint64_t tx_size;
       uint64_t tx_mixin;
-      size_t vin_count;
-      size_t vout_count;
+      uint64_t vin_count;
+      uint64_t vout_count;
       uint64_t unlock_height;
 
       BEGIN_KV_SERIALIZE_MAP()
@@ -762,7 +762,7 @@ namespace cryptonote
       difficulty_type difficulty;
       uint64_t reward;
       uint64_t fee;
-      size_t block_size;
+      uint64_t block_size;
       
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(major_version)
