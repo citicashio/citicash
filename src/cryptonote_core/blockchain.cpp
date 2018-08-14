@@ -85,7 +85,7 @@ static const struct {
   time_t time;
 } mainnet_hard_forks[] = {
   { 1, 1, 0, 1482806500 },
-  { 2, SOFT_FORK_HEIGHT, 0, 1534263625 }
+  { 2, SOFT_FORK_HEIGHT, 0, 1534269625 }
 };
 static const uint64_t mainnet_hard_fork_version_1_till = (uint64_t)-1;
 
