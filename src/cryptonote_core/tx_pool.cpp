@@ -677,13 +677,13 @@ namespace cryptonote
     //baseline empty block
     get_block_reward(median_size, total_size, already_generated_coins, best_coinbase, height);
 
-    size_t max_total_size = (200 * median_size) / 100 - CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE;
+    size_t max_total_size = 2*median_size - CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE;
     std::unordered_set<crypto::key_image> k_images;
 
     LOG_PRINT_L2("Filling block template, median size " << median_size << ", " << m_txs_by_fee_and_receive_time.size() << " txes in the pool");
     auto sorted_it = m_txs_by_fee_and_receive_time.begin();
-    while (sorted_it != m_txs_by_fee_and_receive_time.end())
-    {
+    // int turn = 0;
+    while (sorted_it != m_txs_by_fee_and_receive_time.end()) {
       auto tx_it = m_transactions.find(sorted_it->second);
       LOG_PRINT_L2("Considering " << tx_it->first << ", size " << tx_it->second.blob_size << ", current block size " << total_size << "/" << max_total_size << ", current coinbase " << print_money(best_coinbase));
 
@@ -694,9 +694,7 @@ namespace cryptonote
         sorted_it++;
         continue;
       }
-
-      // If we're getting lower coinbase tx,
-      // stop including more tx
+            
       uint64_t block_reward;
       if (!get_block_reward(median_size, total_size + tx_it->second.blob_size + CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE, already_generated_coins, block_reward, height))
       {
@@ -705,6 +703,7 @@ namespace cryptonote
         continue;
       }
       uint64_t coinbase = block_reward + fee + tx_it->second.fee;
+      // cout << std::right << std::setw(5) << turn++ << ". block_reward: " << block_reward << ", fee: " << fee << ", tx_it->second.fee: " << tx_it->second.fee << ", coinbase: " << coinbase << ", best_coinbase: " << best_coinbase << ", difference: " << ((coinbase > best_coinbase) ? to_string(coinbase - best_coinbase) : ("-" + to_string(best_coinbase - coinbase))) << endl;
       if (coinbase < template_accept_threshold(best_coinbase))
       {
         LOG_PRINT_L2("  would decrease coinbase to " << print_money(coinbase));

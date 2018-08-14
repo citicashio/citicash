@@ -524,7 +524,7 @@ namespace cryptonote
          *
          * @return the per kB fee
          */
-        static uint64_t get_dynamic_per_kb_fee(uint64_t block_reward, size_t median_block_size);
+        static uint64_t get_dynamic_per_kb_fee(uint64_t block_reward, size_t median_block_size, uint64_t height);
 
         /**
          * @brief get dynamic per kB fee estimate for the next few blocks

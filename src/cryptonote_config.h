@@ -38,8 +38,8 @@
 #define CRYPTONOTE_DNS_TIMEOUT_MS                       20000
 
 #define CRYPTONOTE_MAX_BLOCK_NUMBER                     500000000
-#define CRYPTONOTE_MAX_BLOCK_SIZE                       500000000  // block header blob limit, never used!
-#define CRYPTONOTE_GETBLOCKTEMPLATE_MAX_BLOCK_SIZE	    196608 //size of block (bytes) that is the maximum that miners will produce
+#define CRYPTONOTE_MAX_BLOCK_SIZE                       500000000
+#define SOFT_FORK_HEIGHT                                27400
 #define CRYPTONOTE_MAX_TX_SIZE                          1000000000
 #define CRYPTONOTE_PUBLIC_ADDRESS_TEXTBLOB_VER          0
 #define CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW            10
@@ -58,7 +58,6 @@
 #define GENESIS_BLOCK_REWARD                            ((uint64_t)135000000000000000) // ~10% dev premine
 
 #define CRYPTONOTE_REWARD_BLOCKS_WINDOW                 60
-#define CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE       240 * 1024    // 240kB
 #define CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE          600
 #define CRYPTONOTE_DISPLAY_DECIMAL_POINT                9
 // COIN - number of smallest units in one coin
@@ -132,8 +131,8 @@
 #define DEFAULT_MIXIN                                   6      // default & minimum mixin allowed
 #define MAX_MIXIN                                       240    
 
-#define TRANSACTION_SIZE_LIMIT                          ((uint64_t) ((CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE * 110 / 100) - CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE))
-#define BLOCK_SIZE_GROWTH_FAVORED_ZONE                  ((uint64_t) (CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE * 4))
+#define TRANSACTION_SIZE_LIMIT                          ((size_t)500000)
+#define MAX_BLOCK_SIZE_NOT_CHECKED                      ((size_t)5000000)
 
 // New constants are intended to go here
 namespace config

@@ -80,71 +80,68 @@ namespace cryptonote {
   bool get_block_reward(size_t median_size, size_t current_block_size, uint64_t already_generated_coins, uint64_t &reward, uint64_t height) {
     uint64_t base_reward;
     uint64_t round_factor = 10000000; // 1 * pow(10, 7)
-    if (height > 0)
-    {
+    if (height > 1) {
       if (height < (PEAK_COIN_EMISSION_HEIGHT + COIN_EMISSION_HEIGHT_INTERVAL)) {
         uint64_t interval_num = height / COIN_EMISSION_HEIGHT_INTERVAL;
         double money_supply_pct = 0.1888 + interval_num*(0.023 + interval_num*0.0032);
         base_reward = ((uint64_t)(MONEY_SUPPLY * money_supply_pct)) >> EMISSION_SPEED_FACTOR;
       }
-      else{
+      else
         base_reward = (MONEY_SUPPLY - already_generated_coins) >> EMISSION_SPEED_FACTOR;
-      }
     }
     else
-    {
       base_reward = GENESIS_BLOCK_REWARD;
-    }
-	if (height == 1) {
-		base_reward = GENESIS_BLOCK_REWARD;
-	}
     
-    if (base_reward < FINAL_SUBSIDY){
-      if (MONEY_SUPPLY > already_generated_coins){
-        base_reward = FINAL_SUBSIDY;
-      }
-      else{
-        base_reward = FINAL_SUBSIDY/2;
-      }
-    }
+    if (base_reward < FINAL_SUBSIDY)
+        base_reward = (MONEY_SUPPLY > already_generated_coins) ? FINAL_SUBSIDY : FINAL_SUBSIDY/2;
     
     // rounding (floor) base reward
     base_reward = base_reward / round_factor * round_factor;
 
-    //make it soft
-    if (median_size < CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE) {
-      median_size = CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE;
-    }
+    if (height < SOFT_FORK_HEIGHT && median_size < 240 * 1024)
+      median_size = 240 * 1024;
 
-    if (current_block_size > 2 * median_size) {
-      LOG_PRINT_L1("Block cumulative size is too big: " << current_block_size << ", expected less than " << 2 * median_size);
-      return false;
-    }
+    if (height < SOFT_FORK_HEIGHT) {
+      if (current_block_size > 2 * median_size) {
+        LOG_PRINT_L1("Block cumulative size is too big: " << current_block_size << ", expected less than " << 2 * median_size);
+        return false;
+      }
 
-    if (current_block_size <= (median_size < BLOCK_SIZE_GROWTH_FAVORED_ZONE ? median_size * 110 / 100 : median_size)) {
-      reward = base_reward;
+      if (current_block_size <= (median_size < 240 * 1024 *4 ? median_size * 110 / 100 : median_size)) {
+        reward = base_reward;
+        return true;
+      }
+
+      assert(median_size < std::numeric_limits<uint32_t>::max());
+      assert(current_block_size < std::numeric_limits<uint32_t>::max());
+
+      uint64_t product_hi;
+      // BUGFIX: 32-bit saturation bug (e.g. ARM7), the result was being
+      // treated as 32-bit by default.
+      uint64_t multiplicand = 2 * median_size - current_block_size;
+      multiplicand *= current_block_size;
+      uint64_t product_lo = mul128(base_reward, multiplicand, &product_hi);
+
+      uint64_t reward_hi;
+      uint64_t reward_lo;
+      div128_32(product_hi, product_lo, static_cast<uint32_t>(median_size), &reward_hi, &reward_lo);
+      div128_32(reward_hi, reward_lo, static_cast<uint32_t>(median_size), &reward_hi, &reward_lo);
+      assert(0 == reward_hi);
+      assert(reward_lo < base_reward);
+
+      reward = reward_lo;
       return true;
     }
-
-    assert(median_size < std::numeric_limits<uint32_t>::max());
-    assert(current_block_size < std::numeric_limits<uint32_t>::max());
-
-    uint64_t product_hi;
-    // BUGFIX: 32-bit saturation bug (e.g. ARM7), the result was being
-    // treated as 32-bit by default.
-    uint64_t multiplicand = 2 * median_size - current_block_size;
-    multiplicand *= current_block_size;
-    uint64_t product_lo = mul128(base_reward, multiplicand, &product_hi);
-
-    uint64_t reward_hi;
-    uint64_t reward_lo;
-    div128_32(product_hi, product_lo, static_cast<uint32_t>(median_size), &reward_hi, &reward_lo);
-    div128_32(reward_hi, reward_lo, static_cast<uint32_t>(median_size), &reward_hi, &reward_lo);
-    assert(0 == reward_hi);
-    assert(reward_lo < base_reward);
-
-    reward = reward_lo;
-    return true;
+    else {
+      if (current_block_size > std::max(2*median_size, MAX_BLOCK_SIZE_NOT_CHECKED)) {
+        LOG_PRINT_L1("Block cumulative size is too big: " << current_block_size << ", expected less than " << 2 * median_size);
+        return false;
+      }
+      else {
+        reward = base_reward;
+        return true;
+      }
+    }
   }
   //------------------------------------------------------------------------------------
   uint8_t get_account_address_checksum(const public_address_outer_blob& bl)
