@@ -89,8 +89,6 @@ using namespace cryptonote;
 #define RECENT_OUTPUT_RATIO (0.5) // 50% of outputs are from the recent zone
 #define RECENT_OUTPUT_ZONE  ((time_t)(1.8 * 86400)) // last 1.8 day makes up the recent zone (taken from monerolink.pdf, Miller et al)
 
-#define FEE_ESTIMATE_GRACE_BLOCKS 10 // estimate fee valid for that many blocks
-
 #define SUBADDRESS_LOOKAHEAD_MAJOR 50
 #define SUBADDRESS_LOOKAHEAD_MINOR 200
 
@@ -3435,7 +3433,6 @@ uint64_t wallet2::get_dynamic_per_kb_fee_estimate()
   req_t.jsonrpc = "2.0";
   req_t.id = epee::serialization::storage_entry(0);
   req_t.method = "get_fee_estimate";
-  req_t.params.grace_blocks = FEE_ESTIMATE_GRACE_BLOCKS;
   bool r = net_utils::invoke_http_json("/json_rpc", req_t, resp_t, m_http_client);
   m_daemon_rpc_mutex.unlock();
   CHECK_AND_ASSERT_THROW_MES(r, "Failed to connect to daemon");

@@ -450,7 +450,7 @@ namespace cryptonote
       else
         e.as_hex = string_tools::buff_to_hex_nodelimer(blob);
       e.in_pool = pool_tx_hashes.find(tx_hash) != pool_tx_hashes.end();
-      e.block_height = e.in_pool ? std::numeric_limits<uint64_t>::max() : m_core.get_blockchain_storage().get_db().get_tx_block_height(tx_hash);
+      e.block_height = e.in_pool ? std::numeric_limits<uint64_t>::max() : m_core.get_blockchain_storage().get_db().get_tx_block_height(tx_hash); // LUKAS TODO check if it's better to return 0 when tx is in pool
       e.tx_fee = tx.rct_signatures.txnFee;
 
       e.tx_amount = get_decrypted_amounts(req.txs_view_key, tx, tx_hash);
@@ -1419,7 +1419,7 @@ namespace cryptonote
   //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_get_per_kb_fee_estimate(const COMMAND_RPC_GET_PER_KB_FEE_ESTIMATE::request& req, COMMAND_RPC_GET_PER_KB_FEE_ESTIMATE::response& res, epee::json_rpc::error& error_resp)
   {
-    res.fee = m_core.get_blockchain_storage().get_dynamic_per_kb_fee_estimate(req.grace_blocks);
+    res.fee = m_core.get_blockchain_storage().get_dynamic_per_kb_fee_estimate();
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }
