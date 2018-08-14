@@ -889,12 +889,13 @@ namespace rct {
         addKeys2(Ctmp, mask, amount, H);
         DP("Ctmp");
         DP(Ctmp);
-        if (equalKeys(C, Ctmp) == false)
+        if (equalKeys(C, Ctmp) == false) {
             if (enable_errors) {
                 CHECK_AND_ASSERT_THROW_MES(false, "warning, amount decoded incorrectly, will be unable to spend");
             }
             else
                 throw std::runtime_error("incorrectly decrypted amount");
+        }
         return h2d(amount);
     }
 
