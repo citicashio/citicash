@@ -131,8 +131,8 @@
 #define DEFAULT_MIXIN                                   6      // default & minimum mixin allowed
 #define MAX_MIXIN                                       240    
 
-#define TRANSACTION_SIZE_LIMIT                          ((size_t)500000)
-#define MAX_BLOCK_SIZE_NOT_CHECKED                      ((size_t)5000000)
+#define TRANSACTION_SIZE_LIMIT                          ((size_t)0.5*1024*1024) // 0.5MB
+#define MAX_BLOCK_SIZE_NOT_CHECKED                      ((size_t)  5*1024*1024) //   5MB
 
 // New constants are intended to go here
 namespace config
