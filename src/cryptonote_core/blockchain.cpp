@@ -85,7 +85,7 @@ static const struct {
   time_t time;
 } mainnet_hard_forks[] = {
   { 1, 1, 0, 1482806500 },
-  { 2, SOFT_FORK_HEIGHT, 0, 1534269625 }
+  { 2, SOFT_FORK_HEIGHT, 0, 1534269625 } // LUKAS FORK change for production and remove in next update
 };
 static const uint64_t mainnet_hard_fork_version_1_till = (uint64_t)-1;
 
@@ -2635,14 +2635,14 @@ void Blockchain::check_ring_signature(const crypto::hash &tx_prefix_hash, const 
 //------------------------------------------------------------------
 uint64_t Blockchain::get_dynamic_per_kb_fee(uint64_t block_reward, size_t median_block_size, uint64_t height)
 {
-  if (height < SOFT_FORK_HEIGHT && median_block_size < 240 * 1024 * 4)
-    median_block_size = 240 * 1024 * 4;
+  if (height < SOFT_FORK_HEIGHT && median_block_size < 240 * 1024 * 4) // LUKAS FORK remove in next update
+    median_block_size = 240 * 1024 * 4;                                // LUKAS FORK remove in next update
 
   // this to avoid full block fee getting too low when block reward decline, i.e. easier for "block filler" attack
   if (block_reward < DYNAMIC_FEE_PER_KB_BASE_BLOCK_REWARD)
     block_reward = DYNAMIC_FEE_PER_KB_BASE_BLOCK_REWARD;
 
-  uint64_t unscaled_fee_per_kb = height < SOFT_FORK_HEIGHT ? (DYNAMIC_FEE_PER_KB_BASE_FEE * 240 * 1024 * 4 / median_block_size) : DYNAMIC_FEE_PER_KB_BASE_FEE;
+  uint64_t unscaled_fee_per_kb = height < SOFT_FORK_HEIGHT ? (DYNAMIC_FEE_PER_KB_BASE_FEE * 240 * 1024 * 4 / median_block_size) : DYNAMIC_FEE_PER_KB_BASE_FEE; // LUKAS FORK remove condition and true-clause in next update
   uint64_t hi, lo = mul128(unscaled_fee_per_kb, block_reward, &hi);
   static_assert(DYNAMIC_FEE_PER_KB_BASE_BLOCK_REWARD % 1000000 == 0, "DYNAMIC_FEE_PER_KB_BASE_BLOCK_REWARD must be divisible by 1000000");
   static_assert(DYNAMIC_FEE_PER_KB_BASE_BLOCK_REWARD / 1000000 <= std::numeric_limits<uint32_t>::max(), "DYNAMIC_FEE_PER_KB_BASE_BLOCK_REWARD is too large");
@@ -2688,8 +2688,8 @@ uint64_t Blockchain::get_dynamic_per_kb_fee_estimate() const
 
   uint64_t median = epee::misc_utils::median(sz);
   uint64_t height = m_db->height();
-  if (height < SOFT_FORK_HEIGHT && median <= 240 * 1024)
-    median = 240 * 1024;
+  if (height < SOFT_FORK_HEIGHT && median <= 240 * 1024) // LUKAS FORK remove in next update
+    median = 240 * 1024;                                 // LUKAS FORK remove in next update
 
   //uint64_t already_generated_coins = m_db->height() ? m_db->get_block_already_generated_coins(m_db->height() - 1) : 0;
   uint64_t cal_height = height - height % COIN_EMISSION_HEIGHT_INTERVAL;
@@ -3254,13 +3254,13 @@ bool Blockchain::update_next_cumulative_size_limit()
   std::vector<size_t> sz;
   get_last_n_blocks_sizes(sz, CRYPTONOTE_REWARD_BLOCKS_WINDOW);
 
-  if (m_db->height() < SOFT_FORK_HEIGHT) {
-    uint64_t median = epee::misc_utils::median(sz);
-    if (median <= 240 * 1024)
-      median = 240 * 1024;
-      m_current_block_cumul_sz_limit = median*2;
-  }
-  else
+  if (m_db->height() < SOFT_FORK_HEIGHT) {          // LUKAS FORK remove in next update
+    uint64_t median = epee::misc_utils::median(sz); // LUKAS FORK remove in next update
+    if (median <= 240 * 1024)                       // LUKAS FORK remove in next update
+      median = 240 * 1024;                          // LUKAS FORK remove in next update
+      m_current_block_cumul_sz_limit = median*2;    // LUKAS FORK remove in next update
+  }                                                 // LUKAS FORK remove in next update
+  else                                              // LUKAS FORK remove in next update
     m_current_block_cumul_sz_limit = epee::misc_utils::median(sz)*2;
   return true;
 }

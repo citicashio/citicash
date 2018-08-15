@@ -98,41 +98,41 @@ namespace cryptonote {
     // rounding (floor) base reward
     base_reward = base_reward / round_factor * round_factor;
 
-    if (height < SOFT_FORK_HEIGHT && median_size < 240 * 1024)
-      median_size = 240 * 1024;
-
-    if (height < SOFT_FORK_HEIGHT) {
-      if (current_block_size > 2 * median_size) {
-        LOG_PRINT_L1("Block cumulative size is too big: " << current_block_size << ", expected less than " << 2 * median_size);
-        return false;
-      }
-
-      if (current_block_size <= (median_size < 240 * 1024 *4 ? median_size * 110 / 100 : median_size)) {
-        reward = base_reward;
-        return true;
-      }
-
-      assert(median_size < std::numeric_limits<uint32_t>::max());
-      assert(current_block_size < std::numeric_limits<uint32_t>::max());
-
-      uint64_t product_hi;
-      // BUGFIX: 32-bit saturation bug (e.g. ARM7), the result was being
-      // treated as 32-bit by default.
-      uint64_t multiplicand = 2 * median_size - current_block_size;
-      multiplicand *= current_block_size;
-      uint64_t product_lo = mul128(base_reward, multiplicand, &product_hi);
-
-      uint64_t reward_hi;
-      uint64_t reward_lo;
-      div128_32(product_hi, product_lo, static_cast<uint32_t>(median_size), &reward_hi, &reward_lo);
-      div128_32(reward_hi, reward_lo, static_cast<uint32_t>(median_size), &reward_hi, &reward_lo);
-      assert(0 == reward_hi);
-      assert(reward_lo < base_reward);
-
-      reward = reward_lo;
-      return true;
-    }
-    else {
+    if (height < SOFT_FORK_HEIGHT) {                                                                                            // LUKAS FORK remove in next update
+      if (median_size < 240 * 1024)                                                                                             // LUKAS FORK remove in next update
+        median_size = 240 * 1024;                                                                                               // LUKAS FORK remove in next update
+                                                                                                                                // LUKAS FORK remove in next update
+      if (current_block_size > 2 * median_size) {                                                                               // LUKAS FORK remove in next update
+        LOG_PRINT_L1("Block cumulative size is too big: " << current_block_size << ", expected less than " << 2 * median_size); // LUKAS FORK remove in next update
+        return false;                                                                                                           // LUKAS FORK remove in next update
+      }                                                                                                                         // LUKAS FORK remove in next update
+                                                                                                                                // LUKAS FORK remove in next update
+      if (current_block_size <= (median_size < 240 * 1024 *4 ? median_size * 110 / 100 : median_size)) {                        // LUKAS FORK remove in next update
+        reward = base_reward;                                                                                                   // LUKAS FORK remove in next update
+        return true;                                                                                                            // LUKAS FORK remove in next update
+      }                                                                                                                         // LUKAS FORK remove in next update
+                                                                                                                                // LUKAS FORK remove in next update
+      assert(median_size < std::numeric_limits<uint32_t>::max());                                                               // LUKAS FORK remove in next update
+      assert(current_block_size < std::numeric_limits<uint32_t>::max());                                                        // LUKAS FORK remove in next update
+                                                                                                                                // LUKAS FORK remove in next update
+      uint64_t product_hi;                                                                                                      // LUKAS FORK remove in next update
+      // BUGFIX: 32-bit saturation bug (e.g. ARM7), the result was being                                                        // LUKAS FORK remove in next update
+      // treated as 32-bit by default.                                                                                          // LUKAS FORK remove in next update
+      uint64_t multiplicand = 2 * median_size - current_block_size;                                                             // LUKAS FORK remove in next update
+      multiplicand *= current_block_size;                                                                                       // LUKAS FORK remove in next update
+      uint64_t product_lo = mul128(base_reward, multiplicand, &product_hi);                                                     // LUKAS FORK remove in next update
+                                                                                                                                // LUKAS FORK remove in next update
+      uint64_t reward_hi;                                                                                                       // LUKAS FORK remove in next update
+      uint64_t reward_lo;                                                                                                       // LUKAS FORK remove in next update
+      div128_32(product_hi, product_lo, static_cast<uint32_t>(median_size), &reward_hi, &reward_lo);                            // LUKAS FORK remove in next update
+      div128_32(reward_hi, reward_lo, static_cast<uint32_t>(median_size), &reward_hi, &reward_lo);                              // LUKAS FORK remove in next update
+      assert(0 == reward_hi);                                                                                                   // LUKAS FORK remove in next update
+      assert(reward_lo < base_reward);                                                                                          // LUKAS FORK remove in next update
+                                                                                                                                // LUKAS FORK remove in next update
+      reward = reward_lo;                                                                                                       // LUKAS FORK remove in next update
+      return true;                                                                                                              // LUKAS FORK remove in next update
+    }                                                                                                                           // LUKAS FORK remove in next update
+    else {                                                                                                                      // LUKAS FORK remove in next update
       if (current_block_size > std::max(2*median_size, MAX_BLOCK_SIZE_NOT_CHECKED)) {
         LOG_PRINT_L1("Block cumulative size is too big: " << current_block_size << ", expected less than " << 2 * median_size);
         return false;
@@ -141,7 +141,7 @@ namespace cryptonote {
         reward = base_reward;
         return true;
       }
-    }
+    }                                                                                                                           // LUKAS FORK remove in next update
   }
   //------------------------------------------------------------------------------------
   uint8_t get_account_address_checksum(const public_address_outer_blob& bl)

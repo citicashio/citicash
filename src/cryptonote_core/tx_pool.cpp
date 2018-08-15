@@ -682,7 +682,6 @@ namespace cryptonote
 
     LOG_PRINT_L2("Filling block template, median size " << median_size << ", " << m_txs_by_fee_and_receive_time.size() << " txes in the pool");
     auto sorted_it = m_txs_by_fee_and_receive_time.begin();
-    // int turn = 0;
     while (sorted_it != m_txs_by_fee_and_receive_time.end()) {
       auto tx_it = m_transactions.find(sorted_it->second);
       LOG_PRINT_L2("Considering " << tx_it->first << ", size " << tx_it->second.blob_size << ", current block size " << total_size << "/" << max_total_size << ", current coinbase " << print_money(best_coinbase));
@@ -703,7 +702,6 @@ namespace cryptonote
         continue;
       }
       uint64_t coinbase = block_reward + fee + tx_it->second.fee;
-      // cout << std::right << std::setw(5) << turn++ << ". block_reward: " << block_reward << ", fee: " << fee << ", tx_it->second.fee: " << tx_it->second.fee << ", coinbase: " << coinbase << ", best_coinbase: " << best_coinbase << ", difference: " << ((coinbase > best_coinbase) ? to_string(coinbase - best_coinbase) : ("-" + to_string(best_coinbase - coinbase))) << endl;
       if (coinbase < template_accept_threshold(best_coinbase))
       {
         LOG_PRINT_L2("  would decrease coinbase to " << print_money(coinbase));
