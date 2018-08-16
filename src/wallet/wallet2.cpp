@@ -1522,7 +1522,7 @@ void wallet2::update_pool_state()
     if (epee::string_tools::parse_hexstr_to_binbuff(it.id_hash, txid_data)) {
       const crypto::hash txid = *reinterpret_cast<const crypto::hash*>(txid_data.data()); // LUKAS TODO fix
       if (m_unconfirmed_payments.find(txid_data) == m_unconfirmed_payments.end()) {
-        LOG_PRINT_L1("Found new pool tx: " << txid);
+        LOG_PRINT_L3("Found new pool tx: " << txid);
         bool found = false;
         for (const auto &i: m_unconfirmed_txs) {
           if (i.first == txid) {
