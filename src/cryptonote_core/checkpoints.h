@@ -46,7 +46,7 @@ namespace cryptonote
    *
    * A checkpoint is a pre-defined hash for the block at a given height.
    * Some of these are compiled-in, while others can be loaded at runtime
-   * either from a json file or via DNS from a checkpoint-hosting server.
+   * from a json file.
    */
   class checkpoints
   {
@@ -156,16 +156,14 @@ namespace cryptonote
     /**
      * @brief load new checkpoints
      *
-     * Loads new checkpoints from the specified json file, as well as
-     * (optionally) from DNS.
+     * Loads new checkpoints from the specified json file.
      *
      * @param json_hashfile_fullpath path to the json checkpoints file
      * @param testnet whether to load testnet checkpoints or mainnet
-     * @param dns whether or not to load DNS checkpoints
      *
      * @return true if loading successful and no conflicts
      */
-    bool load_new_checkpoints(const std::string json_hashfile_fullpath, bool testnet=false, bool dns=true);
+    bool load_new_checkpoints(const std::string json_hashfile_fullpath, bool testnet=false);
 
     /**
      * @brief load new checkpoints from json
@@ -176,18 +174,7 @@ namespace cryptonote
      */
     bool load_checkpoints_from_json(const std::string json_hashfile_fullpath);
 
-    /**
-     * @brief load new checkpoints from DNS
-     *
-     * @param testnet whether to load testnet checkpoints or mainnet
-     *
-     * @return true if loading successful and no conflicts
-     */
-    bool load_checkpoints_from_dns(bool testnet = false);
-
   private:
-
-
     /**
      * @brief struct for loading a checkpoint from json
      */

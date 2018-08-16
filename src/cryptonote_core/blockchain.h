@@ -658,7 +658,7 @@ namespace cryptonote
          *
          * If a block fails a checkpoint and enforce is enabled, the blockchain
          * will be rolled back to two blocks prior to that block.  If enforce
-         * is disabled, as is currently the default case with DNS-based checkpoints,
+         * is disabled,
          * an error will be printed to the user but no other action will be taken.
          *
          * @param points the checkpoints to check against
@@ -667,21 +667,13 @@ namespace cryptonote
         void check_against_checkpoints(const checkpoints& points, bool enforce);
 
         /**
-         * @brief configure whether or not to enforce DNS-based checkpoints
-         *
-         * @param enforce the new enforcement setting
-         */
-        void set_enforce_dns_checkpoints(bool enforce);
-
-        /**
-         * @brief loads new checkpoints from a file and optionally from DNS
+         * @brief loads new checkpoints from a file
          *
          * @param file_path the path of the file to look for and load checkpoints from
-         * @param check_dns whether or not to check for new DNS-based checkpoints
          *
          * @return false if any enforced checkpoint type fails to load, otherwise true
          */
-        bool update_checkpoints(const std::string& file_path, bool check_dns);
+        bool update_checkpoints(const std::string& file_path);
 
 
         // user options, must be called before calling init()
@@ -911,7 +903,6 @@ namespace cryptonote
         checkpoints m_checkpoints;
         std::atomic<bool> m_is_in_checkpoint_zone;
         std::atomic<bool> m_is_blockchain_storing;
-        bool m_enforce_dns_checkpoints;
 
         HardFork *m_hardfork;
 

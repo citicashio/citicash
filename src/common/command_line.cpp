@@ -83,11 +83,6 @@ namespace command_line
   , "Run on testnet. The wallet must be launched with --testnet flag."
   , false
   };
-  const arg_descriptor<bool> arg_dns_checkpoints  = {
-    "enforce-dns-checkpointing"
-  , "checkpoints from DNS server will be enforced"
-  , false
-  };
   const command_line::arg_descriptor<std::string> arg_db_type = {
     "db-type"
   , "Specify database type"
