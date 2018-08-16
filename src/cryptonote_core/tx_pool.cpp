@@ -677,7 +677,7 @@ namespace cryptonote
     //baseline empty block
     get_block_reward(median_size, total_size, already_generated_coins, best_coinbase, height);
 
-    size_t max_total_size = 2*median_size - CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE;
+    size_t max_total_size = std::max(2*median_size - CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE, MAX_BLOCK_SIZE_NOT_CHECKED);
     std::unordered_set<crypto::key_image> k_images;
 
     LOG_PRINT_L2("Filling block template, median size " << median_size << ", " << m_txs_by_fee_and_receive_time.size() << " txes in the pool");
