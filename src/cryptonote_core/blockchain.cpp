@@ -85,7 +85,7 @@ static const struct {
   time_t time;
 } mainnet_hard_forks[] = {
   { 1, 1, 0, 1482806500 },
-  { 2, SOFT_FORK_HEIGHT, 0, 1534269625 } // LUKAS FORK change for production and remove in next update
+  { 2, SOFT_FORK_HEIGHT, 0, 1534766400 } // LUKAS FORK remove in next update
 };
 static const uint64_t mainnet_hard_fork_version_1_till = (uint64_t)-1;
 
