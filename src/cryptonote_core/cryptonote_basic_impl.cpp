@@ -382,7 +382,7 @@ uint64_t decodeRct(const rct::rctSig & rv, const crypto::key_derivation & deriva
   try {
     switch (rv.type) {
       case rct::RCTTypeSimple:
-        return rct::decodeRctSimple(rv, rct::sk2rct(scalar1), i, mask);
+        return rct::decodeRctSimple(rv, rct::sk2rct(scalar1), i, mask, enable_errors);
       case rct::RCTTypeFull:
         return rct::decodeRct(rv, rct::sk2rct(scalar1), i, mask, enable_errors);
       default:

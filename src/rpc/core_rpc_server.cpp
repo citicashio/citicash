@@ -356,12 +356,12 @@ namespace cryptonote
       LOG_PRINT_L4("Public key wasn't found in the transaction extra." << tx_hash);
     cryptonote::blobdata tx_key_data;
     if (!epee::string_tools::parse_hexstr_to_binbuff(txs_view_key, tx_key_data)) {
-      LOG_PRINT_L0("failed to parse tx key");
+      LOG_PRINT_L4("failed to parse tx key");
       return 0;
     }
     const crypto::secret_key view_key = *reinterpret_cast<const crypto::secret_key*>(tx_key_data.data());
     if (sc_check((const unsigned char*)&view_key)) {
-      LOG_PRINT_L0("failed to parse tx key");
+      LOG_PRINT_L4("failed to check secret view key");
       return 0;
     }
     std::vector<crypto::key_derivation> derivations;

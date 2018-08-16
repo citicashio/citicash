@@ -132,7 +132,7 @@ namespace rct {
     static inline bool verRctSimple(const rctSig & rv) { return verRctSimple(rv, true) && verRctSimple(rv, false); }
     xmr_amount decodeRct(const rctSig & rv, const key & sk, unsigned int i, key & mask, bool enable_errors = true);
     xmr_amount decodeRct(const rctSig & rv, const key & sk, unsigned int i);
-    xmr_amount decodeRctSimple(const rctSig & rv, const key & sk, unsigned int i, key & mask);
+    xmr_amount decodeRctSimple(const rctSig & rv, const key & sk, unsigned int i, key & mask, bool enable_errors = true);
     xmr_amount decodeRctSimple(const rctSig & rv, const key & sk, unsigned int i);
 }
 #endif  /* RCTSIGS_H */

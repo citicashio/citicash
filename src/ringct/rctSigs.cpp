@@ -903,7 +903,7 @@ namespace rct {
       return decodeRct(rv, sk, i, mask);
     }
 
-    xmr_amount decodeRctSimple(const rctSig & rv, const key & sk, unsigned int i, key &mask) {
+    xmr_amount decodeRctSimple(const rctSig & rv, const key & sk, unsigned int i, key &mask, bool enable_errors) {
         CHECK_AND_ASSERT_MES(rv.type == RCTTypeSimple, false, "decodeRct called on non simple rctSig");
         CHECK_AND_ASSERT_THROW_MES(rv.p.rangeSigs.size() > 0, "Empty rv.p.rangeSigs");
         CHECK_AND_ASSERT_THROW_MES(rv.outPk.size() == rv.p.rangeSigs.size(), "Mismatched sizes of rv.outPk and rv.p.rangeSigs");
@@ -922,7 +922,11 @@ namespace rct {
         DP("Ctmp");
         DP(Ctmp);
         if (equalKeys(C, Ctmp) == false) {
-            CHECK_AND_ASSERT_THROW_MES(false, "warning, amount decoded incorrectly, will be unable to spend");
+            if (enable_errors) {
+                CHECK_AND_ASSERT_THROW_MES(false, "warning, amount decoded incorrectly, will be unable to spend");
+            }
+            else
+                throw std::runtime_error("incorrectly decrypted amount");
         }
         return h2d(amount);
     }
