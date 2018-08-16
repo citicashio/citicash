@@ -677,7 +677,7 @@ namespace cryptonote
     //baseline empty block
     get_block_reward(median_size, total_size, already_generated_coins, best_coinbase, height);
 
-    size_t max_total_size = std::max(2*median_size - CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE, MAX_BLOCK_SIZE_NOT_CHECKED);
+    size_t max_total_size = (height < SOFT_FORK_HEIGHT) ? 2*median_size - CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE : std::max(2*median_size - CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE, MAX_BLOCK_SIZE_NOT_CHECKED); // LUKAS FORK remove condition and true-clause in next update
     std::unordered_set<crypto::key_image> k_images;
 
     LOG_PRINT_L2("Filling block template, median size " << median_size << ", " << m_txs_by_fee_and_receive_time.size() << " txes in the pool");
