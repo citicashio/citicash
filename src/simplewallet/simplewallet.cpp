@@ -2097,7 +2097,9 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
     cryptonote::address_parse_info info;
     cryptonote::tx_destination_entry de;
     if (!cryptonote::get_account_address_from_str_or_url(info, m_wallet->testnet(), local_args[i])) {
-      std::string address = m_wallet->get_alias_address(local_args[i], false);
+      std::string possible_alias = local_args[i];
+      cryptonote::convert_alias(possible_alias);
+      std::string address = m_wallet->get_alias_address(possible_alias, false);
       if (address.empty() || !get_account_address_from_str(info, m_wallet->testnet(), address)) {
         fail_msg_writer() << tr("wrong address: ") << (address.empty() ? local_args[i] : address);
         return true;
@@ -2467,7 +2469,9 @@ bool simple_wallet::sweep_all(const std::vector<std::string> &args_, bool retry,
 
   cryptonote::address_parse_info info;
   if (!cryptonote::get_account_address_from_str_or_url(info, m_wallet->testnet(), local_args.front())) {
-    std::string address = m_wallet->get_alias_address(local_args.front(), false);
+    std::string possible_alias = local_args.front();
+    cryptonote::convert_alias(possible_alias);
+    std::string address = m_wallet->get_alias_address(possible_alias, false);
     if (address.empty() || !get_account_address_from_str(info, m_wallet->testnet(), address)) {
       fail_msg_writer() << tr("wrong address: ") << address.empty() ? local_args.front() : address;
       return true;

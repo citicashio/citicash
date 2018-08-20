@@ -397,7 +397,9 @@ namespace tools
       cryptonote::address_parse_info info;
       cryptonote::tx_destination_entry de;
       if (!get_account_address_from_str_or_url(info, m_wallet.testnet(), it->address, false)) {
-        std::string address = m_wallet.get_alias_address(it->address, false);
+        std::string possible_alias = it->address;
+        cryptonote::convert_alias(possible_alias);
+        std::string address = m_wallet.get_alias_address(possible_alias, false);
         if (address.empty() || !get_account_address_from_str(info, m_wallet.testnet(), address)) {
           er.code = WALLET_RPC_ERROR_CODE_WRONG_ADDRESS;
           er.message = std::string("WALLET_RPC_ERROR_CODE_WRONG_ADDRESS: ") + (address.empty() ? it->address : address);
