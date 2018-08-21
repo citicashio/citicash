@@ -508,6 +508,10 @@ namespace cryptonote
   }
 
   void convert_alias(std::string& alias) {
+    if(alias.length() > config::MAX_ALIAS_LENGTH ){
+        alias = "";
+        return;
+    }
     for (char& c : alias) {
       if (c == '-' || c == '_' || c == '.' || c == '@' || (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z'))
         continue;

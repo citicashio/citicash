@@ -468,10 +468,15 @@ namespace tools
       return false;
     }
 
+    if (req.alias.length() > config::MAX_ALIAS_LENGTH){
+        er.code = WALLET_RPC_ERROR_CODE_ALIAS_TOOLONG;
+        er.message = "Alias too long";
+    }
+
     cryptonote::convert_alias(req.alias);
     if (req.alias.empty()) {
       er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
-      er.message = "Alias can contain only a-z (conveting A-Z), 0-9, \'-\', \'_\', \'.\' and \'@\'.";
+      er.message = "Alias can contain only a-z (converting to A-Z), 0-9, \'-\', \'_\', \'.\' and \'@\'.";
       return false;
     }
 

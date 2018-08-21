@@ -1407,13 +1407,13 @@ Set description for an account tag.
  
  ####Inputs:
  
- - alias - string; alias to be created for the address
+ - alias - string; alias to be created for the address, shorter than 32 characters `a-z (converting to A-Z), 0-9, '-', '_', '.' and '@'.` 
  - priority - unsigned int; priority of the alias creation transaction
  - unlock_time - unsigned int number of blocks to unlock the alias
  - do_not_relay - bool; if true, do not create the alias, just check if it is free and estimate fee
  ####Outputs:
  
- - hash - string; transacion hash ov the aliasing transaction 
+ - hash - string; transacion hash of the aliasing transaction 
  - fee - unsigned int; 
  ####Example:
      curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"alias_address", params":{"alias":"send_cash","do_not_relay":true}}' -H 'Content-Type: application/json'  

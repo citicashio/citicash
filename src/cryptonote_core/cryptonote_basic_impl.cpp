@@ -98,14 +98,14 @@ namespace cryptonote {
     // rounding (floor) base reward
     base_reward = base_reward / round_factor * round_factor;
 
-    if (current_block_size > std::max(2*median_size, MAX_BLOCK_SIZE_NOT_CHECKED)) {
+      if (current_block_size > std::max(2*median_size, MAX_BLOCK_SIZE_NOT_CHECKED)) {
       LOG_PRINT_L1("Block cumulative size is too big: " << current_block_size << ", expected no more than " << std::max(2*median_size, MAX_BLOCK_SIZE_NOT_CHECKED));
-      return false;
-    }
-    else {
-      reward = base_reward;
-      return true;
-    }
+        return false;
+      }
+      else {
+        reward = base_reward;
+        return true;
+      }
   }
   //------------------------------------------------------------------------------------
   uint8_t get_account_address_checksum(const public_address_outer_blob& bl)

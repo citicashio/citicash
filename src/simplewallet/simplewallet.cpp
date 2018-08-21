@@ -4082,7 +4082,7 @@ bool simple_wallet::alias_address(const std::vector<std::string> &args) {
 
   cryptonote::convert_alias(local_args.front());
   if (local_args.front().empty()) {
-    fail_msg_writer() << tr("Alias can contain only a-z (conveting A-Z), 0-9, \'-\', \'_\', \'.\' and \'@\'.");
+    fail_msg_writer() << tr("Alias can contain only a-z (converting A-Z), 0-9, \'-\', \'_\', \'.\' and \'@\'. and must be shorter than 32");
     return true;
   }
 
