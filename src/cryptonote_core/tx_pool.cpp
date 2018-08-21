@@ -677,33 +677,22 @@ namespace cryptonote
     //baseline empty block
     get_block_reward(median_size, total_size, already_generated_coins, best_coinbase, height);
 
-    size_t max_total_size = (height < SOFT_FORK_HEIGHT) ? 2*median_size - CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE : std::max(2*median_size - CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE, MAX_BLOCK_SIZE_NOT_CHECKED); // LUKAS FORK remove condition and true-clause in next update
     std::unordered_set<crypto::key_image> k_images;
 
     LOG_PRINT_L2("Filling block template, median size " << median_size << ", " << m_txs_by_fee_and_receive_time.size() << " txes in the pool");
     auto sorted_it = m_txs_by_fee_and_receive_time.begin();
     while (sorted_it != m_txs_by_fee_and_receive_time.end()) {
       auto tx_it = m_transactions.find(sorted_it->second);
-      LOG_PRINT_L2("Considering " << tx_it->first << ", size " << tx_it->second.blob_size << ", current block size " << total_size << "/" << max_total_size << ", current coinbase " << print_money(best_coinbase));
-
-      // Can not exceed maximum block size
-      if (max_total_size < total_size + tx_it->second.blob_size)
-      {
-        LOG_PRINT_L2("  would exceed maximum block size");
-        sorted_it++;
-        continue;
-      }
+      LOG_PRINT_L2("Considering " << tx_it->first << ", size " << tx_it->second.blob_size << ", current block size " << total_size << ", current coinbase " << print_money(best_coinbase));
             
       uint64_t block_reward;
-      if (!get_block_reward(median_size, total_size + tx_it->second.blob_size + CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE, already_generated_coins, block_reward, height))
-      {
+      if (!get_block_reward(median_size, total_size + tx_it->second.blob_size + CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE, already_generated_coins, block_reward, height)) {
         LOG_PRINT_L2("  would exceed maximum block size");
         sorted_it++;
         continue;
       }
       uint64_t coinbase = block_reward + fee + tx_it->second.fee;
-      if (coinbase < template_accept_threshold(best_coinbase))
-      {
+      if (coinbase < template_accept_threshold(best_coinbase)) {
         LOG_PRINT_L2("  would decrease coinbase to " << print_money(coinbase));
         sorted_it++;
         continue;
@@ -712,14 +701,12 @@ namespace cryptonote
       // Skip transactions that are not ready to be
       // included into the blockchain or that are
       // missing key images
-      if (!is_transaction_ready_to_go(tx_it->second))
-      {
+      if (!is_transaction_ready_to_go(tx_it->second)) {
         LOG_PRINT_L2("  not ready to go");
         sorted_it++;
         continue;
       }
-      if (have_key_images(k_images, tx_it->second.tx))
-      {
+      if (have_key_images(k_images, tx_it->second.tx)) {
         LOG_PRINT_L2("  key images already seen");
         sorted_it++;
         continue;
@@ -732,11 +719,11 @@ namespace cryptonote
 
       append_key_images(k_images, tx_it->second.tx);
       sorted_it++;
-      LOG_PRINT_L2("  added, new block size " << total_size << "/" << max_total_size << ", coinbase " << print_money(best_coinbase));
+      LOG_PRINT_L2("  added, new block size " << total_size << ", coinbase " << print_money(best_coinbase));
     }
 
     LOG_PRINT_L2("Block template filled with " << bl.tx_hashes.size() << " txes, size "
-      << total_size << "/" << max_total_size << ", coinbase " << print_money(best_coinbase)
+      << total_size << ", coinbase " << print_money(best_coinbase)
       << " (including " << print_money(fee) << " in fees)");
     return true;
   }
