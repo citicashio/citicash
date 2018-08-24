@@ -216,8 +216,13 @@ bool Blockchain::scan_outputkeys_for_indexes(size_t tx_version, const txin_to_ke
         LOG_PRINT_L0("Output does not exist! amount = " << tx_in_to_key.amount << ", absolute_offset = " << i);
         return false;
       }
+      auto h = output_index.height;
+      if(h < 1){
+        LOG_ERROR("attempt to spend output from  block zero");
+        return false;
+      }
 
-      // if on last output and pmax_related_block_height not null pointer
+        // if on last output and pmax_related_block_height not null pointer
       if(++count == absolute_offsets.size() && pmax_related_block_height)
       {
         // set *pmax_related_block_height to tx block height for this output

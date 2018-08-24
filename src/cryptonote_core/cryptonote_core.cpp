@@ -630,7 +630,7 @@ namespace cryptonote
       coinbase_amount = 0;
       tx_fee_amount = 0;
     }
-
+    emission_amount -= GENESIS_BLOCK_REWARD;
     return std::pair<uint64_t, uint64_t>(emission_amount, total_fee_amount);
   }
   //-----------------------------------------------------------------------------------------------
