@@ -45,9 +45,6 @@ using namespace epee;
 
 #include "wallet/wallet2.h"
 
-#define MAX_RESTRICTED_FAKE_OUTS_COUNT 40
-#define MAX_RESTRICTED_GLOBAL_FAKE_OUTS_COUNT 500
-
 namespace cryptonote
 {
 
@@ -216,15 +213,6 @@ namespace cryptonote
     CHECK_CORE_BUSY();
     res.status = "Failed";
 
-    if (m_restricted)
-    {
-      if (req.amounts.size() > 100 || req.outs_count > MAX_RESTRICTED_FAKE_OUTS_COUNT)
-      {
-        res.status = "Too many outs requested";
-        return true;
-      }
-    }
-
     if(!m_core.get_random_outs_for_amounts(req, res))
     {
       return true;
@@ -255,15 +243,6 @@ namespace cryptonote
     CHECK_CORE_BUSY();
     res.status = "Failed";
 
-    if (m_restricted)
-    {
-      if (req.outputs.size() > MAX_RESTRICTED_GLOBAL_FAKE_OUTS_COUNT)
-      {
-        res.status = "Too many outs requested";
-        return true;
-      }
-    }
-
     if(!m_core.get_outs(req, res))
     {
       return true;
@@ -277,15 +256,6 @@ namespace cryptonote
   {
     CHECK_CORE_BUSY();
     res.status = "Failed";
-
-    if (m_restricted)
-    {
-      if (req.outputs.size() > MAX_RESTRICTED_GLOBAL_FAKE_OUTS_COUNT)
-      {
-        res.status = "Too many outs requested";
-        return true;
-      }
-    }
 
     cryptonote::COMMAND_RPC_GET_OUTPUTS_BIN::request req_bin;
     req_bin.outputs = req.outputs;
