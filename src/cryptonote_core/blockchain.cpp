@@ -3189,7 +3189,7 @@ leave:
     cumulative_difficulty += m_db->get_block_cumulative_difficulty(height - 1);
 
   TIME_MEASURE_FINISH(block_processing_time);
-  if(precomputed)
+  if (precomputed)
     block_processing_time += m_fake_pow_calc_time;
 
   m_db->block_txn_stop();
