@@ -4080,6 +4080,11 @@ bool simple_wallet::alias_address(const std::vector<std::string> &args) {
     return true;
   }
 
+  if (local_args.front().length() > config::MAX_ALIAS_LENGTH) {
+    fail_msg_writer() << tr("Alias too long.");
+    return true;
+  }
+
   cryptonote::convert_alias(local_args.front());
   if (local_args.front().empty()) {
     fail_msg_writer() << tr("Alias can contain only a-z (converting A-Z), 0-9, \'-\', \'_\', \'.\' and \'@\'. and must be shorter than 32");
