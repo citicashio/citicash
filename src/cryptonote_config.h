@@ -153,7 +153,7 @@ namespace config
     } }; // Bender's nightmare
   std::string const GENESIS_TX = "020a01ff00018080b6a58eb9e7ef01029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807121010a5323532a4e4b43bc329f376ffc544acc70fce3ce11a1689d3592bf1a30f02c00";
   uint32_t const GENESIS_NONCE = 10000;
-  uint32_t const MAX_ALIAS_LENGTH = 32;
+  uint32_t const MAX_ALIAS_LENGTH = 42;
 
   namespace testnet
   {

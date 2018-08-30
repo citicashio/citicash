@@ -508,7 +508,7 @@ namespace cryptonote
   }
 
   void convert_alias(std::string& alias) {
-    if (alias.length() > config::MAX_ALIAS_LENGTH ){
+    if (alias.length() > config::MAX_ALIAS_LENGTH ) {
         alias = "";
         return;
     }
