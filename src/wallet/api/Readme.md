@@ -1407,7 +1407,7 @@ Set description for an account tag.
  
  ####Inputs:
  
- - alias - string; alias to be created for the address, shorter than 32 characters `a-z (converting A-Z), 0-9, '-', '_', '.' and '@'.` 
+ - alias - string; alias to be created for the address, shorter than 42 characters `a-z (converting A-Z), 0-9, '-', '_', '.' and '@'.` 
  - priority - unsigned int; priority of the alias creation transaction
  - unlock_time - unsigned int number of blocks to unlock the alias
  - do_not_relay - bool; if true, do not create the alias, just check if it is free and estimate fee
