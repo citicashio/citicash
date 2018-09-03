@@ -216,17 +216,17 @@ bool Blockchain::scan_outputkeys_for_indexes(size_t tx_version, const txin_to_ke
         LOG_PRINT_L0("Output does not exist! amount = " << tx_in_to_key.amount << ", absolute_offset = " << i);
         return false;
       }
+
       auto h = output_index.height;
-      if(h < 1){
-        LOG_ERROR("attempt to spend output from  block zero");
+      if (h < 1) {
+        LOG_ERROR("attempt to spend output from block zero");
         return false;
       }
 
-        // if on last output and pmax_related_block_height not null pointer
+      // if on last output and pmax_related_block_height not null pointer
       if(++count == absolute_offsets.size() && pmax_related_block_height)
       {
         // set *pmax_related_block_height to tx block height for this output
-        auto h = output_index.height;
         if(*pmax_related_block_height < h)
         {
           *pmax_related_block_height = h;
@@ -2734,7 +2734,7 @@ bool Blockchain::is_tx_spendtime_unlocked(uint64_t unlock_time) const
 }
 //------------------------------------------------------------------
 // This function locates all outputs associated with a given input (mixins)
-// and validates that they exist and are usable.  It also checks the ring
+// and validates that they exist and are usable. It also checks the ring
 // signature for each input.
 bool Blockchain::check_tx_input(size_t tx_version, const txin_to_key& txin, const crypto::hash& tx_prefix_hash, const std::vector<crypto::signature>& sig, const rct::rctSig &rct_signatures, std::vector<rct::ctkey> &output_keys, uint64_t* pmax_related_block_height)
 {

@@ -638,7 +638,7 @@ void BlockchainLMDB::add_block(const block& blk, const size_t& block_size, const
   mdb_block_info bi;
   bi.bi_height = m_height;
   bi.bi_timestamp = blk.timestamp;
-  bi.bi_coins = coins_generated;
+  bi.bi_coins = m_height ? coins_generated : 0;
   bi.bi_size = block_size;
   bi.bi_diff = cumulative_difficulty;
   bi.bi_hash = blk_hash;

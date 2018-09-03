@@ -613,7 +613,7 @@ namespace cryptonote
     uint64_t emission_amount = 0;
     uint64_t total_fee_amount = 0;
     uint64_t tx_fee_amount = 0;
-    this->get_blocks(start_offset, count, blocks);
+    this->get_blocks(std::max(uint64_t(1), start_offset), count, blocks);
     BOOST_FOREACH(auto& b, blocks)
     {
       coinbase_amount = get_outs_money_amount(b.miner_tx);
@@ -630,7 +630,6 @@ namespace cryptonote
       coinbase_amount = 0;
       tx_fee_amount = 0;
     }
-    emission_amount -= GENESIS_BLOCK_REWARD;
     return std::pair<uint64_t, uint64_t>(emission_amount, total_fee_amount);
   }
   //-----------------------------------------------------------------------------------------------
