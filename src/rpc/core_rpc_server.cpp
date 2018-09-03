@@ -738,7 +738,7 @@ namespace cryptonote
       error_resp.message = "Core is busy";
       return false;
     }
-    if(req.size() != 1)
+    if(req.size() != 1 || !req[0])
     {
       error_resp.code = CORE_RPC_ERROR_CODE_WRONG_PARAM;
       error_resp.message = "Wrong parameters, expected height";
@@ -1035,7 +1035,7 @@ namespace cryptonote
       return false;
     }
     const uint64_t bc_height = m_core.get_current_blockchain_height();
-    if (req.start_height >= bc_height || req.end_height >= bc_height || req.start_height > req.end_height)
+    if (req.end_height >= bc_height || req.start_height > req.end_height || !req.start_height)
     {
       error_resp.code = CORE_RPC_ERROR_CODE_TOO_BIG_HEIGHT;
       error_resp.message = "Invalid start/end heights.";
@@ -1085,6 +1085,11 @@ namespace cryptonote
       error_resp.message = "Core is busy.";
       return false;
     }
+    if (!req.height) {
+      error_resp.code = CORE_RPC_ERROR_CODE_WRONG_PARAM;
+      error_resp.message = "Height not specified.";
+      return false;
+    }
     if(m_core.get_current_blockchain_height() <= req.height)
     {
       error_resp.code = CORE_RPC_ERROR_CODE_TOO_BIG_HEIGHT;
@@ -1131,6 +1136,11 @@ namespace cryptonote
     }
     else
     {
+      if (!req.height) {
+        error_resp.code = CORE_RPC_ERROR_CODE_WRONG_PARAM;
+        error_resp.message = "Height not specified.";
+        return false;
+      }
       if(m_core.get_current_blockchain_height() <= req.height)
       {
         error_resp.code = CORE_RPC_ERROR_CODE_TOO_BIG_HEIGHT;
