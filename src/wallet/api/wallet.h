@@ -113,6 +113,7 @@ public:
                                         uint32_t subaddr_account = 0,
                                         std::set<uint32_t> subaddr_indices = {});
     virtual PendingTransaction * createSweepUnmixableTransaction();
+    PendingTransaction * createAlias(const std::string& alias, PendingTransaction::Priority priority);
 
     virtual void disposeTransaction(PendingTransaction * t);
     virtual TransactionHistory * history();

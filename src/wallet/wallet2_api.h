@@ -560,6 +560,8 @@ struct Wallet
 
     virtual PendingTransaction * createSweepUnmixableTransaction() = 0;
 
+    virtual PendingTransaction * createAlias(const std::string& alias, PendingTransaction::Priority priority) = 0;
+
     /*!
      * \brief disposeTransaction - destroys transaction object
      * \param t -  pointer to the "PendingTransaction" object. Pointer is not valid after function returned;
