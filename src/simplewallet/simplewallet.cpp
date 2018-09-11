@@ -1197,7 +1197,9 @@ bool simple_wallet::handle_command_line(const boost::program_options::variables_
 bool simple_wallet::try_connect_to_daemon(bool silent)
 {
   uint32_t version = 0;
-  if (!m_wallet->check_connection(&version))
+  if(!m_wallet)
+    return false;
+  if ( !m_wallet->check_connection(&version))
   {
     if (!silent)
       fail_msg_writer() << tr("wallet failed to connect to daemon: ") << m_wallet->get_daemon_address() << ". " <<
