@@ -787,6 +787,10 @@ PRAGMA_WARNING_DISABLE_VS(4355)
     boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve(query);
     acceptor_.open(endpoint.protocol());
     acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
+#ifdef __linux__
+    typedef boost::asio::detail::socket_option::boolean<SOL_SOCKET, SO_REUSEPORT> reuse_port; //TODO Maybe Boost will be cross-platform one day
+    acceptor_.set_option(reuse_port(true));
+#endif
     acceptor_.bind(endpoint);
     acceptor_.listen();
     boost::asio::ip::tcp::endpoint binded_endpoint = acceptor_.local_endpoint();
