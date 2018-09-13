@@ -92,9 +92,18 @@ invokes cmake commands as needed.
 
 * Install the dependencies (see the list above)
 
+    \- On Ubuntu 18.04 you need to have universe repository added (https://askubuntu.com/questions/148638/how-do-i-enable-the-universe-repository)
+
+        sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe"
+
+    \- And update package list
+
+	sudo apt update
+
     \- On Ubuntu 16.04, essential dependencies can be installed with the following command:
 
         sudo apt install build-essential cmake libboost-all-dev libssl-dev pkg-config
+
 
     \- On Mac OS X, install Homebrew first.
 
