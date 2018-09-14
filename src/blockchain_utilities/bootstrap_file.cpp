@@ -423,10 +423,10 @@ uint64_t BootstrapFile::count_blocks(const std::string& import_file_path)
       throw std::runtime_error("Error in deserialization of chunk_size");
     LOG_PRINT_L3("chunk_size: " << chunk_size);
 
-    if (chunk_size > 100000)
+    if (chunk_size > MAX_BLOCK_SIZE_NOT_CHECKED)
     {
       std::cout << refresh_string;
-      LOG_PRINT_L0("NOTE: chunk_size " << chunk_size << " > 100000" << "  height: "
+      LOG_PRINT_L0("NOTE: chunk_size " << chunk_size << " > " << MAX_BLOCK_SIZE_NOT_CHECKED << "  height: "
           << h-1);
     }
     else if (chunk_size <= 0) {

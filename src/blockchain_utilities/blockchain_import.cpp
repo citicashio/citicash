@@ -282,9 +282,9 @@ int import_from_file(FakeCore& simple_core, const std::string& import_file_path,
     }
     LOG_PRINT_L3("chunk_size: " << chunk_size);
 
-    if (chunk_size > 100000)
+    if (chunk_size > MAX_BLOCK_SIZE_NOT_CHECKED)
     {
-      LOG_PRINT_L0("NOTE: chunk_size " << chunk_size << " > 100000");
+      LOG_PRINT_L0("NOTE: chunk_size " << chunk_size << " > " << MAX_BLOCK_SIZE_NOT_CHECKED);
     }
     else if (chunk_size == 0) {
       LOG_PRINT_L0("ERROR: chunk_size == 0");
