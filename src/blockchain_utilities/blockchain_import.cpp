@@ -221,8 +221,6 @@ int import_from_file(FakeCore& simple_core, const std::string& import_file_path,
   // 4 byte magic + (currently) 1024 byte header structures
   bootstrap.seek_to_first_chunk(import_file);
 
-  std::string str1;
-  char buffer1[1024];
   block b;
   transaction tx;
   int quit = 0;
@@ -267,7 +265,8 @@ int import_from_file(FakeCore& simple_core, const std::string& import_file_path,
   while (! quit)
   {
     uint32_t chunk_size;
-    import_file.read(buffer1, sizeof(chunk_size));
+    std::string buffer(sizeof(chunk_size), '\0');
+    import_file.read(&buffer.front(), sizeof(chunk_size));
     // TODO: bootstrap.read_chunk();
     if (! import_file) {
       std::cout << refresh_string;
@@ -277,8 +276,7 @@ int import_from_file(FakeCore& simple_core, const std::string& import_file_path,
     }
     bytes_read += sizeof(chunk_size);
 
-    str1.assign(buffer1, sizeof(chunk_size));
-    if (! ::serialization::parse_binary(str1, chunk_size))
+    if (! ::serialization::parse_binary(buffer, chunk_size))
     {
       throw std::runtime_error("Error in deserialization of chunk size");
     }
@@ -297,8 +295,8 @@ int import_from_file(FakeCore& simple_core, const std::string& import_file_path,
       LOG_PRINT_L0("ERROR: chunk_size == 0");
       return 2;
     }
-    std::string buffer_block(chunk_size, '\0');
-    import_file.read(&buffer_block.front(), chunk_size);
+    buffer.assign(chunk_size, '\0');
+    import_file.read(&buffer.front(), chunk_size);
     if (!import_file) {
       LOG_PRINT_L0("ERROR: unexpected end of file: bytes read before error: "
           << import_file.gcount() << " of chunk_size " << chunk_size);
@@ -325,9 +323,8 @@ int import_from_file(FakeCore& simple_core, const std::string& import_file_path,
 
     try
     {
-      str1.assign(buffer_block.data(), chunk_size);
       bootstrap::block_package bp;
-      if (! ::serialization::parse_binary(str1, bp))
+      if (! ::serialization::parse_binary(buffer, bp))
         throw std::runtime_error("Error in deserialization of chunk");
 
       int display_interval = 1000;
