@@ -282,11 +282,6 @@ int import_from_file(FakeCore& simple_core, const std::string& import_file_path,
     }
     LOG_PRINT_L3("chunk_size: " << chunk_size);
 
-    if (chunk_size > BUFFER_SIZE)
-    {
-      LOG_PRINT_L0("WARNING: chunk_size " << chunk_size << " > BUFFER_SIZE " << BUFFER_SIZE);
-      throw std::runtime_error("Aborting: chunk size exceeds buffer size");
-    }
     if (chunk_size > 100000)
     {
       LOG_PRINT_L0("NOTE: chunk_size " << chunk_size << " > 100000");
