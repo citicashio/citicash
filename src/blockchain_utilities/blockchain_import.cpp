@@ -223,7 +223,6 @@ int import_from_file(FakeCore& simple_core, const std::string& import_file_path,
 
   std::string str1;
   char buffer1[1024];
-  std::string buffer_block;
   block b;
   transaction tx;
   int quit = 0;
@@ -298,8 +297,9 @@ int import_from_file(FakeCore& simple_core, const std::string& import_file_path,
       LOG_PRINT_L0("ERROR: chunk_size == 0");
       return 2;
     }
+    std::string buffer_block(chunk_size, '\0');
     import_file.read(&buffer_block.front(), chunk_size);
-    if (! import_file) {
+    if (!import_file) {
       LOG_PRINT_L0("ERROR: unexpected end of file: bytes read before error: "
           << import_file.gcount() << " of chunk_size " << chunk_size);
       return 2;
