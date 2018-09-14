@@ -223,7 +223,7 @@ int import_from_file(FakeCore& simple_core, const std::string& import_file_path,
 
   std::string str1;
   char buffer1[1024];
-  char buffer_block[BUFFER_SIZE];
+  std::string buffer_block;
   block b;
   transaction tx;
   int quit = 0;
@@ -298,7 +298,7 @@ int import_from_file(FakeCore& simple_core, const std::string& import_file_path,
       LOG_PRINT_L0("ERROR: chunk_size == 0");
       return 2;
     }
-    import_file.read(buffer_block, chunk_size);
+    import_file.read(&buffer_block.front(), chunk_size);
     if (! import_file) {
       LOG_PRINT_L0("ERROR: unexpected end of file: bytes read before error: "
           << import_file.gcount() << " of chunk_size " << chunk_size);
@@ -325,7 +325,7 @@ int import_from_file(FakeCore& simple_core, const std::string& import_file_path,
 
     try
     {
-      str1.assign(buffer_block, chunk_size);
+      str1.assign(buffer_block.data(), chunk_size);
       bootstrap::block_package bp;
       if (! ::serialization::parse_binary(str1, bp))
         throw std::runtime_error("Error in deserialization of chunk");
