@@ -1,0 +1,17 @@
+How is the synchronization of the desktop wallet so fast and doesn't take much space on a disk?
+1) The desktop wallet only runs wallet backend locally and connects to a remote daemon, which has the whole blockchain stored.
+2) The desktop wallet needs to store some data locally, but the new wallet is synchronizing just from the block, where the wallet was created.
+3) By default, the wallet backend connects to a daemon running on our server closest to the wallet.
+
+How is it possible to make the wallet work on mobile phones (compared to Monero which doesn't provide mobile wallet)?
+The mobile wallet uses the wallet API that is included as a library, so it meets the mobile environment requirements.
+We plan to use the library approach even for the desktop wallet, but it needs some more work.
+
+How do the automatic desktop wallet updates work?
+When the application starts, it checks for a new update. If a new version is available, the download and installation begin.
+The installation can update both the wallet frontend and its backend. Our servers with the daemons are already updated prior to the wallet update notification.
+Everyone can connect to any daemon instead of using our servers and in this case, we can use a feature that notifies daemons about the upcoming soft- or hard-forks (only if fork needed, usually not). By doing that we prevent backward incompatibility between wallet backend and daemon.
+
+Network throughput
+The maximum we have tried, was ~400 transactions every block (block sizes above 5MB) and it worked fine.
+We removed some unnecessary blockers of the network throughput, but we still want to focus this area a lot, because we expect that the number of transactions will grow rapidly.

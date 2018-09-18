@@ -1,0 +1,43 @@
+Aliases
+Alias is created by sending normal transaction containing extra information: 1) the alias, 2) wallet address, 3) alias signed by the wallet (for verification).
+Maximum alias size is 42 and can contain case-insensitive letters (big converted to small), digits and following characters: '-', '_', '.' and '@'.
+You need to wait 10 blocks before the alias can be used.
+Everytime you send a transaction to the alias instead of an address, the wallet asks a daemon about the alias and receives it's address, which is then used in the transaction.
+Aliases are stored both in the blockchain and in the memory to be as fast as possible.
+
+Payment note
+We changed original payment_id which could only have exactly 8 or 64 hex-characters to more useful payment note that can contain text.
+Maximum payment_id size is 32 and can contain both lower- and upper-case letters, digits and following characters: '/', '-', '?', ':', '(', ')', '.', ',', '_', '+' and ' '.
+
+Mixin
+Minimum and default mixin amount is 6 (Monero allowed transactions without mixin in the past and they still allow mixin as low as 1 currently => that allows a minimum of only 2 outs mixed together).
+
+Transaction and block sizes
+Maximum transaction size set to 0.5MB.
+Maximum block size that isn't checked is 5MB, bigger blocks checked to be under twice the median size of last 60 blocks (~1 hour).
+
+Difficulty set so block is mined every ~1 minute.
+Merged CryptoNight v2 to add resistance against ASIC mining.
+
+Improved wallet backend interfaces for desktop wallet frontend so it can be as fast and simple as possible.
+- get_transfers pagination
+- get_transfers filter_by_timestamp
+- show_transfers improved
+- getblock improved
+- unlock_time improved
+- other
+Improved wallet backend interfaces for web and mobile wallets that are coming soon (now under testing).
+
+Improved export/import of the blockchain.
+Improved wallet backend login storing (in memory instead of a file).
+Added reuse of ports for wallet backend.
+Fixed do_not_relay parameter not working for transactions, that prevented retrieving data for transactions before they are actually sent.
+
+Removed DNS checkpoint checking from the code (because it does not add any more security than having only hard-coded checkpoints).
+Removed deprecated Berkeley DB and code for unused databases.
+Removed no longer used old methods for transactions.
+Removed strange behaviour that provided only 269736 bytes of space for transactions inside block (SUMOKOIN and Ryo Currency problem).
+Removed poorly designed output restriction in restricted mode.
+
+Maintenance, fixing security problems, merging commits from Monero and others.
+Nowadays we work on Kovri to be started automatically with the daemon. 
