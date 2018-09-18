@@ -19,6 +19,16 @@ CitiCash is a fork from Sumokoin, one of the most respectable cryptocurrency wel
 
 CitiCash, therefore, is a new Sumokoin without its legacy, a _truely fungible_ cryptocurrency among just a few ones in the market.
 
+## Chronology
+
+**Bitcoin** protocol => everything public (transaction amount, source and destination)
+**Zerocoin** protocol => more anonymity
+**CryptoNote** protocol => added **ring signatures** so everything private (transaction amount, source and destination)
+- **Monero** (added **privacy** and **fixed security problems** that remained in other CryptoNote currencies)
+- **SUMOKOIN** (added **ghost addresses** before Monero did, **RingCT from start**, default mixin as minimum mixin)
+- **Ryo Currency** (same as SUMOKOIN, their team splitted)
+- **CitiCash** (added **aliases**, **simple** and **good-looking wallets**, more **useful payment-note** and other improvements => see below)
+
 ## Coin Supply & Emission
 
 - **Total supply**: **1,000,000,000** coins in first 20 years.
