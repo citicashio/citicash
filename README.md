@@ -15,9 +15,18 @@ Portions Copyright (c) 2012-2013, The Cryptonote developers
 
 ## Introduction
 
-CitiCash is a fork from Sumokoin, one of the most respectable cryptocurrency well-known for **security, privacy, untraceability** and **active development**. Starting as an educational project, we found that it would be great to create a new coin with high level of privacy by (1) moving forward right away to **Ring Confidential Transactions (RingCT)**, (2) setting **minimum transaction _mixin_ to 6** that would greatly reduce chance of being attacked, traced or identified by (blockchain) statistical analysis.
+**CitiCash** is the **most secure, private and untraceable decentralised cryptocurrency** out there. You are your bank, you control your funds, and nobody can trace your transfers unless you allow them to do so.  
+**CitiCash** allows you to create an **_alias_** for your address so anyone can send transactions to your alias instead of your address.  
+**CitiCash** allows you to attach a text called **_payment note_** for the recipient(s) of your transaction.  
+It's a fork from SUMOKOIN, which is a fork from Monero, a cryptocurrency known for **security, privacy, untraceability** and **active development**.  
+We forked SUMOKOIN, because it seemed to contain higher level of privacy than Monero at the start of the development because of SUMOKOIN using 1) **Ring Confidential Transactions (RingCT)** from the blockchain start, 2) **hard-coded minimum mixin, which we set to 6** and 3) **ghost addresses** (Monero didn't have them at the time of forking, but now even Monero supports them). These settings significantly reduce the chance of being identified, traced or attacked by blockchain statistical analysis.  
 
-CitiCash, therefore, is a new Sumokoin without its legacy, a _truely fungible_ cryptocurrency among just a few ones in the market.
+**CitiCash** has a very high privacy setting that is suitable for all high confidential transactions as well as for storage of value without being traced, monitored or identified. We call this **_true fungibility_**. This means that each coin is equal and interchangeable; it is highly unlikely that any coin can ever be blacklisted due to previous transactions. Over the course of many years these characteristics will pay off as crypto attacks become more sophisticated with much greater computation power in the future.
+CitiCash, therefore, is a new CryptoNote implementation with all Monero and SUMOKOIN features without their legacy, so a **_truly fungible_** cryptocurrency among just a few ones on the market.
+
+**Privacy**: CitiCash uses robust cryptographical system to allow you to send and receive funds without your transactions being easily revealed on the blockchain (the ledger of transactions that everyone has). This ensures that your purchases, receipts, and all transfers remain absolutely private by default.  
+**Security**: Using the power of a distributed peer-to-peer consensus network, every transaction on the network is cryptographically secured. Individual wallets have a 26 word mnemonic seed that is only displayed once, and can be written down to backup the wallet. Wallet files are encrypted with a passphrase to ensure they are useless if stolen.  
+**Untraceability**: By taking advantage of ring signatures, a special property of a certain type of cryptography, CitiCash is able to ensure that transactions are not only untraceable, but have a measure of ambiguity that ensures that transactions cannot easily be tied back to an individual user or computer.
 
 ## Chronology
 
