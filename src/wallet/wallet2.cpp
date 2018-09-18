@@ -1799,6 +1799,8 @@ void wallet2::refresh(uint64_t start_height, uint64_t & blocks_fetched, bool& re
   }
 
   LOG_PRINT_L1("Refresh done, blocks received: " << blocks_fetched << ", balance (all accounts): " << print_money(balance_all()) << ", unlocked: " << print_money(unlocked_balance_all()));
+  if (blocks_fetched > 0)
+    store();
 }
 //----------------------------------------------------------------------------------------------------
 bool wallet2::refresh(uint64_t & blocks_fetched, bool& received_money, bool& ok)
@@ -2558,6 +2560,8 @@ void wallet2::store_to(const std::string &path, const std::string &password)
   // 3. rename *.new to wallet_name
 
   // handle if we want just store wallet state to current files (ex store() replacement);
+  std::lock_guard<std::mutex> lock(m_wallet_file_lock);
+
   bool same_file = true;
   if (!path.empty())
   {

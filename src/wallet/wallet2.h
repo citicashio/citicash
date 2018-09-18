@@ -745,6 +745,7 @@ namespace tools
     uint64_t m_refresh_from_block_height;
     bool m_confirm_missing_payment_id;
     std::unordered_set<crypto::hash> m_scanned_pool_txs[2];
+    std::mutex m_wallet_file_lock;
   };
 }
 BOOST_CLASS_VERSION(tools::wallet2, 19)
