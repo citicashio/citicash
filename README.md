@@ -21,8 +21,8 @@ CitiCash, therefore, is a new Sumokoin without its legacy, a _truely fungible_ c
 
 ## Chronology
 
-**Bitcoin** protocol => everything public (transaction amount, source and destination)
-**Zerocoin** protocol => more anonymity
+**Bitcoin** protocol => everything public (transaction amount, source and destination)  
+**Zerocoin** protocol => some privacy  
 **CryptoNote** protocol => added **ring signatures** so everything private (transaction amount, source and destination)
 - **Monero** (added **privacy** and **fixed security problems** that remained in other CryptoNote currencies)
 - **SUMOKOIN** (added **ghost addresses** before Monero did, **RingCT from start**, default mixin as minimum mixin)
