@@ -30,10 +30,14 @@
 // 
 // Parts of this file are originally copyright (c) 2012-2013 The Cryptonote developers
 
+
+
 #pragma once
 
 #include <string>
 #include <boost/uuid/uuid.hpp>
+#include "./../contrib/epee/include/string_tools.h"
+
 
 #define CRYPTONOTE_DNS_TIMEOUT_MS                       20000
 
@@ -62,7 +66,7 @@
 // COIN - number of smallest units in one coin
 #define COIN                                            ((uint64_t)1000000000) // pow(10, 9)
 
-#define FEE_PER_KB                                      ((uint64_t)5750000) 
+#define FEE_PER_KB                                      ((uint64_t)5750000)
 #define DYNAMIC_FEE_PER_KB_BASE_FEE                     ((uint64_t)5750000) // 0.0005 * pow(10, 9) * 11.5
 #define DYNAMIC_FEE_PER_KB_BASE_BLOCK_REWARD            ((uint64_t)736000000000) // 64 * pow(10, 9) * 11.5
 
@@ -128,7 +132,7 @@
 #define PEAK_COIN_EMISSION_HEIGHT                       ((uint64_t) (((12 * 30.4375 * 24 * 3600)/DIFFICULTY_TARGET) * PEAK_COIN_EMISSION_YEAR)) // = (# of heights emmitted per year) * PEAK_COIN_EMISSION_YEAR
 
 #define DEFAULT_MIXIN                                   6      // default & minimum mixin allowed
-#define MAX_MIXIN                                       240    
+#define MAX_MIXIN                                       240
 
 #define TRANSACTION_SIZE_LIMIT                          ((size_t)(0.5*1024*1024)) // 0.5MB
 #define MAX_BLOCK_SIZE_NOT_CHECKED                      ((size_t)(  5*1024*1024)) //   5MB
@@ -145,15 +149,25 @@ namespace config
   uint64_t const CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX = 0x77d4; //cci
   uint64_t const CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX = 0x7754; // ccg
   //uint64_t const CRYPTONOTE_PUBLIC_INTEGRATED_SUBADDRESS_BASE58_PREFIX = 0x5b19a; // Subi
-  uint16_t const P2P_DEFAULT_PORT = 19833;
-  uint16_t const RPC_DEFAULT_PORT = 19834;
+
+#define DEVNET
+#ifdef DEVNET
+#include "devnet.h"
+#endif
+
+#ifdef DEVNET
+    DEVNET_ID_GENTX
+#else
+  uint16_t const P2P_DEFAULT_PORT = 39833;
+  uint16_t const RPC_DEFAULT_PORT = 39834;
 
   boost::uuids::uuid const NETWORK_ID = { {
       0xdf, 0xce, 0xfc, 0x7d, 0x27, 0x4a, 0x24, 0xd4, 0xf3, 0x8d, 0x42, 0x44, 0x42, 0xa8, 0x04, 0x66
     } }; // Bender's nightmare
-  std::string const GENESIS_TX = "020a01ff00018080b6a58eb9e7ef01029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807121010a5323532a4e4b43bc329f376ffc544acc70fce3ce11a1689d3592bf1a30f02c00";
-  uint32_t const GENESIS_NONCE = 10000;
-  uint32_t const MAX_ALIAS_LENGTH = 42;
+  std::string const GENESIS_TX = "020a01ff00018080b6a58eb9e7ef01029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd0880712101526505139993ba0347d02ccc2166c29e6faa49ad8b211783c09c79ce481b38cd00";
+#endif
+    uint32_t const GENESIS_NONCE = 10000;
+    uint32_t const MAX_ALIAS_LENGTH = 42;
 
   namespace testnet
   {
@@ -170,3 +184,7 @@ namespace config
     uint32_t const GENESIS_NONCE = 10001;
   }
 }
+
+
+
+
