@@ -34,12 +34,12 @@
 
 namespace daemon_args
 {
-  std::string const WINDOWS_SERVICE_NAME = "Monero Daemon";
+  std::string const WINDOWS_SERVICE_NAME = "Citicash Daemon";
 
   const command_line::arg_descriptor<std::string> arg_config_file = {
     "config-file"
   , "Specify configuration file"
-  , std::string(CRYPTONOTE_NAME ".conf")
+  , std::string(CRYPTONOTE_NAME + ".conf")
   };
   const command_line::arg_descriptor<std::string> arg_log_file = {
     "log-file"

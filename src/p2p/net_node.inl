@@ -395,12 +395,15 @@ namespace nodetool
     if (testnet)
     {
       memcpy(&m_network_id, &::config::testnet::NETWORK_ID, 16);
-	  full_addrs.insert("192.168.25.121:29833");
-	  full_addrs.insert("192.168.25.111:29833");
-	  full_addrs.insert("192.168.25.154:29833");
-	  full_addrs.insert("192.168.25.193:29833");
-	  full_addrs.insert("192.168.25.244:29833");
-
+#ifdef DEVNET
+      DEVNET_FALLBACK_SEEDS
+#else
+      full_addrs.insert("192.168.25.121:19833");
+      full_addrs.insert("192.168.25.111:19833");
+      full_addrs.insert("192.168.25.154:19833");
+      full_addrs.insert("192.168.25.193:19833");
+      full_addrs.insert("192.168.25.244:19833");
+#endif
     }
     else
     {
@@ -468,7 +471,7 @@ namespace nodetool
         if (result.size())
         {
           for (const auto& addr_string : result)
-            full_addrs.insert(addr_string + ":19833");
+            full_addrs.insert(addr_string + TEXT_P2P_PORT);
         }
         ++i;
       }
@@ -476,11 +479,14 @@ namespace nodetool
       if (!full_addrs.size())
       {
         LOG_PRINT_L0("DNS seed node lookup either timed out or failed, falling back to defaults");
+#ifdef DEVNET
+#else
 		full_addrs.insert("192.168.25.121:19833");
 		full_addrs.insert("192.168.25.111:19833");
 		full_addrs.insert("192.168.25.154:19833");
 		full_addrs.insert("192.168.25.193:19833");
 		full_addrs.insert("192.168.25.244:19833");
+#endif
       }
     }
 
@@ -557,7 +563,7 @@ namespace nodetool
           UPNP_DeletePortMapping(urls.controlURL, igdData.first.servicetype, portString.str().c_str(), "TCP", 0);
 
           int portMappingResult;
-          portMappingResult = UPNP_AddPortMapping(urls.controlURL, igdData.first.servicetype, portString.str().c_str(), portString.str().c_str(), lanAddress, CRYPTONOTE_NAME, "TCP", 0, "0");
+          portMappingResult = UPNP_AddPortMapping(urls.controlURL, igdData.first.servicetype, portString.str().c_str(), portString.str().c_str(), lanAddress, CRYPTONOTE_NAME.c_str(), "TCP", 0, "0");
           if (portMappingResult != 0) {
             LOG_ERROR("UPNP_AddPortMapping failed, error: " << strupnperror(portMappingResult));
           } else {

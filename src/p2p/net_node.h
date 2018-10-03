@@ -124,8 +124,12 @@ namespace nodetool
     virtual bool unblock_ip(uint32_t address);
     virtual std::map<uint32_t, time_t> get_blocked_ips() { CRITICAL_REGION_LOCAL(m_blocked_ips_lock); return m_blocked_ips; }
   private:
-    const std::vector<std::string> m_seed_nodes_list =
-    { 
+
+      const std::vector<std::string> m_seed_nodes_list =
+    {
+#ifdef DEVNET
+       DEVNET_SEEDS
+#else
       "node1.citicash.io",
       "node2.citicash.io",
       "node3.citicash.io",
@@ -134,7 +138,8 @@ namespace nodetool
       "node6.citicash.io",
       "node7.citicash.io",
       "node8.citicash.io"
-	};
+#endif
+    };
 
     bool islimitup=false;
     bool islimitdown=false;

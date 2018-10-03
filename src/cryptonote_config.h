@@ -1,23 +1,23 @@
 // Copyright (c) 2018, The CitiCash Project
 // Copyright (c) 2017, SUMOKOIN
 // Copyright (c) 2014-2017, The Monero Project
-// 
+//
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without modification, are
 // permitted provided that the following conditions are met:
-// 
+//
 // 1. Redistributions of source code must retain the above copyright notice, this list of
 //    conditions and the following disclaimer.
-// 
+//
 // 2. Redistributions in binary form must reproduce the above copyright notice, this list
 //    of conditions and the following disclaimer in the documentation and/or other
 //    materials provided with the distribution.
-// 
+//
 // 3. Neither the name of the copyright holder nor the names of its contributors may be
 //    used to endorse or promote products derived from this software without specific
 //    prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
@@ -27,7 +27,7 @@
 // INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
 // STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// 
+//
 // Parts of this file are originally copyright (c) 2012-2013 The Cryptonote developers
 
 
@@ -116,7 +116,15 @@
 
 #define ALLOW_DEBUG_COMMANDS
 
-#define CRYPTONOTE_NAME                                 "citicash"
+#ifdef DEVNET
+#include "devnet.h"
+#endif
+
+#ifdef DEVNET
+   DEVCRYPTONOTENAME
+#else
+   const std::string CRYPTONOTE_NAME {"citicash"};
+#endif
 #define CRYPTONOTE_POOLDATA_FILENAME                    "poolstate.bin"
 #define CRYPTONOTE_BLOCKCHAINDATA_FILENAME              "blockchain.bin"
 #define CRYPTONOTE_BLOCKCHAINDATA_TEMP_FILENAME         "blockchain.bin.tmp"
@@ -150,16 +158,16 @@ namespace config
   uint64_t const CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX = 0x7754; // ccg
   //uint64_t const CRYPTONOTE_PUBLIC_INTEGRATED_SUBADDRESS_BASE58_PREFIX = 0x5b19a; // Subi
 
-#define DEVNET
-#ifdef DEVNET
-#include "devnet.h"
-#endif
+
+
+
 
 #ifdef DEVNET
-    DEVNET_ID_GENTX
-#else
-  uint16_t const P2P_DEFAULT_PORT = 39833;
-  uint16_t const RPC_DEFAULT_PORT = 39834;
+    DEVNET_ID_GENTX_AND_PORT
+ #else
+  #define TEXT_P2P_PORT ":19833"
+  uint16_t const P2P_DEFAULT_PORT = 19833;
+  uint16_t const RPC_DEFAULT_PORT = 19834;
 
   boost::uuids::uuid const NETWORK_ID = { {
       0xdf, 0xce, 0xfc, 0x7d, 0x27, 0x4a, 0x24, 0xd4, 0xf3, 0x8d, 0x42, 0x44, 0x42, 0xa8, 0x04, 0x66
@@ -184,7 +192,3 @@ namespace config
     uint32_t const GENESIS_NONCE = 10001;
   }
 }
-
-
-
-

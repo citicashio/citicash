@@ -87,13 +87,13 @@ int main(int argc, char const * argv[])
       command_line::add_arg(visible_options, command_line::arg_help);
       command_line::add_arg(visible_options, command_line::arg_version);
       command_line::add_arg(visible_options, daemon_args::arg_os_version);
-      bf::path default_conf = default_data_dir / std::string(CRYPTONOTE_NAME ".conf");
+      bf::path default_conf = default_data_dir / std::string(CRYPTONOTE_NAME + ".conf");
       command_line::add_arg(visible_options, daemon_args::arg_config_file, default_conf.string());
       command_line::add_arg(visible_options, command_line::arg_test_dbg_lock_sleep);
       cryptonote::core::init_options(core_settings);
 
       // Settings
-      bf::path default_log = default_data_dir / std::string(CRYPTONOTE_NAME ".log");
+      bf::path default_log = default_data_dir / std::string(CRYPTONOTE_NAME + ".log");
       command_line::add_arg(core_settings, daemon_args::arg_log_file, default_log.string());
       command_line::add_arg(core_settings, daemon_args::arg_log_level);
       command_line::add_arg(core_settings, daemon_args::arg_max_concurrency);
@@ -279,7 +279,7 @@ int main(int argc, char const * argv[])
 
     // Set log file
     {
-      bf::path log_file_path {data_dir / std::string(CRYPTONOTE_NAME ".log")};
+      bf::path log_file_path {data_dir / std::string(CRYPTONOTE_NAME + ".log")};
       if (! vm["log-file"].defaulted())
         log_file_path = command_line::get_arg(vm, daemon_args::arg_log_file);
       log_file_path = bf::absolute(log_file_path, relative_path_base);

@@ -33,7 +33,10 @@ cmake_minimum_required(VERSION 2.8.7)
 
 project(citicash)
 
-option(BUILD_TESTS "Build tests." ON)
+message("Hello ${DEVNET}!")
+if(${DEVNET})
+  add_definitions(-D DEVNET)
+endif()
 
 function (die msg)
   if (NOT WIN32)
@@ -523,7 +526,6 @@ else()
       set(RELEASE_FLAGS "${RELEASE_FLAGS} -fuse-ld=gold")
     endif()
   endif()
-
   set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${DEBUG_FLAGS}")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${DEBUG_FLAGS}")
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${RELEASE_FLAGS}")

@@ -618,7 +618,7 @@ PRAGMA_WARNING_DISABLE_VS(4355)
       LOG_PRINT_L4("New connection from host " << host << ": " << val);
     else if (delta < 0)
       LOG_PRINT_L4("Closed connection from host " << host << ": " << val);
-    CHECK_AND_ASSERT_THROW_MES(delta >= 0 || val >= (unsigned)-delta, "Count would go negative");
+    CHECK_AND_ASSERT_THROW_MES(delta >= 0 || val >= (unsigned)-delta, "Count would go negative"); //TODO ocasionnaly throws
     CHECK_AND_ASSERT_THROW_MES(delta <= 0 || val <= std::numeric_limits<unsigned int>::max() - (unsigned)delta, "Count would wrap");
     val += delta;
     return val;
