@@ -7,7 +7,8 @@ job1:
   stage: build
   script:
   - pwd
-  - make -j2
+  - make -j3
+  - make -j3 debug-test
   - echo "job1 succesfully completed!"
   tags:
   - citicash
