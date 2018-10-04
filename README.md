@@ -173,6 +173,11 @@ invokes cmake commands as needed.
 
         HAVE_DOT=YES doxygen Doxyfile
 
+* **Optional**: build devnet. To build a stagenet-like coin fill the parameters in the `src/devnet.h` and 
+
+     `make debug-devnet ` or `release-devnet`.
+
+   
 #### On the Raspberry Pi
 
 Tested on a Raspberry Pi 2 with a clean install of minimal Debian Jessie from https://www.raspberrypi.org/downloads/raspbian/
