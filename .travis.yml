@@ -58,6 +58,7 @@ script:
   - pwd
   - uname -a
   - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe"
+  - sudo apt-get update
   - sudo apt install build-essential cmake libboost-all-dev libssl-dev pkg-config libdb-dev libdb++-dev libevent-dev libunbound-dev libminiupnpc-dev libunwind8-dev libldns-dev libexpat1-dev libgtest-dev doxygen graphviz
   - sudo apt-get install libgtest-dev && cd /usr/src/gtest && sudo cmake . && sudo make && sudo mv libg* /usr/lib/
   - cd $TRAVIS_BUILD_DIR
