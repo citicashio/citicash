@@ -45,6 +45,7 @@ endif()
 set(common_headers)
 
 set(common_private_headers
+  apply_permutation.h
   base58.h
   boost_serialization_helper.h
   command_line.h
@@ -73,6 +74,7 @@ sumokoin_add_library(common
   ${common_private_headers})
 target_link_libraries(common
   PUBLIC
+    epee
     crypto
     ${UNBOUND_LIBRARY}
     ${LIBUNWIND_LIBRARIES}

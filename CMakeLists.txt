@@ -33,6 +33,8 @@ cmake_minimum_required(VERSION 2.8.7)
 
 project(citicash)
 
+option(BUILD_TESTS "Build tests." ON)
+
 function (die msg)
   if (NOT WIN32)
     string(ASCII 27 Esc)
@@ -91,6 +93,7 @@ endif()
 
 set(CMAKE_C_FLAGS_RELEASE "-DNDEBUG ${OPT_FLAGS_RELEASE}")
 set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG ${OPT_FLAGS_RELEASE}")
+ENABLE_TESTING()
 
 # set this to 0 if per-block checkpoint needs to be disabled
 set(PER_BLOCK_CHECKPOINT 0)
@@ -129,7 +132,7 @@ else()
 endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-enable_testing()
+
 
 option(BUILD_DOCUMENTATION "Build the Doxygen documentation." ON)
 
@@ -598,6 +601,7 @@ add_subdirectory(src)
 
 treat_warnings_as_errors(contrib src)
 
+
 if(BUILD_DOCUMENTATION)
   set(DOC_GRAPHS "YES" CACHE STRING "Create dependency graphs (needs graphviz)")
   set(DOC_FULLGRAPHS "NO" CACHE STRING "Create call/callee graphs (large)")
@@ -627,4 +631,9 @@ option(BUILD_GUI_DEPS "Build GUI dependencies." OFF)
 # on libunbound shipped with their distribution instead
 option(INSTALL_VENDORED_LIBUNBOUND "Install libunbound binary built from source vendored with this repo." OFF)
 
+enable_testing()
+if(BUILD_TESTS)
+  add_subdirectory(tests)
 
+
+endif()
