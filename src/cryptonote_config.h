@@ -117,7 +117,11 @@
 #define ALLOW_DEBUG_COMMANDS
 
 #ifdef DEVNET
-#include "devnet.h"
+#if defined(__has_include) && __has_include("our_devnet.h")
+#  include "our_devnet.h"
+#else
+#  include "devnet.h"
+#endif
 #endif
 
 #ifdef DEVNET

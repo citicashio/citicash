@@ -114,3 +114,4 @@ local.properties
 .vscode
 
 /testnet
+/src/our_devnet.h
