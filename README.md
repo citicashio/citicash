@@ -175,7 +175,7 @@ invokes cmake commands as needed.
 
 * **Optional**: build devnet. To build a stagenet-like coin fill the parameters in the `src/devnet.h` and 
 
-     `make debug-devnet ` or `release-devnet`.
+     `make debug-devnet` or `make release-devnet`.
 
    
 #### On the Raspberry Pi

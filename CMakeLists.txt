@@ -33,7 +33,6 @@ cmake_minimum_required(VERSION 2.8.7)
 
 project(citicash)
 
-message("Hello ${DEVNET}!")
 if(${DEVNET})
   add_definitions(-D DEVNET)
 endif()
