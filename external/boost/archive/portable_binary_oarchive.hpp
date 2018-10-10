@@ -52,7 +52,8 @@ public:
         switch(code){
         case invalid_flags:
             msg = "cannot be both big and little endian";
-        default:
+                // fall through
+            default:
             boost::archive::archive_exception::what();
         }
         return msg;
