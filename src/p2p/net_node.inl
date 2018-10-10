@@ -398,11 +398,14 @@ namespace nodetool
 #ifdef DEVNET
       DEVNET_FALLBACK_SEEDS
 #else
-      full_addrs.insert("192.168.25.121:19833");
-      full_addrs.insert("192.168.25.111:19833");
-      full_addrs.insert("192.168.25.154:19833");
-      full_addrs.insert("192.168.25.193:19833");
-      full_addrs.insert("192.168.25.244:19833");
+      full_addrs.insert("18.209.125.195:19833");
+      full_addrs.insert("13.231.21.224:19833");
+      full_addrs.insert("35.178.92.55:19833");
+      full_addrs.insert("13.238.15.129:19833");
+      full_addrs.insert("52.52.63.214:19833");
+      full_addrs.insert("35.182.82.20:19833");
+      full_addrs.insert("18.228.45.102:19833");
+      full_addrs.insert("(46.234.123.120:19833");
 #endif
     }
     else
