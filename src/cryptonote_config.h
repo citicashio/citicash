@@ -176,7 +176,7 @@ namespace config
   boost::uuids::uuid const NETWORK_ID = { {
       0xdf, 0xce, 0xfc, 0x7d, 0x27, 0x4a, 0x24, 0xd4, 0xf3, 0x8d, 0x42, 0x44, 0x42, 0xa8, 0x04, 0x66
     } }; // Bender's nightmare
-  std::string const GENESIS_TX = "020a01ff00018080b6a58eb9e7ef01029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd0880712101526505139993ba0347d02ccc2166c29e6faa49ad8b211783c09c79ce481b38cd00";
+  std::string const GENESIS_TX = "020a01ff00018080b6a58eb9e7ef01029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807121010a5323532a4e4b43bc329f376ffc544acc70fce3ce11a1689d3592bf1a30f02c00";
 #endif
     uint32_t const GENESIS_NONCE = 10000;
     uint32_t const MAX_ALIAS_LENGTH = 42;
