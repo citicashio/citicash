@@ -9,6 +9,7 @@ job1:
   - pwd
   - make -j3
   - make -j3 debug-test
+  - make -j3 debug-devnet
   - echo "job1 succesfully completed!"
   tags:
   - citicash

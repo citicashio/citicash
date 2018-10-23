@@ -42,10 +42,6 @@ cmake-debug-devnet:
 debug-devnet: cmake-debug-devnet
 	cd build/debug-devnet && $(MAKE)
 
-cmake-release:
-	mkdir -p build/release
-	cd build/release && cmake -D CMAKE_BUILD_TYPE=Release ../..
-
 release: cmake-release
 	cd build/release && $(MAKE)
 
@@ -56,6 +52,31 @@ cmake-release-devnet:
 release-devnet: cmake-release-devnet
 	cd build/release-devnet && $(MAKE)
 
+# Temporarily disable some tests:
+#  * libwallet_api_tests fail (Issue #895)
+debug-test:
+	mkdir -p build/debug
+	cd build/debug && cmake -D BUILD_TESTS=ON -D CMAKE_BUILD_TYPE=Debug ../.. &&  $(MAKE) && $(MAKE) ARGS="-E libwallet_api_tests" test
+
+debug-all:
+	mkdir -p build/debug
+	cd build/debug && cmake -D BUILD_TESTS=ON -D BUILD_SHARED_LIBS=OFF -D CMAKE_BUILD_TYPE=Debug ../.. && $(MAKE)
+
+debug-static-all:
+	mkdir -p build/debug
+	cd build/debug && cmake -D BUILD_TESTS=ON -D STATIC=ON -D CMAKE_BUILD_TYPE=Debug ../.. && $(MAKE)
+
+cmake-release:
+	mkdir -p build/release
+	cd build/release && cmake -D CMAKE_BUILD_TYPE=Release ../..
+
+release-test:
+	mkdir -p build/release
+	cd build/release && cmake -D BUILD_TESTS=ON -D CMAKE_BUILD_TYPE=release ../.. && $(MAKE) && $(MAKE) test
+
+release-all:
+	mkdir -p build/release
+	cd build/release && cmake -D BUILD_TESTS=ON -D CMAKE_BUILD_TYPE=release ../.. && $(MAKE)
 
 coverage:
 	mkdir -p build/debug
@@ -100,7 +121,6 @@ clean:
         read -r -p "This will destroy the build directory, continue (y/N)?: " CONTINUE; \
 	[ $$CONTINUE = "y" ] || [ $$CONTINUE = "Y" ] || (echo "Exiting."; exit 1;)
 	rm -rf build
-
 
 tags:
 	ctags -R --sort=1 --c++-kinds=+p --fields=+iaS --extra=+q --language-force=C++ src contrib tests/gtest
