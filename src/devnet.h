@@ -32,13 +32,9 @@
 #ifndef CITICASH_DEVNET_H
 #define CITICASH_DEVNET_H
 
-//
-
-
-
 #define DEVNET_ID_GENTX_AND_PORT \
-uint16_t const P2P_DEFAULT_PORT = nnnnn; \
-uint16_t const RPC_DEFAULT_PORT = nnnnn; \
+uint16_t const P2P_DEFAULT_PORT = 65535; \
+uint16_t const RPC_DEFAULT_PORT = 65535; \
 boost::uuids::uuid const NETWORK_ID = { { \
                                                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff \
                                         } }; \
@@ -46,10 +42,7 @@ boost::uuids::uuid const NETWORK_ID = { { \
 
 #define INIT_DEVNET_CHECKPOINTS { \
  crypto::hash h; bool r = true; \
- r  = epee::string_tools::parse_tpod_from_hex_string("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", h); m_points[n] = h; \
- r &= epee::string_tools::parse_tpod_from_hex_string("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", h); m_points[nnn] = h; \
- r &= epee::string_tools::parse_tpod_from_hex_string("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", h); m_points[nnnnn] = h; \
- r &= epee::string_tools::parse_tpod_from_hex_string("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", h); m_points[nnnnn] = h; \
+ r &= epee::string_tools::parse_tpod_from_hex_string("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", h); m_points[0] = h; \
  if(!r) \
      throw("Inconsistent checkpoints in devnet"); \
 }
@@ -63,14 +56,12 @@ boost::uuids::uuid const NETWORK_ID = { { \
                 "node5.devciticash.mydomain"
 
 #define DEVNET_FALLBACK_SEEDS \
-    full_addrs.insert("192.168.nnn.nnn:nnnn"); \
-    full_addrs.insert("192.168.nnn.nnn:nnnn"); \
-    full_addrs.insert("192.168.nnn.nnn:nnnn"); \
-    full_addrs.insert("192.168.nnn.nnn:nnnn"); \
-    full_addrs.insert("192.168.nnn.nnn:nnnn");
+    full_addrs.insert("192.168.255.255:65535"); \
+    full_addrs.insert("192.168.255.255:65535"); \
+    full_addrs.insert("192.168.255.255:65535"); \
+    full_addrs.insert("192.168.255.255:65535"); \
+    full_addrs.insert("192.168.255.255:65535");
 
 #define DEVCRYPTONOTENAME const std::string CRYPTONOTE_NAME {"devciticash"};
 
 #endif //CITICASH_DEVNET_H
-
-
