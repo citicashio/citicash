@@ -709,8 +709,8 @@ void wallet2::scan_output(const cryptonote::account_keys &keys, const cryptonote
 
   outs.push_back(i);
   if (!tx_scan_info.money_transfered)
-    tx_scan_info.amount = decodeRct(tx.rct_signatures, tx_scan_info.received->derivation, i, tx_scan_info.mask);
-  tx_money_got_in_outs += tx_scan_info.amount;
+    tx_scan_info.money_transfered = decodeRct(tx.rct_signatures, tx_scan_info.received->derivation, i, tx_scan_info.mask);
+  tx_money_got_in_outs += tx_scan_info.amount = tx_scan_info.money_transfered;
   ++num_vouts_received;
 }
 
