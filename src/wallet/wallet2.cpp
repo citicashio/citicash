@@ -4201,7 +4201,7 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions(std::vector<crypto
   // - we have something to send
   // - or we need to gather more fee
   // - or we have just one input in that tx, which is rct (to try and make all/most rct txes 2/2)
-  while ((!dsts.empty() && dsts[0].amount > 0) || adding_fee || should_pick_a_second_output(use_rct, txes.back().selected_transfers.size(), unused_transfers_indices, unused_dust_indices)) {
+  while ((!dsts.empty() && dsts[0].amount > 0) || adding_fee/* || should_pick_a_second_output(use_rct, txes.back().selected_transfers.size(), unused_transfers_indices, unused_dust_indices)*/) { // LUKAS TODO needs more time to make it work in our code
     TX &tx = txes.back();
 
     LOG_PRINT_L2("Start of loop with " << unused_transfers_indices.size() << " " << unused_dust_indices.size());
