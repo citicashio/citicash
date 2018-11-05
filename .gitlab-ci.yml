@@ -7,6 +7,7 @@ job1:
   stage: build
   script:
   - pwd
+  - rm -rf "%CACHE_PATH%"
   - make -j3
   - make -j3 debug-test
   - make -j3 debug-devnet
