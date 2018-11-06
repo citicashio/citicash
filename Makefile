@@ -100,6 +100,10 @@ release-static-64:
 	mkdir -p build/release
 	cd build/release && cmake -D STATIC=ON -D ARCH="x86-64" -D BUILD_64=ON -D CMAKE_BUILD_TYPE=release ../.. && $(MAKE)
 
+release-static-64-devnet:
+	mkdir -p build/release-devnet
+	cd build/release-devnet && cmake -D STATIC=ON -D ARCH="x86-64" -D BUILD_64=ON -D CMAKE_BUILD_TYPE=release -D DEVNET=DEVNET ../.. && $(MAKE)
+
 release-static-32:
 	mkdir -p build/release
 	cd build/release && cmake -D STATIC=ON -D ARCH="i686" -D BUILD_64=OFF -D CMAKE_BUILD_TYPE=release ../.. && $(MAKE)
