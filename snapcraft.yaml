@@ -39,7 +39,7 @@ parts:
             - log.bash
             - wallet.bash
             - usr/bin/rlwrap
- 
+
     cmake-build:
         plugin: cmake
         configflags:

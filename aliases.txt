@@ -6,94 +6,94 @@ Aliases are stored both in the blockchain and in the memory to be as fast as pos
 Everytime you send a transaction to the alias instead of an address, the wallet asks a daemon about the alias and receives it's address, which is then used in the transaction.
 
 Setting alias
-Alias of your wallet address is created from GUI-, RPC- or CLI- wallet or via wallet ABI. 
-Via GUI-wallet (that forwards it as RPC-wallet call), 
-by pressing "Set an alias!"/"Change alias" from the "HOME" panel, 
-for example TODO screenshot (tell Albi to make a screenshot in devel wallet), 
-result TODO screenshot (tell Albi to make a screenshot in devel wallet). 
-Via RPC-wallet, 
-by using JSON with method alias_address containing parameters alias, [priority], [unlock_time] and [do_not_relay], calls "wallet_rpc_server::on_alias_address" internally, 
-for example {"method":"alias_address","params":{"alias":"salda"}}, 
-result {"result":{"fee":77183800,"tx_hash":"63c3e4538280a085662298f93ebbbedaf9e2f7a91ca4fb81091c21df72e80bc9"}}. 
-Via CLI-wallet, 
-by using "alias_address <alias> [<unlock_time>] [<priority>]", calls "simple_wallet::alias_address" internally, 
-for example "alias_address salda", 
+Alias of your wallet address is created from GUI-, RPC- or CLI- wallet or via wallet ABI.
+Via GUI-wallet (that forwards it as RPC-wallet call),
+by pressing "Set an alias!"/"Change alias" from the "HOME" panel,
+for example TODO screenshot (tell Albi to make a screenshot in devel wallet),
+result TODO screenshot (tell Albi to make a screenshot in devel wallet).
+Via RPC-wallet,
+by using JSON with method alias_address containing parameters alias, [priority], [unlock_time] and [do_not_relay], calls "wallet_rpc_server::on_alias_address" internally,
+for example {"method":"alias_address","params":{"alias":"salda"}},
+result {"result":{"fee":77183800,"tx_hash":"63c3e4538280a085662298f93ebbbedaf9e2f7a91ca4fb81091c21df72e80bc9"}}.
+Via CLI-wallet,
+by using "alias_address <alias> [<unlock_time>] [<priority>]", calls "simple_wallet::alias_address" internally,
+for example "alias_address salda",
 result "
 Transaction successfully sent.
 transaction hash is <2c70eba2eb717f4f8fbe205af134f4dec1c5813268e4f9c1863cb225585653ac>
-transaction fee is 0.300774400". 
-Via wallet ABI, 
-by using function "PendingTransaction * createAlias(const std::string& alias, PendingTransaction::Priority priority)". 
+transaction fee is 0.300774400".
+Via wallet ABI,
+by using function "PendingTransaction * createAlias(const std::string& alias, PendingTransaction::Priority priority)".
 
 Insertion and extraction of alias to/from transaction
-Alias, address and signature (alias's hash encoded with with wallet's private key) are inserted into the transaction extra. 
-Transaction extra is extracted into transaction extra fields and every of them (alias, address and signature) is checked for validity and then is the combination verified (signature decoded with specified address and checked against alias's hash). 
+Alias, address and signature (alias's hash encoded with with wallet's private key) are inserted into the transaction extra.
+Transaction extra is extracted into transaction extra fields and every of them (alias, address and signature) is checked for validity and then is the combination verified (signature decoded with specified address and checked against alias's hash).
 
 Storing in database and memory
-In memory, data are stored as boost::multi_index_container containing alias, height and address and are indexed as both unsorted unique aliases (boost::multi_index::hashed_unique) and as unsorted non-unique addresses (boost::multi_index::hashed_non_unique). 
-In database, data are stored as alias being a key and height with address being a value. 
+In memory, data are stored as boost::multi_index_container containing alias, height and address and are indexed as both unsorted unique aliases (boost::multi_index::hashed_unique) and as unsorted non-unique addresses (boost::multi_index::hashed_non_unique).
+In database, data are stored as alias being a key and height with address being a value.
 
 Getting aliases
-Get aliases of specified address via RPC-core using JSON with method get_address_aliases containing parameter address, calls "core_rpc_server::on_get_address_aliases" internally, 
-{"method":"get_address_aliases","params":{"address":"cczJtbJ5xhZ8jXDWowkDJRxAd1Yo6q13cov9DAZvdH2KyvQLqUaE8oHjkRqbqmid1f5RDiAt5uKTDX5ng7AZN5w7GNKN3f92G"}}, 
-result {"result":{"aliases":[{"alias":"salda","height":350}],"status":"OK"}}. 
+Get aliases of specified address via RPC-core using JSON with method get_address_aliases containing parameter address, calls "core_rpc_server::on_get_address_aliases" internally,
+{"method":"get_address_aliases","params":{"address":"cczJtbJ5xhZ8jXDWowkDJRxAd1Yo6q13cov9DAZvdH2KyvQLqUaE8oHjkRqbqmid1f5RDiAt5uKTDX5ng7AZN5w7GNKN3f92G"}},
+result {"result":{"aliases":[{"alias":"salda","height":350}],"status":"OK"}}.
 
-Get aliases of your wallet via RPC-wallet using JSON with method get_aliases, calls "wallet_rpc_server::on_get_aliases" internally, 
-{"method":"get_aliases"}, 
-result {"result":{"aliases":[{"alias":"salda","height":350}]}}. 
+Get aliases of your wallet via RPC-wallet using JSON with method get_aliases, calls "wallet_rpc_server::on_get_aliases" internally,
+{"method":"get_aliases"},
+result {"result":{"aliases":[{"alias":"salda","height":350}]}}.
 
-Get aliases of your wallet address via CLI-wallet, calls "simple_wallet::get_aliases" internally, 
-"get_aliases", 
+Get aliases of your wallet address via CLI-wallet, calls "simple_wallet::get_aliases" internally,
+"get_aliases",
 result "
 Aliases:
  salda(350)".
 
 Getting alias address
-Get address via RPC-core using JSON with method get_alias_address containing parameter alias, calls "core_rpc_server::on_get_alias_address" internally, 
-{"method":"get_alias_address","params":{"alias":"salda"}}, 
-result {"result":{"address":"cczJtbJ5xhZ8jXDWowk6DJRxAd1Yo6q13cov9DAZvdH2KyvQLqUaE8oHjkRqbqmid1f5RDiAt5uKTDX5ng7AZN5w7GNKN3f92G","status":"OK"}}. 
+Get address via RPC-core using JSON with method get_alias_address containing parameter alias, calls "core_rpc_server::on_get_alias_address" internally,
+{"method":"get_alias_address","params":{"alias":"salda"}},
+result {"result":{"address":"cczJtbJ5xhZ8jXDWowk6DJRxAd1Yo6q13cov9DAZvdH2KyvQLqUaE8oHjkRqbqmid1f5RDiAt5uKTDX5ng7AZN5w7GNKN3f92G","status":"OK"}}.
 
-Get address via RPC-wallet using JSON with method get_alias_address containing parameter alias, calls "wallet_rpc_server::on_get_alias_address" internally, 
-{"method":"get_alias_address","params":{"alias":"salda"}}, 
-result {"result":{"address":"cczJtbJ5xhZ8jXDWowk6DJRxAd1Yo6q13cov9DAZvdH2KyvQLqUaE8oHjkRqbqmid1f5RDiAt5uKTDX5ng7AZN5w7GNKN3f92G"}}. 
+Get address via RPC-wallet using JSON with method get_alias_address containing parameter alias, calls "wallet_rpc_server::on_get_alias_address" internally,
+{"method":"get_alias_address","params":{"alias":"salda"}},
+result {"result":{"address":"cczJtbJ5xhZ8jXDWowk6DJRxAd1Yo6q13cov9DAZvdH2KyvQLqUaE8oHjkRqbqmid1f5RDiAt5uKTDX5ng7AZN5w7GNKN3f92G"}}.
 
 Common methods handling alias
-BlockchainLMDB::add_transaction_data extracts alias data from transaction, checks if the alias doesn't already exist in the database and inserts it both into the database and cache. 
-BlockchainLMDB::remove_transaction_data extracts alias data from transaction, verifies combination of alias, nonce and signature and removes it from both the database and cache. 
-BlockchainLMDB::load_aliases loads all aliases from the database to the memory during the core initialization. 
-BlockchainLMDB::get_alias_address tries to find alias in cache and returns it's address if conditions are met. 
-BlockchainLMDB::get_address_aliases returns all address's aliases with their height sorted by their height. 
-Blockchain::handle_block_to_main_chain extracts alias data from transaction and checks if the alias doesn't already exist in the database. 
-core::check_tx_semantic extracts alias data from transaction and verifies combination of alias, nonce and signature. 
-cryptonote::convert_alias is used after every extraction and checks the alias length, checks the alias for invalid characters and converts uppercase letters to lowercase. 
+BlockchainLMDB::add_transaction_data extracts alias data from transaction, checks if the alias doesn't already exist in the database and inserts it both into the database and cache.
+BlockchainLMDB::remove_transaction_data extracts alias data from transaction, verifies combination of alias, nonce and signature and removes it from both the database and cache.
+BlockchainLMDB::load_aliases loads all aliases from the database to the memory during the core initialization.
+BlockchainLMDB::get_alias_address tries to find alias in cache and returns it's address if conditions are met.
+BlockchainLMDB::get_address_aliases returns all address's aliases with their height sorted by their height.
+Blockchain::handle_block_to_main_chain extracts alias data from transaction and checks if the alias doesn't already exist in the database.
+core::check_tx_semantic extracts alias data from transaction and verifies combination of alias, nonce and signature.
+cryptonote::convert_alias is used after every extraction and checks the alias length, checks the alias for invalid characters and converts uppercase letters to lowercase.
 
 Transaction pool methods handling alias
-tx_memory_pool::add_tx extracts alias data from transaction and checks if the alias is already pending and if the alias already exists in the database. 
-tx_memory_pool::remove_transaction_alias extracts alias data from transaction and checks if the alias is already pending and removes it from the pending aliases. 
-tx_memory_pool::take_tx and tx_memory_pool::remove_stuck_transactions call tx_memory_pool::remove_transaction_alias. 
-tx_memory_pool::is_transaction_ready_to_go extracts alias data from transaction and returns false, if the alias already exists in the database. 
+tx_memory_pool::add_tx extracts alias data from transaction and checks if the alias is already pending and if the alias already exists in the database.
+tx_memory_pool::remove_transaction_alias extracts alias data from transaction and checks if the alias is already pending and removes it from the pending aliases.
+tx_memory_pool::take_tx and tx_memory_pool::remove_stuck_transactions call tx_memory_pool::remove_transaction_alias.
+tx_memory_pool::is_transaction_ready_to_go extracts alias data from transaction and returns false, if the alias already exists in the database.
 
 RPC-core methods for aliases
-core_rpc_server::on_get_alias_address returns aliased address if conditions are met. 
-core_rpc_server::on_get_address_aliases returns all aliases from the specified address. 
+core_rpc_server::on_get_alias_address returns aliased address if conditions are met.
+core_rpc_server::on_get_address_aliases returns all aliases from the specified address.
 
 RPC-wallet methods for aliases
-wallet_rpc_server::validate_transfer calls m_wallet.get_alias_address to get specified alias's address. 
-wallet_rpc_server::on_alias_address checks validity of the arguments, calls m_wallet.get_alias_address to check if the alias doesn't already exist, inserts alias, address and signature into transaction extra, puts extra into transaction, commits the transaction and returns it's hash and fee. 
-wallet_rpc_server::on_get_aliases calls m_wallet.get_address_aliases and returns all aliases from the specified address with their height sorted by their height. 
-wallet_rpc_server::on_get_alias_address calls m_wallet.get_alias_address and returns the aliased address. 
+wallet_rpc_server::validate_transfer calls m_wallet.get_alias_address to get specified alias's address.
+wallet_rpc_server::on_alias_address checks validity of the arguments, calls m_wallet.get_alias_address to check if the alias doesn't already exist, inserts alias, address and signature into transaction extra, puts extra into transaction, commits the transaction and returns it's hash and fee.
+wallet_rpc_server::on_get_aliases calls m_wallet.get_address_aliases and returns all aliases from the specified address with their height sorted by their height.
+wallet_rpc_server::on_get_alias_address calls m_wallet.get_alias_address and returns the aliased address.
 
 CLI-wallet methods for aliases
-simple_wallet::transfer_main and simple_wallet::sweep_all call m_wallet->get_alias_address to get specified alias's address. 
-simple_wallet::alias_address checks validity of the arguments, m_wallet->get_alias_address to check if the alias doesn't already exist, inserts alias, address and signature into transaction extra, puts extra into transaction, commits the transaction and returns it's hash. 
-simple_wallet::get_aliases calls m_wallet->get_address_aliases and returns all aliases from the specified address with their height sorted by their height. 
+simple_wallet::transfer_main and simple_wallet::sweep_all call m_wallet->get_alias_address to get specified alias's address.
+simple_wallet::alias_address checks validity of the arguments, m_wallet->get_alias_address to check if the alias doesn't already exist, inserts alias, address and signature into transaction extra, puts extra into transaction, commits the transaction and returns it's hash.
+simple_wallet::get_aliases calls m_wallet->get_address_aliases and returns all aliases from the specified address with their height sorted by their height.
 
 Wallet ABI method for setting alias
-WalletImpl::createAlias checks validity of the arguments, inserts alias, address and signature into transaction extra, puts extra into transaction and commits the transaction. 
+WalletImpl::createAlias checks validity of the arguments, inserts alias, address and signature into transaction extra, puts extra into transaction and commits the transaction.
 
 Common wallet methods handling alias
-wallet2::process_new_transaction extracts alias data from transaction and puts alias into payments. 
-wallet2::process_outgoing just extracts alias data from transaction to check that the transaction contains alias. 
-wallet2::commit_tx extracts alias data from transaction and inserts it into unconfirmed transactions in the wallet. 
-wallet2::get_alias_address calls core_rpc_server::on_get_alias_address. 
-wallet2::get_address_aliases calls core_rpc_server::on_get_address_aliases. 
+wallet2::process_new_transaction extracts alias data from transaction and puts alias into payments.
+wallet2::process_outgoing just extracts alias data from transaction to check that the transaction contains alias.
+wallet2::commit_tx extracts alias data from transaction and inserts it into unconfirmed transactions in the wallet.
+wallet2::get_alias_address calls core_rpc_server::on_get_alias_address.
+wallet2::get_address_aliases calls core_rpc_server::on_get_address_aliases.
