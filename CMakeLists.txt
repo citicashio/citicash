@@ -29,6 +29,11 @@
 #
 # Parts of this file are originally copyright (c) 2012-2013 The Cryptonote developers
 
+if (IOS)
+    INCLUDE(CmakeLists_IOS.txt)
+    include_directories(/usr/local/include)
+endif()
+
 cmake_minimum_required(VERSION 2.8.7)
 
 project(citicash)
@@ -82,9 +87,10 @@ if (ARM_TEST STREQUAL "arm")
   endif()
 endif()
 
-if (ARM_ID STREQUAL "aarch64")
+if (ARM_ID STREQUAL "aarch64" OR ARM_ID STREQUAL "arm64" OR ARM_ID STREQUAL "armv8-a")
   set(ARM 1)
   set(ARM8 1)
+  set(ARCH "armv8-a")
 endif()
 
 if(WIN32 OR ARM)
@@ -271,6 +277,7 @@ if (APPLE AND NOT IOS)
   endif()
 endif()
 
+
 find_package(OpenSSL REQUIRED)
 message(STATUS "Using OpenSSL include dir at ${OPENSSL_INCLUDE_DIR}")
 include_directories(${OPENSSL_INCLUDE_DIR})
@@ -283,7 +290,7 @@ endif()
 add_subdirectory(external)
 
 # Final setup for miniupnpc
-if(UPNP_STATIC)
+if(UPNP_STATIC OR IOS)
   add_definitions("-DUPNP_STATIC")
 else()
   add_definitions("-DUPNP_DYNAMIC")
@@ -320,6 +327,9 @@ else()
   message(STATUS "Building on ${CMAKE_SYSTEM_PROCESSOR} for ${ARCH}")
   if(ARCH STREQUAL "default")
     set(ARCH_FLAG "")
+  elseif(IOS AND ARCH STREQUAL "arm64")
+    message(STATUS "IOS: Changing arch from arm64 to armv8")
+    set(ARCH_FLAG "-march=armv8")
   else()
     set(ARCH_FLAG "-march=${ARCH}")
   endif()
@@ -388,6 +398,10 @@ else()
     endif()
   else()
     message(STATUS "AES support disabled")
+  endif()
+
+  if(IOS AND ARCH STREQUAL "x86_64")
+    set(ARCH_FLAG "-march=x86-64")
   endif()
 
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -D_GNU_SOURCE ${MINGW_FLAG} ${STATIC_ASSERT_FLAG} ${WARNINGS} ${C_WARNINGS} ${ARCH_FLAG} ${COVERAGE_FLAGS} ${PIC_FLAG}")
@@ -583,7 +597,7 @@ list(APPEND EXTRA_LIBRARIES ${CMAKE_DL_LIBS})
 if(ANDROID)
     set(ATOMIC libatomic.a)
 endif()
-if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND ARCH_WIDTH EQUAL "32")
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND ARCH_WIDTH EQUAL "32" AND NOT IOS AND NOT FREEBSD)
   find_library(ATOMIC atomic)
   list(APPEND EXTRA_LIBRARIES ${ATOMIC})
 endif()
