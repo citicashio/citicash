@@ -115,3 +115,6 @@ local.properties
 
 /testnet
 /src/our_devnet.h
+/build-ios-arm64
+/build-ios-armv7
+/build-ios-x86
