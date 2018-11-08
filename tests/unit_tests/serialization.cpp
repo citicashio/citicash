@@ -700,7 +700,7 @@ TEST(Serialization, portability_wallet)
 	}
 	ASSERT_TRUE(r);
 	/*
-  fields of tools::wallet2 to be checked: 
+  fields of tools::wallet2 to be checked:
     std::vector<crypto::hash>                                       m_blockchain
     std::vector<transfer_details>                                   m_transfers               // TODO
     cryptonote::account_public_address                              m_account_public_address
@@ -867,7 +867,7 @@ TEST(Serialization, portability_outputs)
 	}
 	ASSERT_TRUE(r);
 	/*
-  fields of tools::wallet2::transfer_details to be checked: 
+  fields of tools::wallet2::transfer_details to be checked:
     uint64_t                        m_block_height
     cryptonote::transaction_prefix  m_tx                        // TODO
     crypto::hash                    m_txid
@@ -962,7 +962,7 @@ TEST(Serialization, portability_unsigned_tx)
     uint64_t                                      unlock_time
     bool                                          use_rct
     std::vector<cryptonote::tx_destination_entry> dests
-  
+
   fields of cryptonote::tx_source_entry to be checked:
     std::vector<std::pair<uint64_t, rct::ctkey>>  outputs
     size_t                                        real_output
@@ -971,7 +971,7 @@ TEST(Serialization, portability_unsigned_tx)
     uint64_t                                      amount
     bool                                          rct
     rct::key                                      mask
-  
+
   fields of cryptonote::tx_destination_entry to be checked:
     uint64_t                amount
     account_public_address  addr
@@ -1101,7 +1101,7 @@ TEST(Serialization, portability_signed_tx)
   fields of tools::wallet2::signed_tx_set to be checked:
     std::vector<pending_tx>         ptx
     std::vector<crypto::key_image>  key_images
-  
+
   fields of tools::walllet2::pending_tx to be checked:
     cryptonote::transaction                       tx                  // TODO
     uint64_t                                      dust

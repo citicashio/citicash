@@ -1,21 +1,21 @@
 # Copyright (c) 2014-2018, The Monero Project
-# 
+#
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without modification, are
 # permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this list of
 #    conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright notice, this list
 #    of conditions and the following disclaimer in the documentation and/or other
 #    materials provided with the distribution.
-# 
+#
 # 3. Neither the name of the copyright holder nor the names of its contributors may be
 #    used to endorse or promote products derived from this software without specific
 #    prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
@@ -25,7 +25,7 @@
 # INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# 
+#
 # Parts of this file are originally copyright (c) 2012-2013 The Cryptonote developers
 
 use Math::BigInt only => 'GMP';
@@ -51,7 +51,7 @@ sub ec_rec {
 	if ($x->copy()->bpow(2)->bsub($xx)->bmod($p)) {$x->bmul($ii)->bmod($p)}
 	if ($x->is_odd) {$x = $p->copy()->bsub($x)};
 	return $x;
-	} 
+	}
 
 sub h2i {
 	return Math::BigInt->new('0x'.(unpack 'H*', (reverse pack 'H*', shift)));;
@@ -118,7 +118,7 @@ sub ec_add {
 	#$x3 = $t->copy()->bpow(2)->bsub($d)->bsub($x1)->bsub($x2)->bmod($p);
 	#$y3 = $x1->copy()->bmul(2)->badd($x2)->badd($d)->bmul($t)->bsub($t->copy()->bpow(3))->bsub($y1)->bmod($p);
 	$t = $x1->copy->bmul($x2)->bmul($y1)->bmul($y2)->bmul($d)->bmod($p);
-	$x3 = $x1->copy()->bmul($y2)->badd($y1->copy()->bmul($x2))->bmul(minv($t+1))->bmod($p); 
+	$x3 = $x1->copy()->bmul($y2)->badd($y1->copy()->bmul($x2))->bmul(minv($t+1))->bmod($p);
 	$y3 = $y1->copy()->bmul($y2)->badd($x1->copy()->bmul($x2))->bmul(minv(1-$t))->bmod($p);
 	
 	
@@ -208,7 +208,7 @@ sub r_sign {
 			$a = pack 'H*', ec_pack(ec_mul($w,$x0,$y0));
 			$b = pack 'H*', ec_pack(ec_mul($w,$hx,$hy));
 			push @zc,0,0;
-			} 
+			}
 		else {
 			$z = Math::BigInt->new('0x'.(unpack 'H*', random()))->bmod($l);
 			$c = Math::BigInt->new('0x'.(unpack 'H*', random()))->bmod($l);

@@ -47,7 +47,7 @@
 #define GTEST_INCLUDE_GTEST_GTEST_MESSAGE_H_
 
 #include <limits>
-#include <sstream> 
+#include <sstream>
 
 #include "gtest/internal/gtest-port.h"
 

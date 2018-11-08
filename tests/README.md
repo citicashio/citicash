@@ -27,7 +27,7 @@ To run the same tests on a release build, replace `debug` with `release`.
 
 # Crypto Tests
 
-Crypto tests are located under the `tests/crypto` directory. 
+Crypto tests are located under the `tests/crypto` directory.
 
 - `crypto-tests.h` contains test harness headers
 - `main.cpp` implements the driver for the crypto tests

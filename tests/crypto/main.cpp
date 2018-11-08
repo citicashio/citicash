@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
 		}
 		else if(cmd == "generate_ring_signature")
 		{
-			// this test uses a deterministic random number generator in the backend  
+			// this test uses a deterministic random number generator in the backend
 			chash prefix_hash;
 			key_image image;
 			vector<public_key> vpubs;
