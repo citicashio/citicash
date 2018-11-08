@@ -7,7 +7,7 @@ job1:
   stage: build
   script:
   - pwd
-  - rm -rf "%CACHE_PATH%"
+  - make clean-force
   - make -j3 release-static-64-devnet
   - make -j3 debug-test
   - echo "job1 succesfully completed!"

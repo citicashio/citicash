@@ -646,15 +646,10 @@ option(BUILD_GUI_DEPS "Build GUI dependencies." OFF)
 # on libunbound shipped with their distribution instead
 option(INSTALL_VENDORED_LIBUNBOUND "Install libunbound binary built from source vendored with this repo." OFF)
 
-enable_testing()
-if(BUILD_TESTS)
-  add_subdirectory(tests)
-endif()
-
 if (NOT IOS)
   enable_testing()
 endif()
 
-if(NOT IOS AND BUILD_TESTS)
+if (NOT IOS AND BUILD_TESTS)
   add_subdirectory(tests)
 endif()
