@@ -649,6 +649,7 @@ option(INSTALL_VENDORED_LIBUNBOUND "Install libunbound binary built from source 
 enable_testing()
 if(BUILD_TESTS)
   add_subdirectory(tests)
+endif()
 
 if (NOT IOS)
   enable_testing()
