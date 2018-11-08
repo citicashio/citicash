@@ -54,7 +54,7 @@ cp -f contrib/epee/src/libepee.a ../../lib-x86_64
 #cp -f libeasylogging.a ../../lib-x86_64
 popd
 
-echo "Creating fat library for armv7 and arm64"
+echo "Creating fat library for armv7 and arm64 and x86"
 mkdir -p lib-ios
 lipo -create lib-armv7/libwallet_merged.a lib-x86_64/libwallet_merged.a lib-arm64/libwallet_merged.a -output lib-ios/libwallet_merged.a
 lipo -create lib-armv7/libwallet.a lib-x86_64/libwallet.a lib-arm64/libwallet.a -output lib-ios/libwallet.a

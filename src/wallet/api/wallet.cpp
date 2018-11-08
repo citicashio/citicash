@@ -1374,6 +1374,15 @@ PendingTransaction * WalletImpl::createAlias(const std::string& alias, PendingTr
   return transaction;    
 }
 
+std::string WalletImpl::getAddressForAlias(const std::string& alias, bool get_if_premature)
+{
+    return m_wallet->get_alias_address(alias, get_if_premature);
+}
+    
+std::vector<cryptonote::alias> WalletImpl::getAliasesForForAddress(const std::string& address)
+{
+    return m_wallet->get_address_aliases(address);
+}
 } // namespace
 
 namespace Bitmonero = Monero;

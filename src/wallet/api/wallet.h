@@ -131,6 +131,9 @@ public:
     virtual void startRefresh();
     virtual void pauseRefresh();
 
+    std::string getAddressForAlias(const std::string& alias, bool get_if_premature);
+    std::vector<cryptonote::alias> getAliasesForForAddress(const std::string& address);
+                                              
 private:
     void clearStatus();
     void refreshThreadFunc();
