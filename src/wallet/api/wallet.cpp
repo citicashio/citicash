@@ -1371,7 +1371,7 @@ PendingTransaction * WalletImpl::createAlias(const std::string& alias, PendingTr
 
   transaction->m_status = Status_Error;
   startRefresh();
-  return transaction;    
+  return transaction;
 }
 
 std::string WalletImpl::getAddressForAlias(const std::string& alias, bool get_if_premature)
@@ -1382,122 +1382,6 @@ std::string WalletImpl::getAddressForAlias(const std::string& alias, bool get_if
 std::vector<cryptonote::alias> WalletImpl::getAliasesForForAddress(const std::string& address)
 {
     return m_wallet->get_address_aliases(address);
-}
-    
-// LUKAS TODO fix duplicate code with RPC and CLI
-PendingTransaction * WalletImpl::createAlias(const std::string& alias, PendingTransaction::Priority priority) {
-  clearStatus();
-  // Pause refresh thread while creating transaction
-  pauseRefresh();
-
-  PendingTransactionImpl * transaction = new PendingTransactionImpl(*this);
-  transaction->m_status = Status_Ok;
-
-  cryptonote::tx_destination_entry dst;
-  dst.addr = m_wallet->get_account().get_keys().m_account_address; // LUKAS TODO consider extending to subaddresses via wallet2::get_subaddress(const cryptonote::subaddress_index& index)
-  dst.is_subaddress = false;
-  dst.amount = 1;
-
-  // append alias, wallet_address and signature into extra
-  const std::string wallet_address = m_wallet->get_account().get_public_address_str(m_wallet->testnet()); // LUKAS TODO consider extending to subaddresses via get_subaddress_as_str(const cryptonote::subaddress_index& index)
-  std::vector<uint8_t> extra;
-  if (!cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ALIAS + alias)
-      || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ADDRESS + wallet_address)
-      || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_SIGNATURE + m_wallet->sign(alias))) 
-    { // LUKAS TODO consider encrypting dst.addr and signature to chars and use them instead, then decrypt via get_account_address_as_str (or get_subaddress_as_str)
-      LOG_ERROR("Something went wrong with alias. Please check its format: \"" + alias + "\"");
-      return nullptr;
-    }
-
-  try
-  {
-    std::vector<tools::wallet2::pending_tx> ptx_vector;
-    ptx_vector = m_wallet->create_transactions({dst}, DEFAULT_MIXIN, 0/* unlock_time */, priority, extra, 0/*req.account_index, LUKAS TODO prolly subaddress index*/, std::set<uint32_t>()/*LUKAS TODO I didn't check this parameter at all*/, false/* m_trusted_daemon */);
-
-    if (m_wallet->always_confirm_transfers() && ptx_vector.back().construction_data.subaddr_indices.size() > 1)
-      LOG_ERROR("WARNING: Outputs of multiple addresses are being used together, which might potentially compromise your privacy.\n");
-
-    transaction->m_pending_tx = ptx_vector;
-    startRefresh();
-    return transaction;
-  }
-  catch (const tools::error::daemon_busy&)
-  {
-    LOG_ERROR("daemon is busy. Please try again later.");
-  }
-  catch (const tools::error::no_connection_to_daemon&)
-  {
-    LOG_ERROR("no connection to daemon. Please make sure daemon is running.");
-  }
-  catch (const tools::error::wallet_rpc_error& e)
-  {
-    LOG_ERROR("RPC error: " << e.to_string());
-  }
-  catch (const tools::error::get_random_outs_error&)
-  {
-    LOG_ERROR("failed to get random outputs to mix");
-  }
-  catch (const tools::error::not_enough_money& e)
-  {
-    LOG_PRINT_L0(boost::format("not enough money to transfer, available only %s, sent amount %s") %
-        print_money(e.available()) %
-        print_money(e.tx_amount()));
-  }
-  catch (const tools::error::tx_not_possible& e)
-  {
-    LOG_PRINT_L0(boost::format("not enough money to transfer, available only %s, transaction amount %s = %s + %s (fee)") %
-        print_money(e.available()) %
-        print_money(e.tx_amount() + e.fee())  %
-        print_money(e.tx_amount()) %
-        print_money(e.fee()));
-  }
-  catch (const tools::error::not_enough_outs_to_mix& e)
-  {
-    LOG_ERROR(("not enough outputs for specified mixin_count") << " = " << e.mixin_count() << ":");
-  }
-  catch (const tools::error::tx_not_constructed&)
-  {
-    LOG_ERROR("transaction was not constructed");
-  }
-  catch (const tools::error::tx_rejected& e)
-  {
-    LOG_ERROR((boost::format(tr("transaction %s was rejected by daemon with status: ")) % get_transaction_hash(e.tx())) << e.status());
-    std::string reason = e.reason();
-    if (!reason.empty())
-      LOG_ERROR("Reason: " << reason);
-  }
-  catch (const tools::error::tx_sum_overflow& e)
-  {
-    LOG_ERROR(e.what());
-  }
-  catch (const tools::error::zero_destination&)
-  {
-    LOG_ERROR("one of destinations is zero");
-  }
-  catch (const tools::error::tx_too_big& e)
-  {
-    LOG_ERROR("transaction too big: " << e.to_string());
-  }
-  catch (const tools::error::transfer_error& e)
-  {
-    LOG_ERROR("unknown transfer error: " << e.to_string());
-  }
-  catch (const tools::error::wallet_internal_error& e)
-  {
-    LOG_ERROR("internal error: " << e.to_string());
-  }
-  catch (const std::exception& e)
-  {
-    LOG_ERROR("unexpected error: " << e.what());
-  }
-  catch (...)
-  {
-    LOG_ERROR("unknown error");
-  }
-
-  transaction->m_status = Status_Error;
-  startRefresh();
-  return transaction;    
 }
 } // namespace
 
