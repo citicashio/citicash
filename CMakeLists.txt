@@ -650,5 +650,10 @@ enable_testing()
 if(BUILD_TESTS)
   add_subdirectory(tests)
 
+if (NOT IOS)
+  enable_testing()
+endif()
 
+if(NOT IOS AND BUILD_TESTS)
+  add_subdirectory(tests)
 endif()
