@@ -115,7 +115,7 @@ public:
 	inline uint8_t& as_byte(size_t i) { return *(reinterpret_cast<uint8_t*>(base_ptr)+i); }
 	inline uint8_t* as_byte() { return reinterpret_cast<uint8_t*>(base_ptr); }
 	inline uint64_t& as_uqword(size_t i) { return *(reinterpret_cast<uint64_t*>(base_ptr)+i); }
-	inline const uint64_t& as_uqword(size_t i) const { return *(reinterpret_cast<uint64_t*>(base_ptr)+i); } 
+	inline const uint64_t& as_uqword(size_t i) const { return *(reinterpret_cast<uint64_t*>(base_ptr)+i); }
 	inline uint64_t* as_uqword() { return reinterpret_cast<uint64_t*>(base_ptr); }
 	inline const uint64_t* as_uqword() const { return reinterpret_cast<uint64_t*>(base_ptr); }
 	inline int64_t& as_qword(size_t i) { return *(reinterpret_cast<int64_t*>(base_ptr)+i); }

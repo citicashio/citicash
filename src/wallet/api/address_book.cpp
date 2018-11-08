@@ -38,18 +38,18 @@
 #include <vector>
 
 namespace Monero {
-  
+
 AddressBook::~AddressBook() {}
-  
+
 AddressBookImpl::AddressBookImpl(WalletImpl *wallet)
     : m_wallet(wallet) {}
 
 bool AddressBookImpl::addRow(const std::string &dst_addr , const std::string &payment_id, const std::string &description)
 {
   LOG_PRINT_L2("Adding row");
-  
+
   clearStatus();
-  
+
   cryptonote::address_parse_info info;
   if (!cryptonote::get_account_address_from_str(info, m_wallet->m_wallet->testnet(), dst_addr)) {
     m_errorString = "Invalid destination address";
@@ -73,34 +73,34 @@ bool AddressBookImpl::addRow(const std::string &dst_addr , const std::string &pa
   return r;
 }
 
-void AddressBookImpl::refresh() 
+void AddressBookImpl::refresh()
 {
   LOG_PRINT_L2("Refreshing addressbook");
-  
+
   clearRows();
-  
+
   // Fetch from Wallet2 and create vector of AddressBookRow objects
   std::vector<tools::wallet2::address_book_row> rows = m_wallet->m_wallet->get_address_book();
   for (size_t i = 0; i < rows.size(); ++i) {
     tools::wallet2::address_book_row * row = &rows.at(i);
-    
+
     std::string payment_id = row->m_payment_id;
     std::string address = cryptonote::get_account_address_as_str(m_wallet->m_wallet->testnet(), row->m_is_subaddress, row->m_address);
 
     AddressBookRow * abr = new AddressBookRow(i, address, payment_id, row->m_description);
     m_rows.push_back(abr);
   }
-  
+
 }
 
-bool AddressBookImpl::deleteRow(int rowId) 
+bool AddressBookImpl::deleteRow(int rowId)
 {
   LOG_PRINT_L2("Deleting address book row " << rowId);
   bool r = m_wallet->m_wallet->delete_address_book_row(rowId);
   if (r)
     refresh();
   return r;
-} 
+}
 
 void AddressBookImpl::clearRows() {
    for (auto r : m_rows) {

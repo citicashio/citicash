@@ -549,14 +549,14 @@ namespace cryptonote
       LOG_PRINT_RED_L1("tx is too large " << get_object_blobsize(tx) << ", expected not bigger than " << m_blockchain_storage.get_current_cumulative_blocksize_limit() - CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE);
       return false;
     }
-    
+
     //check if tx use different key images
     if(!check_tx_inputs_keyimages_diff(tx))
     {
       LOG_PRINT_RED_L1("tx uses a single key image more than once");
       return false;
     }
-    
+
     if (!check_tx_inputs_keyimages_domain(tx))
     {
       LOG_PRINT_RED_L1("tx uses key image not in the valid domain");
@@ -619,12 +619,12 @@ namespace cryptonote
       coinbase_amount = get_outs_money_amount(b.miner_tx);
       std::list<transaction> txs;
       std::list<crypto::hash> missed_txs;
-      this->get_transactions(b.tx_hashes, txs, missed_txs);      
+      this->get_transactions(b.tx_hashes, txs, missed_txs);
       BOOST_FOREACH(const auto& tx, txs)
       {
         tx_fee_amount += get_tx_fee(tx);
       }
-      
+
       emission_amount += coinbase_amount - tx_fee_amount;
       total_fee_amount += tx_fee_amount;
       coinbase_amount = 0;
@@ -656,7 +656,7 @@ namespace cryptonote
     }
     return true;
   }
-  
+
   //-----------------------------------------------------------------------------------------------
   bool core::add_new_tx(const transaction& tx, tx_verification_context& tvc, bool keeped_by_block, bool relayed)
   {
@@ -784,7 +784,7 @@ namespace cryptonote
   {
     m_miner.resume();
   }
-  
+
   bool core::handle_block_found(block& b)
   {
     block_verification_context bvc = boost::value_initialized<block_verification_context>();
@@ -926,7 +926,7 @@ namespace cryptonote
   bool core::get_pool_transaction(const crypto::hash &id, transaction& tx) const
   {
     return m_mempool.get_transaction(id, tx);
-  }  
+  }
   //-----------------------------------------------------------------------------------------------
   bool core::get_pool_transactions_and_spent_keys_info(std::vector<tx_info>& tx_infos, std::vector<spent_key_image_info>& key_image_infos) const
   {

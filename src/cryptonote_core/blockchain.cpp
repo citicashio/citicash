@@ -981,7 +981,7 @@ bool Blockchain::validate_miner_transaction(const block& b, size_t cumulative_bl
     LOG_PRINT_L1("coinbase transaction spend too much money (" << print_money(money_in_use) << "). Block reward is " << print_money(base_reward + fee) << "(" << print_money(base_reward) << "+" << print_money(fee) << ")");
     return false;
   }
-  
+
   // from hard fork 2, since a miner can claim less than the full block reward, we update the base_reward
   // to show the amount of coins that were actually generated, the remainder will be pushed back for later
   // emission. This modifies the emission curve very slightly.
@@ -989,7 +989,7 @@ bool Blockchain::validate_miner_transaction(const block& b, size_t cumulative_bl
   if(base_reward + fee != money_in_use)
     partial_block_reward = true;
   base_reward = money_in_use - fee;
-  
+
   return true;
 }
 //------------------------------------------------------------------
@@ -1053,7 +1053,7 @@ bool Blockchain::create_block_template(block& b, const account_public_address& m
 
   cal_height = height - height % COIN_EMISSION_HEIGHT_INTERVAL;
   already_generated_coins = cal_height ? m_db->get_block_already_generated_coins(cal_height - 1) : 0;
-  
+
   CRITICAL_REGION_END();
 
   size_t txs_size;
@@ -2193,7 +2193,7 @@ bool Blockchain::check_tx_outputs(const transaction& tx, tx_verification_context
       return false;
     }
   }
-  
+
   // from v4, forbid invalid pubkeys
   for (const auto &o: tx.vout) {
     if (o.target.type() == typeid(txout_to_key)) {
@@ -2204,7 +2204,7 @@ bool Blockchain::check_tx_outputs(const transaction& tx, tx_verification_context
       }
     }
   }
-  
+
   return true;
 }
 //------------------------------------------------------------------
@@ -2363,7 +2363,7 @@ bool Blockchain::check_tx_inputs(transaction& tx, tx_verification_context &tvc, 
     tvc.m_high_mixin = true;
     return false;
   }
-  
+
   // min/max tx version based on HF, and we accept v1 txes if having a non mixable
   const size_t max_tx_version = CURRENT_TRANSACTION_VERSION;
   if (tx.version > max_tx_version)
@@ -2379,7 +2379,7 @@ bool Blockchain::check_tx_inputs(transaction& tx, tx_verification_context &tvc, 
     tvc.m_verifivation_failed = true;
     return false;
   }
-  
+
   auto it = m_check_txin_table.find(tx_prefix_hash);
   if(it == m_check_txin_table.end())
   {
@@ -2614,7 +2614,7 @@ bool Blockchain::check_tx_inputs(transaction& tx, tx_verification_context &tvc, 
     LOG_PRINT_L1("Unsupported rct type: " << rv.type);
     return false;
   }
-  
+
   return true;
 }
 
@@ -2668,7 +2668,7 @@ bool Blockchain::check_fee(size_t blob_size, uint64_t fee) const
   if (!get_block_reward(median, 1, cal_generated_coins, base_reward, height))
     return false;
   fee_per_kb = get_dynamic_per_kb_fee(base_reward, median, height);
-  
+
   LOG_PRINT_L2("Using " << print_money(fee) << "/kB fee");
 
   float kB = (blob_size - CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE) * 1.0f / 1024;
@@ -2832,7 +2832,7 @@ bool Blockchain::check_block_timestamp(const block& b) const
 
   if (b.timestamp > get_adjusted_time() + block_future_time_limit)
   {
-    LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << 
+    LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp <<
       ", bigger than adjusted time + " << "30 minutes");
     return false;
   }

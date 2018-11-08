@@ -1,22 +1,22 @@
 // Copyright (c) 2018, The CitiCash Project
 // Copyright (c) 2014-2017, The Monero Project
-// 
+//
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without modification, are
 // permitted provided that the following conditions are met:
-// 
+//
 // 1. Redistributions of source code must retain the above copyright notice, this list of
 //    conditions and the following disclaimer.
-// 
+//
 // 2. Redistributions in binary form must reproduce the above copyright notice, this list
 //    of conditions and the following disclaimer in the documentation and/or other
 //    materials provided with the distribution.
-// 
+//
 // 3. Neither the name of the copyright holder nor the names of its contributors may be
 //    used to endorse or promote products derived from this software without specific
 //    prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
@@ -26,7 +26,7 @@
 // INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
 // STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// 
+//
 // Parts of this file are originally copyright (c) 2012-2013 The Cryptonote developers
 
 #include <boost/foreach.hpp>
@@ -316,7 +316,7 @@ namespace cryptonote
     LOG_PRINT_L2("COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES: [" << res.o_indexes.size() << "]");
     return true;
   }
-  
+
   uint64_t get_decrypted_amounts(std::string txs_view_key, transaction tx, crypto::hash tx_hash) {
     std::vector<tx_extra_field> tx_extra_fields;
     if (!parse_tx_extra(tx.extra, tx_extra_fields)) // Extra may only be partially parsed, it's OK if tx_extra_fields contains public key
@@ -632,7 +632,7 @@ namespace cryptonote
 
     const miner& lMiner = m_core.get_miner();
     res.active = lMiner.is_mining();
-    
+
     if ( lMiner.is_mining() ) {
       res.speed = lMiner.get_speed();
       res.threads_count = lMiner.get_threads_count();
@@ -875,7 +875,7 @@ namespace cryptonote
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }
-  
+
   bool core_rpc_server::on_submitblock(const COMMAND_RPC_SUBMITBLOCK::request& req, COMMAND_RPC_SUBMITBLOCK::response& res, epee::json_rpc::error& error_resp)
   {
     CHECK_CORE_READY();
@@ -892,7 +892,7 @@ namespace cryptonote
       error_resp.message = "Wrong block blob";
       return false;
     }
-    
+
     // Fixing of high orphan issue for most pools
     // Thanks Boolberry!
     block b = AUTO_VAL_INIT(b);
@@ -921,7 +921,7 @@ namespace cryptonote
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }
-  
+
   uint64_t core_rpc_server::get_block_reward(const block& blk) {
     uint64_t reward = 0;
     BOOST_FOREACH(const tx_out& out, blk.miner_tx.vout) {
@@ -939,7 +939,7 @@ namespace cryptonote
       fee += get_tx_fee(tx);
     return fee;
   }
-  
+
   bool core_rpc_server::fill_block_header_response(const block& blk, bool orphan_status, uint64_t height, const crypto::hash& hash, block_header_response& response)
   {
     response.major_version = blk.major_version;
@@ -1424,7 +1424,7 @@ namespace cryptonote
 			m_p2p.delete_connections(count);
 		  }
 	  }
-	  
+
 	  else
 		m_p2p.m_config.m_net_config.connections_count = req.out_peers;
 		*/

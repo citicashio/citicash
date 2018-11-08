@@ -1,21 +1,21 @@
 // Copyright (c) 2014-2016, The Monero Project
-// 
+//
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without modification, are
 // permitted provided that the following conditions are met:
-// 
+//
 // 1. Redistributions of source code must retain the above copyright notice, this list of
 //    conditions and the following disclaimer.
-// 
+//
 // 2. Redistributions in binary form must reproduce the above copyright notice, this list
 //    of conditions and the following disclaimer in the documentation and/or other
 //    materials provided with the distribution.
-// 
+//
 // 3. Neither the name of the copyright holder nor the names of its contributors may be
 //    used to endorse or promote products derived from this software without specific
 //    prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
@@ -25,7 +25,7 @@
 // INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
 // STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// 
+//
 // Parts of this file are originally copyright (c) 2012-2013 The Cryptonote developers
 
 #pragma once
@@ -42,7 +42,7 @@ namespace nodetool
   typedef uint64_t peerid_type;
 
 #pragma pack (push, 1)
-  
+
   struct net_address
   {
     uint32_t ip;
@@ -76,7 +76,7 @@ namespace nodetool
   {
     return  memcmp(&a, &b, sizeof(a)) == 0;
   }
-  inline 
+  inline
   std::string print_peerlist_to_string(const std::list<peerlist_entry>& pl)
   {
     time_t now_time = 0;
@@ -111,7 +111,7 @@ namespace nodetool
 
   struct basic_node_data
   {
-    uuid network_id;                   
+    uuid network_id;
     uint64_t local_time;
     uint32_t my_port;
     peerid_type peer_id;
@@ -123,7 +123,7 @@ namespace nodetool
       KV_SERIALIZE(my_port)
     END_KV_SERIALIZE_MAP()
   };
-  
+
 
 #define P2P_COMMANDS_POOL_BASE 1000
 
@@ -150,7 +150,7 @@ namespace nodetool
     {
       basic_node_data node_data;
       t_playload_type payload_data;
-      std::list<peerlist_entry> local_peerlist; 
+      std::list<peerlist_entry> local_peerlist;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(node_data)
@@ -181,7 +181,7 @@ namespace nodetool
     {
       uint64_t local_time;
       t_playload_type payload_data;
-      std::list<peerlist_entry> local_peerlist; 
+      std::list<peerlist_entry> local_peerlist;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(local_time)
@@ -198,7 +198,7 @@ namespace nodetool
   struct COMMAND_PING
   {
     /*
-      Used to make "callback" connection, to be sure that opponent node 
+      Used to make "callback" connection, to be sure that opponent node
       have accessible connection point. Only other nodes can add peer to peerlist,
       and ONLY in case when peer has accepted connection and answered to ping.
     */
@@ -222,13 +222,13 @@ namespace nodetool
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
         KV_SERIALIZE(peer_id)
-      END_KV_SERIALIZE_MAP()    
+      END_KV_SERIALIZE_MAP()
     };
   };
 
-  
+
 #ifdef ALLOW_DEBUG_COMMANDS
-  //These commands are considered as insecure, and made in debug purposes for a limited lifetime. 
+  //These commands are considered as insecure, and made in debug purposes for a limited lifetime.
   //Anyone who feel unsafe with this commands can disable the ALLOW_GET_STAT_COMMAND macro.
 
   struct proof_of_trust
@@ -239,9 +239,9 @@ namespace nodetool
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(peer_id)
-      KV_SERIALIZE(time)        
-      KV_SERIALIZE_VAL_POD_AS_BLOB(sign)  
-    END_KV_SERIALIZE_MAP()    
+      KV_SERIALIZE(time)
+      KV_SERIALIZE_VAL_POD_AS_BLOB(sign)
+    END_KV_SERIALIZE_MAP()
   };
 
 
@@ -255,9 +255,9 @@ namespace nodetool
       proof_of_trust tr;
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tr)
-      END_KV_SERIALIZE_MAP()    
+      END_KV_SERIALIZE_MAP()
     };
-    
+
     struct response
     {
       std::string version;
@@ -272,7 +272,7 @@ namespace nodetool
         KV_SERIALIZE(connections_count)
         KV_SERIALIZE(incoming_connections_count)
         KV_SERIALIZE(payload_info)
-      END_KV_SERIALIZE_MAP()    
+      END_KV_SERIALIZE_MAP()
     };
   };
 
@@ -289,14 +289,14 @@ namespace nodetool
       proof_of_trust tr;
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tr)
-      END_KV_SERIALIZE_MAP()    
+      END_KV_SERIALIZE_MAP()
     };
 
     struct response
     {
-      std::list<peerlist_entry> local_peerlist_white; 
-      std::list<peerlist_entry> local_peerlist_gray; 
-      std::list<connection_entry> connections_list; 
+      std::list<peerlist_entry> local_peerlist_white;
+      std::list<peerlist_entry> local_peerlist_gray;
+      std::list<connection_entry> connections_list;
       peerid_type my_id;
       uint64_t    local_time;
       BEGIN_KV_SERIALIZE_MAP()
@@ -305,7 +305,7 @@ namespace nodetool
         KV_SERIALIZE_CONTAINER_POD_AS_BLOB(connections_list)
         KV_SERIALIZE(my_id)
         KV_SERIALIZE(local_time)
-      END_KV_SERIALIZE_MAP()    
+      END_KV_SERIALIZE_MAP()
     };
   };
 
@@ -319,7 +319,7 @@ namespace nodetool
     struct request
     {
       BEGIN_KV_SERIALIZE_MAP()
-      END_KV_SERIALIZE_MAP()    
+      END_KV_SERIALIZE_MAP()
     };
 
     struct response
@@ -328,7 +328,7 @@ namespace nodetool
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(my_id)
-      END_KV_SERIALIZE_MAP()    
+      END_KV_SERIALIZE_MAP()
     };
   };
 
@@ -342,7 +342,7 @@ namespace nodetool
     struct request
     {
       BEGIN_KV_SERIALIZE_MAP()
-      END_KV_SERIALIZE_MAP()    
+      END_KV_SERIALIZE_MAP()
     };
 
     struct response
@@ -351,10 +351,10 @@ namespace nodetool
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(support_flags)
-      END_KV_SERIALIZE_MAP()    
+      END_KV_SERIALIZE_MAP()
     };
   };
-  
+
 #endif
 
 

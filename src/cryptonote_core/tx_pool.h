@@ -353,14 +353,14 @@ namespace cryptonote
       /*! if the transaction was returned to the pool from the blockchain
        *  due to a reorg, then this will be true
        */
-      bool kept_by_block;  
+      bool kept_by_block;
 
       //! the highest block the transaction referenced when last checking it failed
       /*! if verifying a transaction's inputs fails, it's possible this is due
        *  to a reorg since it was created (if it used recently created outputs
        *  as inputs).
        */
-      uint64_t last_failed_height;  
+      uint64_t last_failed_height;
 
       //! the hash of the highest block the transaction referenced when last checking it failed
       /*! if verifying a transaction's inputs fails, it's possible this is due

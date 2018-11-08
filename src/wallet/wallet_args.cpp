@@ -71,7 +71,7 @@ namespace wallet_args
     const char* const usage,
     boost::program_options::options_description desc_params,
     const boost::program_options::positional_options_description& positional_options)
-  
+
   {
     namespace bf = boost::filesystem;
     namespace po = boost::program_options;

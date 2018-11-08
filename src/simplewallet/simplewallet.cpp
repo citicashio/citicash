@@ -4115,7 +4115,7 @@ bool simple_wallet::alias_address(const std::vector<std::string> &args) {
       return true;
     }
   }
-  
+
   unsigned int priority = 3;
   if (local_args.size() == 3) {
     try {
@@ -4141,7 +4141,7 @@ bool simple_wallet::alias_address(const std::vector<std::string> &args) {
   std::vector<uint8_t> extra;
   if (!cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ALIAS + local_args.front())
     || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ADDRESS + wallet_address)
-    || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_SIGNATURE + m_wallet->sign(local_args.front()))) 
+    || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_SIGNATURE + m_wallet->sign(local_args.front())))
   { // LUKAS TODO consider encrypting dst.addr and signature to chars and use them instead, then decrypt via get_account_address_as_str (or get_subaddress_as_str)
     fail_msg_writer() << tr("Something went wrong with alias. Please check its format: \"") << local_args.front() << tr("\"");
     return true;

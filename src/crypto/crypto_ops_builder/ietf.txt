@@ -1,9 +1,9 @@
-                                                                        
 
-[Docs] [txt|pdf] [Tracker] [Email] [Diff1] [Diff2] [Nits]               
-                                                                        
-Versions: 00 01 02                                                      
-                                                                        
+
+[Docs] [txt|pdf] [Tracker] [Email] [Diff1] [Diff2] [Nits]
+
+Versions: 00 01 02
+
 Network Working Group                                       S. Josefsson
 Internet-Draft                                                    SJD AB
 Intended status: Informational                                N. Moeller
@@ -59,7 +59,7 @@ Copyright Notice
 
 Josefsson & Moeller      Expires August 26, 2015                [Page 1]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -117,7 +117,7 @@ Table of Contents
 
 Josefsson & Moeller      Expires August 26, 2015                [Page 2]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -176,7 +176,7 @@ Internet-Draft               EdDSA & Ed25519               February 2015
 
 Josefsson & Moeller      Expires August 26, 2015                [Page 3]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -235,7 +235,7 @@ Internet-Draft               EdDSA & Ed25519               February 2015
 
 Josefsson & Moeller      Expires August 26, 2015                [Page 4]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -296,7 +296,7 @@ Internet-Draft               EdDSA & Ed25519               February 2015
 
 Josefsson & Moeller      Expires August 26, 2015                [Page 5]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -356,7 +356,7 @@ Internet-Draft               EdDSA & Ed25519               February 2015
 
 Josefsson & Moeller      Expires August 26, 2015                [Page 6]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -414,7 +414,7 @@ Internet-Draft               EdDSA & Ed25519               February 2015
 
 Josefsson & Moeller      Expires August 26, 2015                [Page 7]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -473,7 +473,7 @@ Internet-Draft               EdDSA & Ed25519               February 2015
 
 Josefsson & Moeller      Expires August 26, 2015                [Page 8]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -532,7 +532,7 @@ Internet-Draft               EdDSA & Ed25519               February 2015
 
 Josefsson & Moeller      Expires August 26, 2015                [Page 9]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -589,7 +589,7 @@ Internet-Draft               EdDSA & Ed25519               February 2015
 
 Josefsson & Moeller      Expires August 26, 2015               [Page 10]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -646,7 +646,7 @@ def point_equal(P, Q):
 
 Josefsson & Moeller      Expires August 26, 2015               [Page 11]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -703,7 +703,7 @@ def point_decompress(s):
 
 Josefsson & Moeller      Expires August 26, 2015               [Page 12]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -760,7 +760,7 @@ Internet-Draft               EdDSA & Ed25519               February 2015
 
 Josefsson & Moeller      Expires August 26, 2015               [Page 13]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -818,7 +818,7 @@ Internet-Draft               EdDSA & Ed25519               February 2015
 
 Josefsson & Moeller      Expires August 26, 2015               [Page 14]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -875,7 +875,7 @@ Internet-Draft               EdDSA & Ed25519               February 2015
 
 Josefsson & Moeller      Expires August 26, 2015               [Page 15]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -932,7 +932,7 @@ Internet-Draft               EdDSA & Ed25519               February 2015
 
 Josefsson & Moeller      Expires August 26, 2015               [Page 16]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -990,7 +990,7 @@ Internet-Draft               EdDSA & Ed25519               February 2015
 
 Josefsson & Moeller      Expires August 26, 2015               [Page 17]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -1053,7 +1053,7 @@ Internet-Draft               EdDSA & Ed25519               February 2015
 
 Josefsson & Moeller      Expires August 26, 2015               [Page 18]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -1111,7 +1111,7 @@ def sha512(s):
 
 Josefsson & Moeller      Expires August 26, 2015               [Page 19]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -1168,7 +1168,7 @@ def point_equal(P, Q):
 
 Josefsson & Moeller      Expires August 26, 2015               [Page 20]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -1225,7 +1225,7 @@ def point_decompress(s):
 
 Josefsson & Moeller      Expires August 26, 2015               [Page 21]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -1282,7 +1282,7 @@ def verify(public, msg, signature):
 
 Josefsson & Moeller      Expires August 26, 2015               [Page 22]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -1340,7 +1340,7 @@ Appendix B.  Library driver
 
 Josefsson & Moeller      Expires August 26, 2015               [Page 23]
 
- 
+
 Internet-Draft               EdDSA & Ed25519               February 2015
 
 
@@ -1399,4 +1399,4 @@ Josefsson & Moeller      Expires August 26, 2015               [Page 24]
 
 
 
-Html markup produced by rfcmarkup 1.113, available from https://tools.ietf.org/tools/rfcmarkup/  
+Html markup produced by rfcmarkup 1.113, available from https://tools.ietf.org/tools/rfcmarkup/

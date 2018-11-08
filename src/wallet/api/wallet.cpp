@@ -84,7 +84,7 @@ struct Wallet2CallbackImpl : public tools::i_wallet2_callback
 
     virtual void on_new_block(uint64_t height, const cryptonote::block& block) {
         // Don't flood the GUI with signals. On fast refresh - send signal every 1000th block
-        // get_refresh_from_block_height() returns the blockheight from when the wallet was 
+        // get_refresh_from_block_height() returns the blockheight from when the wallet was
         // created or the restore height specified when wallet was recovered
         if (height >= m_wallet->m_wallet->get_refresh_from_block_height() || height % 1000 == 0) {
             // LOG_PRINT_L3(__FUNCTION__ << ": new block. height: " << height);
@@ -604,13 +604,13 @@ uint64_t WalletImpl::daemonBlockChainHeight() const
         m_status = Status_Ok;
         m_errorString = "";
     }
-    // Target height can be 0 when daemon is synced. Use blockchain height instead. 
+    // Target height can be 0 when daemon is synced. Use blockchain height instead.
     if(result == 0)
         result = daemonBlockChainHeight();
     return result;
 }
 
-bool WalletImpl::daemonSynced() const {   
+bool WalletImpl::daemonSynced() const {
     if(connected() == Wallet::ConnectionStatus_Disconnected)
         return false;
     uint64_t blockChainHeight = daemonBlockChainHeight();
@@ -1175,7 +1175,7 @@ void WalletImpl::doRefresh()
         if (daemonSynced()) {
             // Use fast refresh for new wallets
             if (isNewWallet())
-                m_wallet->set_refresh_from_block_height(daemonBlockChainHeight());        
+                m_wallet->set_refresh_from_block_height(daemonBlockChainHeight());
             m_wallet->refresh();
             if (!m_synchronized) {
                 m_synchronized = true;
@@ -1186,7 +1186,7 @@ void WalletImpl::doRefresh()
             if (m_history->count() == 0) {
                 m_history->refresh();
             }
-        } 
+        }
     } catch (const std::exception &e) {
         m_status = Status_Error;
         m_errorString = e.what();
@@ -1277,7 +1277,7 @@ PendingTransaction * WalletImpl::createAlias(const std::string& alias, PendingTr
   std::vector<uint8_t> extra;
   if (!cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ALIAS + alias)
       || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ADDRESS + wallet_address)
-      || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_SIGNATURE + m_wallet->sign(alias))) 
+      || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_SIGNATURE + m_wallet->sign(alias)))
     { // LUKAS TODO consider encrypting dst.addr and signature to chars and use them instead, then decrypt via get_account_address_as_str (or get_subaddress_as_str)
       LOG_ERROR("Something went wrong with alias. Please check its format: \"" + alias + "\"");
       return nullptr;
@@ -1378,7 +1378,7 @@ std::string WalletImpl::getAddressForAlias(const std::string& alias, bool get_if
 {
     return m_wallet->get_alias_address(alias, get_if_premature);
 }
-    
+
 std::vector<cryptonote::alias> WalletImpl::getAliasesForForAddress(const std::string& address)
 {
     return m_wallet->get_address_aliases(address);

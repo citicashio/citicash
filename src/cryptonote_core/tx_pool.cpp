@@ -79,7 +79,7 @@ namespace cryptonote
 
 
   tx_memory_pool::tx_memory_pool(Blockchain& bchs): m_blockchain(bchs) {}
-  
+
   bool tx_memory_pool::add_tx(const transaction &tx, /*const crypto::hash& tx_prefix_hash,*/ const crypto::hash &id, size_t blob_size, tx_verification_context& tvc, bool kept_by_block, bool relayed, uint8_t version)
   {
     PERF_TIMER(add_tx);
@@ -110,7 +110,7 @@ namespace cryptonote
     }
 
     uint64_t fee = tx.rct_signatures.txnFee;
-    
+
     if (!kept_by_block && !m_blockchain.check_fee(blob_size, fee))
     {
       tvc.m_verifivation_failed = true;
@@ -126,7 +126,7 @@ namespace cryptonote
       tvc.m_too_big = true;
       return false;
     }
-    
+
     bool mixin_too_low = false;
     bool mixin_too_high = false;
     BOOST_FOREACH(const auto& in, tx.vin)
@@ -141,7 +141,7 @@ namespace cryptonote
         break;
       }
     }
-    
+
     if (!kept_by_block && mixin_too_low){
       LOG_PRINT_L1("transaction with id= "<< id << " has too low mixin");
       tvc.m_low_mixin = true;
@@ -288,7 +288,7 @@ namespace cryptonote
     get_transaction_hash(tx, h, blob_size);
     return add_tx(tx, h, blob_size, tvc, keeped_by_block, relayed, version);
   }
-  
+
   //FIXME: Can return early before removal of all of the key images.
   //       At the least, need to make sure that a false return here
   //       is treated properly.  Should probably not return early, however.
@@ -549,7 +549,7 @@ namespace cryptonote
     }
     return false;
   }
-  
+
   bool tx_memory_pool::have_tx_keyimg_as_spent(const crypto::key_image& key_im) const {
     CRITICAL_REGION_LOCAL(m_transactions_lock);
     return m_spent_key_images.find(key_im) != m_spent_key_images.end();
@@ -691,7 +691,7 @@ namespace cryptonote
     while (sorted_it != m_txs_by_fee_and_receive_time.end()) {
       auto tx_it = m_transactions.find(sorted_it->second);
       LOG_PRINT_L2("Considering " << tx_it->first << ", size " << tx_it->second.blob_size << ", current block size " << total_size << ", current coinbase " << print_money(best_coinbase));
-            
+
       uint64_t block_reward;
       if (!get_block_reward(median_size, total_size + tx_it->second.blob_size + CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE, already_generated_coins, block_reward, height))
       {
@@ -803,7 +803,7 @@ namespace cryptonote
     // no need to store queue of sorted transactions, as it's easy to generate.
     for (const auto& tx : m_transactions)
     {
-      // Rounding tx fee/blob_size ratio so that txs with same priority level 
+      // Rounding tx fee/blob_size ratio so that txs with same priority level
       // and the ratios not much diff would be sorted by receive_time
       uint32_t fee_per_size_ratio = (uint32_t)(tx.second.fee / (double)tx.second.blob_size);
       m_txs_by_fee_and_receive_time.emplace(std::pair<uint32_t, time_t>(fee_per_size_ratio, tx.second.receive_time), tx.first);

@@ -1,22 +1,22 @@
 // Copyright (c) 2017, SUMOKOIN
 // Copyright (c) 2014-2016, The Monero Project
-// 
+//
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without modification, are
 // permitted provided that the following conditions are met:
-// 
+//
 // 1. Redistributions of source code must retain the above copyright notice, this list of
 //    conditions and the following disclaimer.
-// 
+//
 // 2. Redistributions in binary form must reproduce the above copyright notice, this list
 //    of conditions and the following disclaimer in the documentation and/or other
 //    materials provided with the distribution.
-// 
+//
 // 3. Neither the name of the copyright holder nor the names of its contributors may be
 //    used to endorse or promote products derived from this software without specific
 //    prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
@@ -29,9 +29,9 @@
 
 /*!
  * \file electrum-words.cpp
- * 
+ *
  * \brief Mnemonic seed generation and wallet restoration from them.
- * 
+ *
  * This file and its header file are for translating Electrum-style word lists
  * into their equivalent byte representations for cross-compatibility with
  * that method of "backing up" one's wallet keys.
@@ -237,14 +237,14 @@ namespace
 
 /*!
  * \namespace crypto
- * 
+ *
  * \brief crypto namespace.
  */
 namespace crypto
 {
   /*!
    * \namespace crypto::ElectrumWords
-   * 
+   *
    * \brief Mnemonic seed word generation and wallet restoration helper functions.
    */
   namespace ElectrumWords
@@ -287,7 +287,7 @@ namespace crypto
         return false;
       }
       seed.pop_back();
-      
+
       if (!checksum_test(seed, language->get_unique_prefix_length()))
       {
         // Checksum fail
@@ -369,7 +369,7 @@ namespace crypto
       for (unsigned int i=0; i < sizeof(src.data)/4; i++, words += ' ')
       {
         uint32_t w1, w2, w3;
-        
+
         uint32_t val;
 
         memcpy(&val, (src.data) + (i * 4), 4);

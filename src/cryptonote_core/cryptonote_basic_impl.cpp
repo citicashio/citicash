@@ -62,7 +62,7 @@ namespace cryptonote {
       KV_SERIALIZE(payment_id)
     END_KV_SERIALIZE_MAP()
   };
-  
+
   /************************************************************************/
   /* Cryptonote helper functions                                          */
   /************************************************************************/
@@ -91,10 +91,10 @@ namespace cryptonote {
     }
     else
       base_reward = GENESIS_BLOCK_REWARD;
-    
+
     if (base_reward < FINAL_SUBSIDY)
         base_reward = (MONEY_SUPPLY > already_generated_coins) ? FINAL_SUBSIDY : FINAL_SUBSIDY/2;
-    
+
     // rounding (floor) base reward
     base_reward = base_reward / round_factor * round_factor;
 
@@ -179,7 +179,7 @@ namespace cryptonote {
       config::testnet::CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX : config::CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX;
     uint64_t subaddress_prefix = testnet ?
       config::testnet::CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX : config::CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX;
-    
+
     if (2 * sizeof(public_address_outer_blob) != str.size())
     {
       blobdata data;

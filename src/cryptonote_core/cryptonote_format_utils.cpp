@@ -484,22 +484,22 @@ namespace cryptonote
     std::copy(s.begin(), s.end(), std::back_inserter(tx_extra));
     return true;
   }
-  
+
   void set_payment_id_to_tx_extra_nonce(blobdata& extra_nonce, const std::string& payment_id) {
     extra_nonce = (char)TX_EXTRA_NONCE_PAYMENT_ID + payment_id;
   }
-  
+
   void set_encrypted_payment_id_to_tx_extra_nonce(blobdata& extra_nonce, const std::string& payment_id) {
     extra_nonce = (char)TX_EXTRA_NONCE_ENCRYPTED_PAYMENT_ID + payment_id;
   }
-  
+
   bool get_payment_id_from_tx_extra_nonce(const blobdata& extra_nonce, std::string& payment_id) {
     if (extra_nonce.size() > HASH_SIZE+1 || extra_nonce.empty() || extra_nonce[0] != TX_EXTRA_NONCE_PAYMENT_ID)
       return false;
     payment_id = extra_nonce.substr(1);
     return true;
   }
-  
+
   bool get_encrypted_payment_id_from_tx_extra_nonce(const blobdata& extra_nonce, std::string& payment_id) {
     if (extra_nonce.size() > HASH_SIZE+1 || extra_nonce.empty() || extra_nonce[0] != TX_EXTRA_NONCE_ENCRYPTED_PAYMENT_ID)
       return false;
@@ -541,7 +541,7 @@ namespace cryptonote
     }
     return destinations[0].addr.m_view_public_key;
   }
-  
+
   bool encrypt_payment_id(std::string& payment_id, const crypto::public_key& public_key, const crypto::secret_key& secret_key) {
     crypto::key_derivation derivation;
     crypto::hash hash;
@@ -559,11 +559,11 @@ namespace cryptonote
 
     return true;
   }
-  
+
   bool decrypt_payment_id(std::string& payment_id, const crypto::public_key& public_key, const crypto::secret_key& secret_key) {
     return encrypt_payment_id(payment_id, public_key, secret_key); // Encryption and decryption are the same operation (xor with a key)
   }
-  
+
   bool construct_tx_and_get_tx_key(const account_keys& sender_account_keys, const std::unordered_map<crypto::public_key, subaddress_index>& subaddresses, const std::vector<tx_source_entry>& sources, const std::vector<tx_destination_entry>& destinations, const cryptonote::account_public_address& change_addr, std::vector<uint8_t> extra, transaction& tx, uint64_t unlock_time, crypto::secret_key &tx_key, std::vector<crypto::secret_key> &additional_tx_keys, bool rct) {
     if (destinations.empty()) {
       LOG_ERROR("The destinations must be non-empty");
@@ -582,7 +582,7 @@ namespace cryptonote
 
     keypair txkey = keypair::generate();
     tx_key = txkey.sec;
-    
+
     // if we have a stealth payment id, find it and encrypt it with the tx key now
     std::vector<tx_extra_field> tx_extra_fields;
     if (parse_tx_extra(tx.extra, tx_extra_fields)) {
@@ -715,7 +715,7 @@ namespace cryptonote
 
 
     std::vector<crypto::public_key> additional_tx_public_keys;
-    
+
     // we don't need to include additional tx keys if:
     //   - all the destinations are standard addresses
     //   - there's only one destination which is a subaddress
@@ -728,7 +728,7 @@ namespace cryptonote
       }
       CHECK_AND_ASSERT_MES(destinations.size() == additional_tx_keys.size(), false, "Wrong amount of additional tx keys");
     }
-    
+
     uint64_t summary_outs_money = 0;
     //fill outputs
     size_t output_index = 0;
@@ -762,7 +762,7 @@ namespace cryptonote
         r = crypto::generate_key_derivation(dst_entr.addr.m_view_public_key, dst_entr.is_subaddress && need_additional_txkeys ? additional_txkey.sec : tx_key, derivation);
         CHECK_AND_ASSERT_MES(r, false, "at creation outs: failed to generate_key_derivation(" << dst_entr.addr.m_view_public_key << ", " << (dst_entr.is_subaddress && need_additional_txkeys ? additional_txkey.sec : tx_key) << ")");
       }
-      
+
       if (need_additional_txkeys)
       {
         additional_tx_public_keys.push_back(additional_txkey.pub);
@@ -787,7 +787,7 @@ namespace cryptonote
     CHECK_AND_ASSERT_MES(additional_tx_public_keys.size() == additional_tx_keys.size(), false, "Internal error creating additional public keys");
 
     remove_field_from_tx_extra(tx.extra, typeid(tx_extra_additional_pub_keys));
-    
+
     LOG_PRINT_L2("tx pubkey: " << txkey.pub);
     if (need_additional_txkeys)
     {
@@ -1207,7 +1207,7 @@ namespace cryptonote
 	  std::vector<size_t> sz;
 	  construct_miner_tx(0, 0, 0, 0, 0, ac, tx); // zero fee in genesis
 	  blobdata txb = tx_to_blob(tx);
-	  
+
   }
   //---------------------------------------------------------------
   std::string get_genesis_tx_hex() {

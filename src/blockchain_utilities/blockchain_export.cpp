@@ -134,7 +134,7 @@ int main(int argc, char* argv[]) {
   BlockchainDB* db = nullptr;
   db_flags |= MDB_RDONLY;
   db = new BlockchainLMDB();
-  
+
   boost::filesystem::path folder(m_config_folder);
   folder /= db->get_db_name();
   const std::string filename = folder.string();

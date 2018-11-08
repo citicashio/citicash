@@ -172,7 +172,7 @@ struct aesdata
 
 inline uint32_t sub_word(uint32_t key)
 {
-	return (saes_sbox[key >> 24 ] << 24)   | (saes_sbox[(key >> 16) & 0xff] << 16 ) | 
+	return (saes_sbox[key >> 24 ] << 24)   | (saes_sbox[(key >> 16) & 0xff] << 16 ) |
 		(saes_sbox[(key >> 8)  & 0xff] << 8  ) | saes_sbox[key & 0xff];
 }
 
@@ -458,7 +458,7 @@ inline uint64_t _umul128(uint64_t a, uint64_t b, uint64_t* hi)
 	*hi = r >> 64;
 	return (uint64_t)r;
 }
-#endif 
+#endif
 #endif
 
 extern "C" void blake256_hash(uint8_t*, const uint8_t*, uint64_t);

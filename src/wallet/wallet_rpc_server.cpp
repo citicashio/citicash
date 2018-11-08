@@ -1,23 +1,23 @@
 // Copyright (c) 2018, The CitiCash Project
 // Copyright (c) 2017, SUMOKOIN
 // Copyright (c) 2014-2017, The Monero Project
-// 
+//
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without modification, are
 // permitted provided that the following conditions are met:
-// 
+//
 // 1. Redistributions of source code must retain the above copyright notice, this list of
 //    conditions and the following disclaimer.
-// 
+//
 // 2. Redistributions in binary form must reproduce the above copyright notice, this list
 //    of conditions and the following disclaimer in the documentation and/or other
 //    materials provided with the distribution.
-// 
+//
 // 3. Neither the name of the copyright holder nor the names of its contributors may be
 //    used to endorse or promote products derived from this software without specific
 //    prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
@@ -27,7 +27,7 @@
 // INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
 // STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// 
+//
 // Parts of this file are originally copyright (c) 2012-2013 The Cryptonote developers
 #include <boost/asio/ip/address.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -65,11 +65,11 @@ namespace tools
   {
     return i18n_translate(str, "tools::wallet_rpc_server");
   }
-  
+
   wallet_rpc_server::wallet_rpc_server(wallet2& w):m_wallet(w), m_stop(false) {}
 
   wallet_rpc_server::~wallet_rpc_server() {}
-  
+
   bool wallet_rpc_server::run()
   {
     m_stop = false;
@@ -119,7 +119,7 @@ namespace tools
       }
       else
         http_login.emplace(std::move(rpc_config->login->username), std::move(rpc_config->login->password).password());
-      
+
       assert(bool(http_login));
       tools::scoped_message_writer(epee::log_space::console_color_white, true) << "rpc-login: " << http_login->username << ":" << http_login->password;
     }
@@ -482,13 +482,13 @@ namespace tools
     dst.addr = m_wallet.get_account().get_keys().m_account_address; // LUKAS TODO consider extending to subaddresses via wallet2::get_subaddress(const cryptonote::subaddress_index& index)
     dst.is_subaddress = false;
     dst.amount = 1;
-    
+
     // append alias, wallet_address and signature into extra
     const std::string wallet_address = m_wallet.get_account().get_public_address_str(m_wallet.testnet()); // LUKAS TODO consider extending to subaddresses via get_subaddress_as_str(const cryptonote::subaddress_index& index)
     std::vector<uint8_t> extra;
     if (!cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ALIAS + req.alias)
       || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_ADDRESS + wallet_address)
-      || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_SIGNATURE + m_wallet.sign(req.alias))) 
+      || !cryptonote::add_extra_nonce_to_tx_extra(extra, (char)TX_EXTRA_NONCE_SIGNATURE + m_wallet.sign(req.alias)))
     { // LUKAS TODO consider encrypting dst.addr and signature to chars and use them instead, then decrypt via get_account_address_as_str (or get_subaddress_as_str)
       er.code = WALLET_RPC_ERROR_CODE_WRONG_ALIAS;
       er.message = "Something went wrong with alias. Please check its format: \"" + req.alias + "\"";
@@ -574,7 +574,7 @@ namespace tools
         LOG_PRINT_L1("Requested mixin " << req.mixin << " too high, using " << MAX_MIXIN);
         mixin = MAX_MIXIN;
       }
-      
+
       std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions(dsts, mixin, req.unlock_time, req.priority, extra, req.account_index, req.subaddr_indices, req.trusted_daemon);
 
       // reject proposed transactions if there are more than one.  see on_transfer_split below.
@@ -645,7 +645,7 @@ namespace tools
         LOG_PRINT_L1("Requested mixin " << req.mixin << " too high, using " << MAX_MIXIN);
         mixin = MAX_MIXIN;
       }
-      
+
       std::vector<wallet2::pending_tx> ptx_vector;
       ptx_vector = m_wallet.create_transactions(dsts, mixin, req.unlock_time, req.priority, extra, req.account_index, req.subaddr_indices, req.trusted_daemon);
 
@@ -1284,7 +1284,7 @@ namespace tools
         return true;
       transfer_entries.sort(
         [](const std::pair<int, tools::wallet_rpc::transfer_entry>& first, const std::pair<int, tools::wallet_rpc::transfer_entry>& second) {
-          return first.second.timestamp > second.second.timestamp; 
+          return first.second.timestamp > second.second.timestamp;
         });
       transfer_entries.assign(std::next(transfer_entries.begin(), req.offset), std::next(transfer_entries.begin(), std::min(req.offset + req.limit, static_cast<uint64_t>(transfer_entries.size()))));
     }

@@ -3,23 +3,23 @@
 /// @brief interface for throttling of connection (count and rate-limit speed etc)
 
 // Copyright (c) 2014-2016, The Monero Project
-// 
+//
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without modification, are
 // permitted provided that the following conditions are met:
-// 
+//
 // 1. Redistributions of source code must retain the above copyright notice, this list of
 //    conditions and the following disclaimer.
-// 
+//
 // 2. Redistributions in binary form must reproduce the above copyright notice, this list
 //    of conditions and the following disclaimer in the documentation and/or other
 //    materials provided with the distribution.
-// 
+//
 // 3. Neither the name of the copyright holder nor the names of its contributors may be
 //    used to endorse or promote products derived from this software without specific
 //    prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
@@ -54,8 +54,8 @@
 
 #include "syncobj.h"
 
-#include "../../contrib/epee/include/net/net_utils_base.h" 
-#include "../../contrib/epee/include/misc_log_ex.h" 
+#include "../../contrib/epee/include/net/net_utils_base.h"
+#include "../../contrib/epee/include/misc_log_ex.h"
 #include <boost/lambda/bind.hpp>
 #include <boost/foreach.hpp>
 #include <boost/lambda/lambda.hpp>
@@ -64,7 +64,7 @@
 #include <boost/utility/value_init.hpp>
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/thread/thread.hpp> 
+#include <boost/thread/thread.hpp>
 #include "misc_language.h"
 #include "pragma_comp_defs.h"
 #include <sstream>
@@ -102,7 +102,7 @@ typedef calculate_times_struct calculate_times_struct;
 
 namespace cryptonote { class cryptonote_protocol_handler_base; } // a friend class // TODO friend not working
 
-/*** 
+/***
 @brief Access to simple throttles, with singlton to access global network limits
 */
 class network_throttle_manager {
@@ -155,7 +155,7 @@ class i_network_throttle {
 		// time calculations:
 		
 		virtual void calculate_times(size_t packet_size, calculate_times_struct &cts, bool dbg, double force_window) const =0; // assuming sending new package (or 0), calculate:
-		// Average, Window, Delay, Recommended data size ; also gets dbg=debug flag, and forced widnow size if >0 or -1 for not forcing window size 
+		// Average, Window, Delay, Recommended data size ; also gets dbg=debug flag, and forced widnow size if >0 or -1 for not forcing window size
 
 		// Average speed, Window size, recommended Delay to sleep now, Recommended size of data to send now
 

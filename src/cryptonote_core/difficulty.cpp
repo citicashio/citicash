@@ -180,7 +180,7 @@ namespace cryptonote {
     if (adjusted_total_timespan < MIN_AVERAGE_TIMESPAN * timespan_length){
       adjusted_total_timespan = MIN_AVERAGE_TIMESPAN * timespan_length;
     }
-    
+
     difficulty_type total_work = cumulative_difficulties[cut_end - 1] - cumulative_difficulties[cut_begin];
     assert(total_work > 0);
 

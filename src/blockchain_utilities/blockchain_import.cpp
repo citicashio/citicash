@@ -662,7 +662,7 @@ int main(int argc, char* argv[]) {
     std::cerr << "Error parsing database argument(s)" << ENDL;
     return 1;
   }
-  
+
   LOG_PRINT_L0("database flags: " << db_flags);
   LOG_PRINT_L0("verify:  " << std::boolalpha << opt_verify << std::noboolalpha);
   if (opt_batch)

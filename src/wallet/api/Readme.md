@@ -126,7 +126,7 @@ Return the wallet's addresses for an account. Optionally filter for specific set
 ####Example:
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"getaddress","params":{"account_index":0,"address_index":[0,1]}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -156,7 +156,7 @@ Returns the wallet's current block height.
 ####Example:
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"getheight"}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -196,7 +196,7 @@ Send citicash to a number of recipients.
 ####Example:
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"transfer","params":{"destinations":[{"amount":100000000,"address":"9wNgSYy2F9qPZu7KBjvsFgZLTKE2TZgEpNFbGka9gA5zPmAXS35QzzYaLKJRkYTnzgArGNX7TvSqZC87tBLwtaC5RQgJ8rm"},{"amount":200000000,"address":"9vH5D7Fv47mbpCpdcthcjU34rqiiAYRCh1tYywmhqnEk9iwCE9yppgNCXAyVHG5qJt2kExa42TuhzQfJbmbpeGLkVbg8xit"}],"mixin":4,"get_tx_key": true}}' -H 'Content-Type: application/json'
-    
+
         {
           "id": "0",
           "jsonrpc": "2.0",
@@ -243,7 +243,7 @@ Same as transfer, but can split into more than one tx if necessary.
 ####Example:
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"transfer_split","params":{"destinations":[{"amount":100000000,"address":"9wNgSYy2F9qPZu7KBjvsFgZLTKE2TZgEpNFbGka9gA5zPmAXS35QzzYaLKJRkYTnzgArGNX7TvSqZC87tBwtaC5RQgJ8rm"},{"amount":200000000,"address":"9vH5D7Fv47mbpCpdcthcjU34rqiiAYRCh1tYywmhqnEk9iwCE9yppgNCXAyVHG5qJt2kExa42TuhzQfJbmbpeGLkVbg8xit"},{"amount":200000000,"address":"9vC5Q25cR1d3WzKX6dpTaLJaqZyDrtTnfadTmVuB1Wue2tyFGxUhiE4RGa74pEDJv7gSySzcd1Ao6G1nzSaqp78vLfP6MPj"},{"amount":200000000,"address":"A2MSrn49ziBPJBh8ZNEhhbfyLMou6mao4C1F5TLGUatmUnCxZArDYkcbAnVkVEopWVeak2rKDrmc8JpoS7n5dvfN9YDPBTG"},{"amount":200000000,"address":"9tEDyVQ8zgRQbDYiykTdpw5kZ6qWQWcKfExEj9eQshjpGb3sdr3UyWE2AHWzUGzJjaH9HN1DdGBdyQQ4AqGMc7rr5xYwZWW"}],"mixin":4,"get_tx_key": true, "new_algorithm": true}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -264,7 +264,7 @@ Send all dust outputs back to the wallet's, to make them easier to spend (and mi
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"sweep_dust"}' -H 'Content-Type: application/json'
     {
-      "error": 
+      "error":
       {
         "code": -4,
         "message": "not enough money"
@@ -311,7 +311,7 @@ Save the blockchain.
 ####Example:
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"store"}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -339,7 +339,7 @@ payment_id - string; Payment ID used to find the payments.
 ####Example:
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_payments","params":{"payment_id":"4279257e0a20608e25dba8744949c9e1caff4fcdafc7d5362ecf14225f3d9030"}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -380,7 +380,7 @@ Get a list of incoming payments using a given payment id, or a list of payments 
 ####Example:
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_bulk_payments","params":{"payment_ids":["4279257e0a20608e25dba8744949c9e1caff4fcdafc7d5362ecf14225f3d9030"],"min_block_height":990000}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -417,7 +417,7 @@ Returns a list of transfers.
 - min_timestamp - unsigned int; (Opional) Maximum timestamp to scan for transfers, if filtering by height is enabled.
 - account_index - unsigned int; (Optional) Index of the account to query for transfers.
 - subaddr_indices - array of unsigned int; (Optional) List of subaddress indices to query for transfers.
-- pagination - boolean; (Optional) 
+- pagination - boolean; (Optional)
 - offset - unsigned int; (Optional)
 - limit - unsigned int; (Optional)
 
@@ -497,7 +497,7 @@ pool array of transfers:
 ####Example:
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_transfers","params":{"pool":true}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -546,7 +546,7 @@ destinations - array of JSON objects containing transfer destinations:
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_transfer_by_txid","params":{"txid":"f2d33ba969a09941c6671e6dfe7e9456e5f686eca72c1a94a3e63ac6d7f27baf"}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -597,7 +597,7 @@ Return a list of incoming transfers to the wallet.
 Example (Return "all" transaction types):
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"incoming_transfers","params":{"transfer_type":"all"}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -633,7 +633,7 @@ Example (Return "all" transaction types):
 Example (Return "available" transactions):
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"incoming_transfers","params":{"transfer_type":"available"}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -670,14 +670,14 @@ Example (Return "unavailable" transaction. Note that this particular example ret
 
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"incoming_transfers","params":{"transfer_type":"unavailable"}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
       "result": {
       }
     }
-    
+
 ###query_key
 Return the spend or view private key.
 
@@ -689,9 +689,9 @@ Return the spend or view private key.
 - key - string; The view key will be hex encoded, while the mnemonic will be a string of words.
 
 Example (Query view key):
-    
+
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"query_key","params":{"key_type":"view_key"}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -701,10 +701,10 @@ Example (Query view key):
     }
 
 Example (Query mnemonic key):
-    
+
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"query_key","params":{"key_type":"mnemonic"}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -723,11 +723,11 @@ Make an integrated address from the wallet address and a payment id.
 - integrated_address - string
 
 Example (Payment ID is empty, use a random ID):
-    
+
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"make_integrated_address","params":{"payment_id":""}}' -H 'Content-Type: application/json'
-    
-    { 
+
+    {
       "id": "0",
       "jsonrpc": "2.0",
       "result": {
@@ -748,7 +748,7 @@ Retrieve the standard address and payment id corresponding to an integrated addr
 ####Example:
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"split_integrated_address","params":{"integrated_address": "4BpEv3WrufwXoyJAeEoBaNW56ScQaLXyyQWgxeRL9KgAUhVzkvfiELZV7fCPBuuB2CGuJiWFQjhnhhwiH1FsHYGQQ8H2RRJveAtUeiFs6J"}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -757,7 +757,7 @@ Retrieve the standard address and payment id corresponding to an integrated addr
         "standard_address": "427ZuEhNJQRXoyJAeEoBaNW56ScQaLXyyQWgxeRL9KgAUhVzkvfiELZV7fCPBuuB2CGuJiWFQjhnhhwiH1FsHYGQGaDsaBA"
       }
     }
-    
+
 ###stop_wallet
 Stops the wallet, storing the current state.
 
@@ -768,7 +768,7 @@ Stops the wallet, storing the current state.
 ####Example:
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"stop_wallet"}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -792,7 +792,7 @@ Create a payment URI using the official URI spec.
 ####Example:
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"make_uri","params":{"address":"44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A","amount":10,"payment_id":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef","tx_description":"Testing out the make_uri function.","recipient_name":"Citicash Project donation address"}}'  -H 'Content-Type: application/json'
-    
+
     {
       "id": 0,
       "jsonrpc": "2.0",
@@ -800,7 +800,7 @@ Create a payment URI using the official URI spec.
         "uri": "citicash:44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A?tx_payment_id=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef&tx_amount=0.000000000010&recipient_name=Citicash%20Project%20donation%20address&tx_description=Testing%20out%20the%20make_uri%20function."
       }
     }
-    
+
 ###parse_uri
 
 Parse a payment URI to get payment information.
@@ -819,7 +819,7 @@ Parse a payment URI to get payment information.
 ####Example:
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"parse_uri","params":{"uri":"citicash:44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A?tx_payment_id=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef&tx_amount=0.000000000010&recipient_name=Citicash%20Project%20donation%20address&tx_description=Testing%20out%20the%20make_uri%20function."}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": 0,
       "jsonrpc": "2.0",
@@ -833,7 +833,7 @@ Parse a payment URI to get payment information.
         }
       }
     }
-    
+
 ###rescan_blockchain
 Rescan blockchain from scratch.
 
@@ -844,14 +844,14 @@ Rescan blockchain from scratch.
 ####Example:
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"rescan_blockchain"}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
       "result": {
       }
     }
-    
+
 ###set_tx_notes
 Set arbitrary string notes for transactions.
 
@@ -864,7 +864,7 @@ Set arbitrary string notes for transactions.
 ####Example:
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"set_tx_notes","params":{"txids":["6a1a100c079c236e2cbf36f7760e8ef1a9e8357c434aa790a8c78de653ec4cf2"],"notes":["This is an example"]}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -884,7 +884,7 @@ Get string notes for transactions.
 ####Example:
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_tx_notes","params":{"txids":["6a1a100c079c236e2cbf36f7760e8ef1a9e8357c434aa790a8c78de653ec4cf2"]}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -928,7 +928,7 @@ Verify a signature on a string.
 ####Example:
 
     $ curl -X POST http://127.0.0.1:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"verify","params":{"data":"This is sample data to be signed","address":"9sS8eRU2b5ZbN2FPSrpkiab1bjbHE5XtL6Ti6We3Fhw5aQPudRfVVypjgzKDNkxtvTQZSPs122NKggb2mqcqkKSeMNVu59S","signature":"SigV1Xp61ZkGguxSCHpkYEVw9eaWfRfSoAf36PCsSCApx4DUrKWHEqM9CdNwjeuhJii6LHDVDFxvTPijFsj3L8NDQp1TV"}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -950,7 +950,7 @@ Export a signed set of key images.
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"export_key_images"}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -961,7 +961,7 @@ Export a signed set of key images.
         }]
       }
     }
-    
+
 ###import_key_images
 Import signed key images list and verify their spent status.
 
@@ -978,7 +978,7 @@ Import signed key images list and verify their spent status.
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"import_key_images", "params":{"signed_key_images":[{"key_image":"63b83df78cafd99e23b5ad3f667bc6f8d38813d9e84c7bb6c223a556dfd34af","signature":"b87b7e989aa86aa2a7a7cd8adcb3a848d3512ff718b168e15217ff3e5da29c0183c0328b97cc052fcb5ee3548aa5e41e530ba9d854199ea19d7ddaf6a54a4c0a"},{"key_image":"44ec12fbc56c533a30b09de8ae26febd515528c4957dfe875430377a7e212b4e","signature":"91105f15be0b25bc2a94bd78a7e261608974d6d888080b9f1815655b98af190340325ea1a0840a5951dacf913d4de1b2bd33ea59c1cb7bce1b6648afa7133d03"}]}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -988,7 +988,7 @@ Import signed key images list and verify their spent status.
         "unspent": 4979852760000
       }
     }
-    
+
 ###get_address_book
 Retrieves entries from the address book.
 
@@ -1003,9 +1003,9 @@ description - string;
 index - unsigned int;
 payment_id - string;
 ####Example:
-    
+
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_address_book","params":{"entries":[1,2]}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1023,7 +1023,7 @@ payment_id - string;
         }]
       }
     }
-    
+
 ###add_address_book
 Add an entry to the address book.
 
@@ -1038,7 +1038,7 @@ Add an entry to the address book.
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"add_address_book","params":{"address":"44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A","description":"Donation address for the Citicash project"}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1058,7 +1058,7 @@ Delete an entry from the address book.
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"delete_address_book","params":{"index":0}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1075,7 +1075,7 @@ Rescan the blockchain for spent outputs.
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"rescan_spent"}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1096,7 +1096,7 @@ Start mining in the Citicash daemon.
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"start_mining","params":{"threads_count":1,"do_background_mining":true,"ignore_battery":true}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1114,7 +1114,7 @@ Stop mining in the Citicash daemon.
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"stop_mining"}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1133,7 +1133,7 @@ Get a list of available languages for your wallet's seed.
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_languages"}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1155,7 +1155,7 @@ Create a new wallet. You need to have set the argument "–wallet-dir" when laun
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"create_wallet","params":{"filename":"mytestwallet","password":"mytestpassword","language":"English"}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1175,7 +1175,7 @@ Open a wallet. You need to have set the argument "–wallet-dir" when launching 
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"open_wallet","params":{"filename":"mytestwallet","password":"mytestpassword"}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1203,7 +1203,7 @@ subaddress_accounts - array of subaddress account information:
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_accounts","params":{"tag":"checking"}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1241,7 +1241,7 @@ Create a new account with an optional label.
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"create_account","params":{"label":"Secondary account"}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1263,7 +1263,7 @@ Label an account.
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"label_account","params":{"account_index":0,"label":"Secondary account"}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1285,7 +1285,7 @@ Create a new address for an account. Optionally, label the new address.
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"create_address","params":{"account_index:0,"label":"Secondary account"}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1309,7 +1309,7 @@ Label an address.
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"label_address","params":{"index":{"major":0,"minor":1}},"label":"Secondary account"}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1331,7 +1331,7 @@ account_tags - array of account tag information:
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_account_tags","params":""}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1355,7 +1355,7 @@ Apply a filtering tag to a list of accounts.
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"tag_accounts","params":{"tag":"test","accounts":[0,1]}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1374,7 +1374,7 @@ Remove filtering tag from a list of accounts.
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"untag_accounts","params":{"accounts":[1]}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1394,7 +1394,7 @@ Set description for an account tag.
 ####Example:
 
     $ curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"set_account_tag_description","params":{"tag":"test","description":"Test accounts"}}' -H 'Content-Type: application/json'
-    
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1404,20 +1404,20 @@ Set description for an account tag.
  ----------------------------------------------------------------------------------------------------
  ###alias_address
  Create an alias for the current account address.
- 
+
  ####Inputs:
- 
- - alias - string; alias to be created for the address, shorter than 42 characters `a-z (converting A-Z), 0-9, '-', '_', '.' and '@'.` 
+
+ - alias - string; alias to be created for the address, shorter than 42 characters `a-z (converting A-Z), 0-9, '-', '_', '.' and '@'.`
  - priority - unsigned int; priority of the alias creation transaction
  - unlock_time - unsigned int number of blocks to unlock the alias
  - do_not_relay - bool; if true, do not create the alias, just check if it is free and estimate fee
  ####Outputs:
- 
- - hash - string; transacion hash of the aliasing transaction 
- - fee - unsigned int; 
+
+ - hash - string; transacion hash of the aliasing transaction
+ - fee - unsigned int;
  ####Example:
-     curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"alias_address", params":{"alias":"send_cash","do_not_relay":true}}' -H 'Content-Type: application/json'  
-     
+     curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"alias_address", params":{"alias":"send_cash","do_not_relay":true}}' -H 'Content-Type: application/json'
+
      {
        "id": "0",
        "jsonrpc": "2.0",
@@ -1428,20 +1428,20 @@ Set description for an account tag.
      }
 
 ###get_aliases
- 
+
  A list of aliases for the current address
- 
+
  ####Inputs:
- 
+
  none
- 
+
  ####Outputs:
- 
+
  - aliases - list of strings, ordered by time of creation/
 
  ####Example:
-    curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_aliases"}' -H 'Content-Type: application/json'  
-    
+    curl -X POST http://localhost:18082/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_aliases"}' -H 'Content-Type: application/json'
+
     {
       "id": "0",
       "jsonrpc": "2.0",
@@ -1453,7 +1453,7 @@ Set description for an account tag.
       }
     }
 
-  
+
 ###get_alias_address
 
 Get address for a given alias

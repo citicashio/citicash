@@ -68,7 +68,7 @@ inline void aes_genkey_sub(__m128i& xout0, __m128i& xout2)
 	xout2 = _mm_xor_si128(xout2, xout1);
 }
 
-inline void aes_genkey(const __m128i* memory, __m128i& k0, __m128i& k1, __m128i& k2, __m128i& k3, __m128i& k4, 
+inline void aes_genkey(const __m128i* memory, __m128i& k0, __m128i& k1, __m128i& k2, __m128i& k3, __m128i& k4,
 	__m128i& k5, __m128i& k6, __m128i& k7, __m128i& k8, __m128i& k9)
 {
 	__m128i xout0, xout2;
