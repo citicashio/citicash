@@ -3787,7 +3787,7 @@ void wallet2::transfer_selected_rct(std::vector<cryptonote::tx_destination_entry
     //paste mixin transaction
 
     THROW_WALLET_EXCEPTION_IF(outs.size() < out_index + 1 ,  error::wallet_internal_error, "outs.size() < out_index + 1");
-    THROW_WALLET_EXCEPTION_IF(outs[out_index].size() < fake_outputs_count ,  error::wallet_internal_error, "fake_outputs_count > random outputts found");
+    THROW_WALLET_EXCEPTION_IF(outs[out_index].size() < fake_outputs_count ,  error::wallet_internal_error, "fake_outputs_count > random outputs found");
 
     typedef cryptonote::tx_source_entry::output_entry tx_output_entry;
     for (size_t n = 0; n < fake_outputs_count + 1; ++n)
@@ -4054,8 +4054,8 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions(std::vector<crypto
 {
   std::vector<size_t> unused_transfers_indices;
   std::vector<size_t> unused_dust_indices;
-  uint64_t needed_money;
-  uint64_t accumulated_fee, accumulated_outputs, accumulated_change;
+  uint64_t needed_money = 0;
+  uint64_t accumulated_fee = 0, accumulated_outputs = 0, accumulated_change = 0;
   struct TX {
     std::list<size_t> selected_transfers;
     std::vector<cryptonote::tx_destination_entry> dsts;
@@ -4073,8 +4073,8 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions(std::vector<crypto
     }
   };
   std::vector<TX> txes;
-  bool adding_fee; // true if new outputs go towards fee, rather than destinations
-  uint64_t needed_fee, available_for_fee = 0;
+  bool adding_fee = false; // true if new outputs go towards fee, rather than destinations
+  uint64_t needed_fee = 0, available_for_fee = 0;
   uint64_t upper_transaction_size_limit = get_upper_transaction_size_limit();
   const bool use_rct = true;
 
@@ -4087,7 +4087,6 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions(std::vector<crypto
 
   // calculate total amount being sent to all destinations
   // throw if total amount overflows uint64_t
-  needed_money = 0;
   for (auto& dt : dsts) {
     THROW_WALLET_EXCEPTION_IF(!dt.amount, error::zero_destination);
     needed_money += dt.amount;
@@ -4114,13 +4113,13 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions(std::vector<crypto
   uint64_t balance_subtotal = 0;
   for (uint32_t index_minor : subaddr_indices_in)
 	  balance_subtotal += balance_per_subaddr[index_minor];
-  THROW_WALLET_EXCEPTION_IF(needed_money > balance_subtotal, error::not_enough_money,
-	  balance_subtotal, needed_money, 0);
+  uint64_t estimated_fee = calculate_fee(fee_per_kb, estimate_rct_tx_size(2, fake_outs_count + 1, 2), fee_multiplier);
+  THROW_WALLET_EXCEPTION_IF(needed_money + estimated_fee > balance_subtotal, error::not_enough_money, balance_subtotal, needed_money, 0);
 
   // if one or more subaddresses have sufficient balance, choose one randomly (with index=0 being chosen last)
   for (uint32_t index_minor : subaddr_indices_in)
   {
-	  if (balance_per_subaddr[index_minor] >= needed_money)
+	  if (balance_per_subaddr[index_minor] >= needed_money + estimated_fee)
 		  subaddr_indices.insert(index_minor);
   }
   if (subaddr_indices.size() > 0)
@@ -4142,7 +4141,7 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions(std::vector<crypto
 	  }
 	  std::sort(index_balance_pairs.begin(), index_balance_pairs.end(), [](const std::pair<uint32_t, uint64_t>& i, const std::pair<uint32_t, uint64_t>& j) { return i.second > j.second; });
 	  balance_subtotal = 0;
-	  while (balance_subtotal < needed_money)
+	  while (balance_subtotal < needed_money + estimated_fee)
 	  {
 		  subaddr_indices.insert(index_balance_pairs.front().first);
 		  balance_subtotal += index_balance_pairs.front().second;
@@ -4168,11 +4167,6 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions(std::vector<crypto
 
   // start with an empty tx
   txes.push_back(TX());
-  accumulated_fee = 0;
-  accumulated_outputs = 0;
-  accumulated_change = 0;
-  adding_fee = false;
-  needed_fee = 0;
   std::vector<std::vector<tools::wallet2::get_outs_entry>> outs;
 
   // for rct, since we don't see the amounts, we will try to make all transactions
@@ -4187,7 +4181,6 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions(std::vector<crypto
   {
     // this is used to build a tx that's 1 or 2 inputs, and 2 outputs, which
     // will get us a known fee.
-    uint64_t estimated_fee = calculate_fee(fee_per_kb, estimate_rct_tx_size(2, fake_outs_count + 1, 2), fee_multiplier);
 	  prefered_inputs = pick_preferred_rct_inputs(needed_money + estimated_fee, subaddr_account, subaddr_indices);
     if (!prefered_inputs.empty())
     {
@@ -4216,9 +4209,6 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions(std::vector<crypto
 
     // if we need to spend money and don't have any left, we fail
     if (unused_dust_indices.empty() && unused_transfers_indices.empty()) {
-		  // ToDo:
-		  //    the subaddress scheme tends to fail here when the requested amount is exactly the same as the subtotal of a subaddress
-		  //    because the selection of subaddr_indices doesn't take the fee into account
 		  LOG_PRINT_L2("No more outputs to choose from");
 		  THROW_WALLET_EXCEPTION_IF(1, error::tx_not_possible, unlocked_balance(subaddr_account), needed_money, accumulated_fee + needed_fee);
     }
@@ -4226,7 +4216,7 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions(std::vector<crypto
     // get a random unspent output and use it to pay part (or all) of the current destination (and maybe next one, etc)
     // This could be more clever, but maybe at the cost of making probabilistic inferences easier
     size_t idx;
-    if ((dsts.empty() || dsts[0].amount == 0) && !adding_fee) {
+    /*if ((dsts.empty() || dsts[0].amount == 0) && !adding_fee) { // LUKAS TODO I think this can never happen if "should_pick_a_second_output" above commented out
       // the "make rct txes 2/2" case - we pick a small value output to "clean up" the wallet too
       std::vector<size_t> indices = get_only_rct(unused_dust_indices, unused_transfers_indices);
       idx = pop_best_value(indices, tx.selected_transfers, true);
@@ -4241,7 +4231,7 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions(std::vector<crypto
       }
       pop_if_present(unused_transfers_indices, idx);
       pop_if_present(unused_dust_indices, idx);
-    } else if (!prefered_inputs.empty()) {
+    } else */if (!prefered_inputs.empty()) {
       idx = pop_back(prefered_inputs);
       pop_if_present(unused_transfers_indices, idx);
       pop_if_present(unused_dust_indices, idx);
@@ -4263,9 +4253,7 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions(std::vector<crypto
     }
     else
     {
-      while (!dsts.empty() && dsts[0].amount <= available_amount)
-      {
-        // we can fully pay that destination
+      while (!dsts.empty() && dsts[0].amount <= available_amount) { // we can fully pay that destination
         LOG_PRINT_L2("We can fully pay " << get_account_address_as_str(m_testnet, dsts[0].is_subaddress, dsts[0].addr) <<
 		      " for " << print_money(dsts[0].amount));
         tx.add(dsts[0].addr, dsts[0].amount, dsts[0].is_subaddress);
@@ -4274,31 +4262,24 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions(std::vector<crypto
         pop_index(dsts, 0);
       }
 
-      if (available_amount > 0 && !dsts.empty()) {
-        // we can partially fill that destination
+      if (available_amount > 0 && !dsts.empty()) { // we can only partially fill that destination
         LOG_PRINT_L2("We can partially pay " << get_account_address_as_str(m_testnet, dsts[0].is_subaddress, dsts[0].addr) <<
            " for " << print_money(available_amount) << "/" << print_money(dsts[0].amount));
         tx.add(dsts[0].addr, available_amount, dsts[0].is_subaddress);
         dsts[0].amount -= available_amount;
         available_amount = 0;
       }
+      else if (dsts.empty() && estimated_fee > available_amount) {
+        adding_fee = true;
+        needed_fee = estimated_fee - available_amount;
+      }
     }
 
     // here, check if we need to sent tx and start a new one
-    LOG_PRINT_L2("Considering whether to create a tx now, " << tx.selected_transfers.size() << " inputs, tx limit "
-      << upper_transaction_size_limit);
-    bool try_tx;
-    if (adding_fee)
-    {
-      /* might not actually be enough if adding this output bumps size to next kB, but we need to try */
-      try_tx = available_for_fee >= needed_fee;
-    }
-    else
-    {
-      size_t estimated_rct_tx_size;
-      estimated_rct_tx_size = estimate_rct_tx_size(tx.selected_transfers.size(), fake_outs_count, tx.dsts.size() + 1);
-      try_tx = dsts.empty() || (estimated_rct_tx_size >= TX_SIZE_TARGET(upper_transaction_size_limit, tx_size_target_factor));
-    }
+    LOG_PRINT_L2("Considering whether to create a tx now, " << tx.selected_transfers.size() << " inputs, tx limit " << upper_transaction_size_limit);
+    // might not actually be enough if adding this output bumps size to next kB, but we need to try
+    bool try_tx = adding_fee ? available_for_fee >= needed_fee : 
+      !adding_fee && (dsts.empty() || (estimate_rct_tx_size(tx.selected_transfers.size(), fake_outs_count, tx.dsts.size() + 1) >= TX_SIZE_TARGET(upper_transaction_size_limit, tx_size_target_factor)));
 
     if (try_tx) {
       cryptonote::transaction test_tx;
