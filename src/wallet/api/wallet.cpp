@@ -790,6 +790,13 @@ PendingTransaction *WalletImpl::createTransaction(const string &dst_addr, const 
     std::vector<tools::wallet2::pending_tx> ptx_vector;
     ptx_vector = m_wallet->create_transactions(dsts, fake_outs_count, 0 /* unlock_time */, priority, extra, subaddr_account, subaddr_indices, false/* m_trusted_daemon */);
 
+    if (ptx_vector.empty()) {
+      LOG_ERROR("Not enough money.");
+      transaction->m_status = Status_Error;
+      startRefresh();
+      return transaction;
+    }
+
     // if more than one tx necessary
     if (m_wallet->always_confirm_transfers() || ptx_vector.size() > 1) {
       uint64_t total_sent = 0;
@@ -822,7 +829,6 @@ PendingTransaction *WalletImpl::createTransaction(const string &dst_addr, const 
     transaction->m_pending_tx = ptx_vector;
     startRefresh();
     return transaction;
-
   }
   catch (const tools::error::daemon_busy&)
   {
@@ -1287,6 +1293,13 @@ PendingTransaction * WalletImpl::createAlias(const std::string& alias, PendingTr
   {
     std::vector<tools::wallet2::pending_tx> ptx_vector;
     ptx_vector = m_wallet->create_transactions({dst}, DEFAULT_MIXIN, 0/* unlock_time */, priority, extra, 0/*req.account_index, LUKAS TODO prolly subaddress index*/, std::set<uint32_t>()/*LUKAS TODO I didn't check this parameter at all*/, false/* m_trusted_daemon */);
+
+    if (ptx_vector.empty()) {
+      LOG_ERROR("Not enough money.");
+      transaction->m_status = Status_Error;
+      startRefresh();
+      return transaction;
+    }
 
     if (m_wallet->always_confirm_transfers() && ptx_vector.back().construction_data.subaddr_indices.size() > 1)
       LOG_ERROR("WARNING: Outputs of multiple addresses are being used together, which might potentially compromise your privacy.\n");

@@ -2175,13 +2175,17 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
           return true;
         }
         unlock_block = bc_height + locked_blocks;
-        ptx_vector = m_wallet->create_transactions(dsts, fake_outs_count, unlock_block /* unlock_time */, priority, extra, m_current_subaddress_account, subaddr_indices, m_trusted_daemon, tx_size_target_factor);
-      break;
+        [[fallthrough]];
       case TransferNew:
-        ptx_vector = m_wallet->create_transactions(dsts, fake_outs_count, 0 /* unlock_time */, priority, extra, m_current_subaddress_account, subaddr_indices, m_trusted_daemon, tx_size_target_factor);
+        ptx_vector = m_wallet->create_transactions(dsts, fake_outs_count, unlock_block /* unlock_time */, priority, extra, m_current_subaddress_account, subaddr_indices, m_trusted_daemon, tx_size_target_factor);
       break;
       default:
         LOG_ERROR("Unknown transfer method, using original");
+    }
+
+    if (ptx_vector.empty()) {
+      fail_msg_writer() << tr("Not enough money.");
+      return true;
     }
 
     if (m_wallet->always_confirm_transfers() || ptx_vector.size() > 1)
@@ -2363,7 +2367,8 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
     fail_msg_writer() << tr("unknown error");
   }
 
-  if (retry) transfer_main(transfer_type, args_, retry, tx_size_target_factor);
+  if (retry)
+    transfer_main(transfer_type, args_, retry, tx_size_target_factor);
 
   return true;
 }
@@ -4148,6 +4153,11 @@ bool simple_wallet::alias_address(const std::vector<std::string> &args) {
 
   try {
     std::vector<tools::wallet2::pending_tx> ptx_vector = m_wallet->create_transactions({dst}, DEFAULT_MIXIN, unlock_time, priority, extra, 0/*req.account_index, LUKAS TODO prolly subaddress index*/, std::set<uint32_t>()/*LUKAS TODO I didn't check this parameter at all*/, false);
+
+    if (ptx_vector.empty()) {
+      fail_msg_writer() << tr("Not enough money.");
+      return true;
+    }
 
     if (m_wallet->always_confirm_transfers()) {
       std::stringstream prompt;

@@ -4114,7 +4114,8 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions(std::vector<crypto
   for (uint32_t index_minor : subaddr_indices_in)
 	  balance_subtotal += balance_per_subaddr[index_minor];
   uint64_t estimated_fee = calculate_fee(fee_per_kb, estimate_rct_tx_size(2, fake_outs_count + 1, 2), fee_multiplier);
-  THROW_WALLET_EXCEPTION_IF(needed_money + estimated_fee > balance_subtotal, error::not_enough_money, balance_subtotal, needed_money, 0);
+  if (needed_money + estimated_fee > balance_subtotal)
+    return std::vector<wallet2::pending_tx>();
 
   // if one or more subaddresses have sufficient balance, choose one randomly (with index=0 being chosen last)
   for (uint32_t index_minor : subaddr_indices_in)

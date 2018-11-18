@@ -497,6 +497,13 @@ namespace tools
 
     try {
       std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions({dst}, DEFAULT_MIXIN, req.unlock_time, req.priority, extra, 0/*req.account_index, LUKAS TODO prolly subaddress index*/, std::set<uint32_t>()/*LUKAS TODO I didn't check this parameter at all*/, false);
+      
+      if (ptx_vector.empty()) {
+        er.code = WALLET_RPC_ERROR_CODE_GENERIC_TRANSFER_ERROR;
+        er.message = "Not enough money.";
+        return false;
+      }
+
       if (!req.do_not_relay)
         m_wallet.commit_tx(ptx_vector.back());
 
@@ -577,11 +584,17 @@ namespace tools
 
       std::vector<wallet2::pending_tx> ptx_vector = m_wallet.create_transactions(dsts, mixin, req.unlock_time, req.priority, extra, req.account_index, req.subaddr_indices, req.trusted_daemon);
 
+      if (ptx_vector.empty()) {
+        er.code = WALLET_RPC_ERROR_CODE_GENERIC_TRANSFER_ERROR;
+        er.message = "Not enough money.";
+        return false;
+      }
+
       // reject proposed transactions if there are more than one.  see on_transfer_split below.
       if (ptx_vector.size() != 1)
       {
         er.code = WALLET_RPC_ERROR_CODE_GENERIC_TRANSFER_ERROR;
-        er.message = "Transaction would be too large.  try /transfer_split.";
+        er.message = "Transaction would be too large. Try transfer_split instead.";
         return false;
       }
 
@@ -648,6 +661,12 @@ namespace tools
 
       std::vector<wallet2::pending_tx> ptx_vector;
       ptx_vector = m_wallet.create_transactions(dsts, mixin, req.unlock_time, req.priority, extra, req.account_index, req.subaddr_indices, req.trusted_daemon);
+
+      if (ptx_vector.empty()) {
+        er.code = WALLET_RPC_ERROR_CODE_GENERIC_TRANSFER_ERROR;
+        er.message = "Not enough money.";
+        return false;
+      }
 
       if (!req.do_not_relay)
         m_wallet.commit_tx(ptx_vector);

@@ -39,7 +39,6 @@
 #include "rpc/core_rpc_server_commands_defs.h"
 #include "include_base_utils.h"
 
-
 namespace tools
 {
   namespace error
@@ -371,7 +370,7 @@ namespace tools
       uint64_t m_available;
       uint64_t m_tx_amount;
     };
-    //----------------------------------------------------------------------------------------------------
+
     struct tx_not_possible : public transfer_error
     {
       explicit tx_not_possible(std::string&& loc, uint64_t availbable, uint64_t tx_amount, uint64_t fee)
