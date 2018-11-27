@@ -18,7 +18,7 @@ build1:
   stage: build
   script:
     - pwd
-    - make -j3 release-static-64-devnet
+    - make -j2 release-static-64-devnet
     - echo "Build no.:1 succesfully completed!"
   tags:
   - citicash
@@ -27,7 +27,7 @@ build2:
   stage: build
   script:
     - pwd
-    - make -j3 debug-test
+    - make -j2 debug-test
     - echo "Build no.:2 succesfully completed!"
   tags:
   - citicash
@@ -36,7 +36,7 @@ build3:
   stage: build
   script:
     - pwd
-    - make -j3
+    - make -j2
     - echo "Build no.:3 succesfully completed!"
   tags:
   - citicash
@@ -45,7 +45,7 @@ build4:
   stage: build
   script:
     - pwd
-    - make -j3 debug-devnet
+    - make -j2 debug-devnet
     - echo "Build no.:4 succesfully completed!"
   tags:
   - citicash
