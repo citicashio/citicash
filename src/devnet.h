@@ -46,7 +46,7 @@ boost::uuids::uuid const NETWORK_ID = { { \
  if(!r) \
      throw("Inconsistent checkpoints in devnet"); \
 }
-#define DEVNET_TEXT_P2P_PORT ":39833"
+#define TEXT_P2P_PORT ":39833"
 
 #define DEVNET_SEEDS \
                 "node1.devciticash.mydomain", \
