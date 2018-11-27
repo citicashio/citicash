@@ -83,9 +83,13 @@ static const struct {
   uint64_t height;
   uint8_t threshold;
   time_t time;
-} mainnet_hard_forks[] = {
+} hard_forks[] = {
+#ifdef DEVNET
+  DEVNET_FORKS
+#else
   { 1, 1, 0, 1482806500 },
   { 2, 49100, 0, 1534766400 }
+#endif
 };
 static const uint64_t mainnet_hard_fork_version_1_till = (uint64_t)-1;
 
@@ -301,8 +305,8 @@ bool Blockchain::init(BlockchainDB* db, const bool testnet, const cryptonote::te
   }
   else
   {
-    for (size_t n = 0; n < sizeof(mainnet_hard_forks) / sizeof(mainnet_hard_forks[0]); ++n)
-      m_hardfork->add_fork(mainnet_hard_forks[n].version, mainnet_hard_forks[n].height, mainnet_hard_forks[n].threshold, mainnet_hard_forks[n].time);
+    for (size_t n = 0; n < sizeof(hard_forks) / sizeof(hard_forks[0]); ++n)
+      m_hardfork->add_fork(hard_forks[n].version, hard_forks[n].height, hard_forks[n].threshold, hard_forks[n].time);
   }
   m_hardfork->init();
 

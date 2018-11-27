@@ -474,7 +474,7 @@ namespace nodetool
         if (result.size())
         {
           for (const auto& addr_string : result)
-            full_addrs.insert(addr_string + TEXT_P2P_PORT);
+            full_addrs.insert(addr_string + DEVNET_TEXT_P2P_PORT);
         }
         ++i;
       }

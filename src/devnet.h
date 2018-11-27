@@ -40,13 +40,13 @@ boost::uuids::uuid const NETWORK_ID = { { \
                                         } }; \
    std::string const GENESIS_TX = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"; \
 
-#define INIT_DEVNET_CHECKPOINTS { \
+#define DEVNET_CHECKPOINTS { \
  crypto::hash h; bool r = true; \
  r &= epee::string_tools::parse_tpod_from_hex_string("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", h); m_points[0] = h; \
  if(!r) \
      throw("Inconsistent checkpoints in devnet"); \
 }
-#define TEXT_P2P_PORT ":39833"
+#define DEVNET_TEXT_P2P_PORT ":39833"
 
 #define DEVNET_SEEDS \
                 "node1.devciticash.mydomain", \
@@ -61,6 +61,9 @@ boost::uuids::uuid const NETWORK_ID = { { \
     full_addrs.insert("192.168.255.255:65535"); \
     full_addrs.insert("192.168.255.255:65535"); \
     full_addrs.insert("192.168.255.255:65535");
+
+#define DEVNET_FORKS \
+    { 1, 1, 0, 1482806500 }
 
 #define DEVCRYPTONOTENAME const std::string CRYPTONOTE_NAME {"devciticash"};
 
