@@ -1,17 +1,51 @@
 services:
 
 stages:
-- build
+  - clean
+  - build
+
 
 job1:
-  stage: build
+  stage: clean
   script:
   - pwd
   - make clean-force
-  - make -j3 release-static-64-devnet
-  - make -j3 debug-test
-  - make -j3
-  - make -j3 debug-devnet
-  - echo "job1 succesfully completed!"
+  - echo "Clean force succesfully completed!"
+  tags:
+  - citicash
+
+build1:
+  stage: build
+  script:
+    - pwd
+    - make -j3 release-static-64-devnet
+    - echo "Build no.:1 succesfully completed!"
+  tags:
+  - citicash
+  
+build2:
+  stage: build
+  script:
+    - pwd
+    - make -j3 debug-test
+    - echo "Build no.:2 succesfully completed!"
+  tags:
+  - citicash
+  
+build3:
+  stage: build
+  script:
+    - pwd
+    - make -j3
+    - echo "Build no.:3 succesfully completed!"
+  tags:
+  - citicash
+  
+build4:
+  stage: build
+  script:
+    - pwd
+    - make -j3 debug-devnet
+    - echo "Build no.:4 succesfully completed!"
   tags:
   - citicash
