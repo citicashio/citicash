@@ -49,7 +49,7 @@ namespace cryptonote
 // whether they can talk to a given daemon without having to know in
 // advance which version they will stop working with
 // Don't go over 32767 for any of these
-#define CORE_RPC_VERSION_MAJOR 1
+#define CORE_RPC_VERSION_MAJOR 2
 #define CORE_RPC_VERSION_MINOR 0
 #define CORE_RPC_VERSION (((CORE_RPC_VERSION_MAJOR)<<16)|(CORE_RPC_VERSION_MINOR))
 
