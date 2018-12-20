@@ -969,17 +969,16 @@ namespace boost
       if (ver < 2)
         return;
       a & x.m_subaddr_index;
-      if (ver < 3) {
-        string empty;
-        a & empty;
-        a & empty;
+      if (Archive::is_saving::value) {
+        a & x.m_payment_id;
+        a & x.m_alias;
       }
-      else {
+      else if (ver >= 3) {
         a & x.m_payment_id;
         a & x.m_alias;
       }
     }
-
+    
     template <class Archive>
     inline void serialize(Archive& a, cryptonote::tx_destination_entry& x, const boost::serialization::version_type ver)
     {
