@@ -969,8 +969,10 @@ namespace boost
       if (ver < 2)
         return;
       a & x.m_subaddr_index;
-      if (ver < 3)
-        return;
+      if (ver < 3) {
+        x.m_payment_id.clear();
+        x.m_alias.clear();
+      }
       a & x.m_payment_id;
       a & x.m_alias;
     }
