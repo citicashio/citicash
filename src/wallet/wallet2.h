@@ -970,11 +970,14 @@ namespace boost
         return;
       a & x.m_subaddr_index;
       if (ver < 3) {
-        x.m_payment_id.clear();
-        x.m_alias.clear();
+        string empty;
+        a & empty;
+        a & empty;
       }
-      a & x.m_payment_id;
-      a & x.m_alias;
+      else {
+        a & x.m_payment_id;
+        a & x.m_alias;
+      }
     }
 
     template <class Archive>
