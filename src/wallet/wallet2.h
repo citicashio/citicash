@@ -753,7 +753,7 @@ namespace tools
 }
 BOOST_CLASS_VERSION(tools::wallet2, 19)
 BOOST_CLASS_VERSION(tools::wallet2::transfer_details, 8)
-BOOST_CLASS_VERSION(tools::wallet2::payment_details, 3)
+BOOST_CLASS_VERSION(tools::wallet2::payment_details, 2)
 BOOST_CLASS_VERSION(tools::wallet2::unconfirmed_transfer_details, 7)
 BOOST_CLASS_VERSION(tools::wallet2::confirmed_transfer_details, 4)
 BOOST_CLASS_VERSION(tools::wallet2::address_book_row, 17)
@@ -969,16 +969,8 @@ namespace boost
       if (ver < 2)
         return;
       a & x.m_subaddr_index;
-      if (Archive::is_saving::value) {
-        a & x.m_payment_id;
-        a & x.m_alias;
-      }
-      else if (ver >= 3) {
-        a & x.m_payment_id;
-        a & x.m_alias;
-      }
     }
-    
+
     template <class Archive>
     inline void serialize(Archive& a, cryptonote::tx_destination_entry& x, const boost::serialization::version_type ver)
     {
