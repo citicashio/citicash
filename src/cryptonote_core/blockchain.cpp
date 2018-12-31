@@ -89,7 +89,7 @@ static const struct {
 #else
   { 1, 1, 0, 1482806500 },
   { 2, 49100, 0, 1534766400 },
-  { 3, 234740, 0, 1546266600 }
+  { 3, 234739, 0, 1546266600 }
 #endif
 };
 static const uint64_t mainnet_hard_fork_version_1_till = (uint64_t)-1;
