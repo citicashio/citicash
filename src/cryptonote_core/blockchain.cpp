@@ -685,36 +685,31 @@ difficulty_type Blockchain::get_difficulty_for_next_block()
   std::vector<uint64_t> timestamps;
   std::vector<difficulty_type> difficulties;
   auto height = m_db->height();
-  size_t difficult_block_count = DIFFICULTY_BLOCKS_COUNT;
 
   // ND: Speedup
-  // 1. Keep a list of the last 735 (or less) blocks that is used to compute difficulty,
+  // 1. Keep a list of the last 17 (or less) blocks that is used to compute difficulty,
   //    then when the next block difficulty is queried, push the latest height data and
   //    pop the oldest one from the list. This only requires 1x read per height instead
-  //    of doing 735 (DIFFICULTY_BLOCKS_COUNT).
-  if (m_timestamps_and_difficulties_height != 0 && ((height - m_timestamps_and_difficulties_height) == 1))
-  {
+  //    of doing 17 (DIFFICULTY_BLOCKS_COUNT).
+  if (m_timestamps_and_difficulties_height != 0 && m_timestamps_and_difficulties_height + 1 == height) {
     uint64_t index = height - 1;
     m_timestamps.push_back(m_db->get_block_timestamp(index));
     m_difficulties.push_back(m_db->get_block_cumulative_difficulty(index));
 
-    while (m_timestamps.size() > difficult_block_count)
+    while (m_timestamps.size() > DIFFICULTY_BLOCKS_COUNT)
       m_timestamps.erase(m_timestamps.begin());
-    while (m_difficulties.size() > difficult_block_count)
+    while (m_difficulties.size() > DIFFICULTY_BLOCKS_COUNT)
       m_difficulties.erase(m_difficulties.begin());
 
     m_timestamps_and_difficulties_height = height;
     timestamps = m_timestamps;
     difficulties = m_difficulties;
   }
-  else
-  {
-    size_t offset = height - std::min < size_t >(height, static_cast<size_t>(difficult_block_count));
+  else {
+    size_t offset = height - std::min<size_t>(height, static_cast<size_t>(DIFFICULTY_BLOCKS_COUNT));
     if (offset == 0)
       ++offset;
 
-    timestamps.clear();
-    difficulties.clear();
     for (; offset < height; offset++)
     {
       timestamps.push_back(m_db->get_block_timestamp(offset));
@@ -725,8 +720,7 @@ difficulty_type Blockchain::get_difficulty_for_next_block()
     m_timestamps = timestamps;
     m_difficulties = difficulties;
   }
-  size_t target = DIFFICULTY_TARGET;
-  return next_difficulty(timestamps, difficulties, target);
+  return next_difficulty(timestamps, difficulties);
 }
 //------------------------------------------------------------------
 // This function removes blocks from the blockchain until it gets to the
@@ -926,11 +920,8 @@ difficulty_type Blockchain::get_next_difficulty_for_alternative_chain(const std:
     }
   }
 
-  // FIXME: This will fail if fork activation heights are subject to voting
-  size_t target = DIFFICULTY_TARGET;
-
   // calculate the difficulty target for the block and return it
-  return next_difficulty(timestamps, cumulative_difficulties, target);
+  return next_difficulty(timestamps, cumulative_difficulties);
 }
 //------------------------------------------------------------------
 // This function does a sanity check on basic things that all miner
@@ -2838,7 +2829,7 @@ bool Blockchain::check_block_timestamp(const block& b, uint64_t& median_ts) cons
   LOG_PRINT_L3("Blockchain::" << __func__);
   uint64_t block_future_time_limit = CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT;
 
-  if (b.timestamp > get_adjusted_time() + block_future_time_limit)
+  if (b.timestamp > get_adjusted_time() + block_future_time_limit) // this makes sense, but attacker can send premined blockchain branch later than immediatelly
   {
     LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp <<
       ", bigger than adjusted time + " << "30 minutes");
@@ -3186,12 +3177,9 @@ leave:
   }
 
   TIME_MEASURE_FINISH(vmt);
-  size_t block_size;
-  difficulty_type cumulative_difficulty;
+  size_t block_size = cumulative_block_size;
+  difficulty_type cumulative_difficulty = current_diffic;
 
-  // populate various metadata about the block to be stored alongside it.
-  block_size = cumulative_block_size;
-  cumulative_difficulty = current_diffic;
   // In the "tail" state when the minimum subsidy (implemented in get_block_reward) is in effect, the number of
   // coins will eventually exceed MONEY_SUPPLY and overflow a uint64. To prevent overflow, cap already_generated_coins
   // at MONEY_SUPPLY. already_generated_coins is only used to compute the block subsidy and MONEY_SUPPLY yields a

@@ -43,8 +43,8 @@
 #include "misc_language.h"
 #include "difficulty.h"
 
-#define MAX_AVERAGE_TIMESPAN          (uint64_t) DIFFICULTY_TARGET*6   // 24 minutes
-#define MIN_AVERAGE_TIMESPAN          (uint64_t) DIFFICULTY_TARGET/24  // 10s
+#define MAX_AVERAGE_TIMESPAN          (uint64_t) DIFFICULTY_TARGET*6   // 6 minutes
+#define MIN_AVERAGE_TIMESPAN          (uint64_t) DIFFICULTY_TARGET/24  // 2 seconds
 
 namespace cryptonote {
 
@@ -123,8 +123,7 @@ namespace cryptonote {
     return !carry;
   }
 
-  difficulty_type next_difficulty(std::vector<std::uint64_t> timestamps, std::vector<difficulty_type> cumulative_difficulties, size_t target_seconds) {
-
+  difficulty_type next_difficulty(std::vector<std::uint64_t> timestamps, std::vector<difficulty_type> cumulative_difficulties) {
     if (timestamps.size() > DIFFICULTY_BLOCKS_COUNT)
     {
       timestamps.resize(DIFFICULTY_BLOCKS_COUNT);
@@ -185,17 +184,14 @@ namespace cryptonote {
     assert(total_work > 0);
 
     uint64_t low, high;
-    mul(total_work, target_seconds, low, high);
-    if (high != 0) {
+    mul(total_work, DIFFICULTY_TARGET, low, high);
+    if (high)
       return 0;
-    }
 
     uint64_t next_diff = (low + adjusted_total_timespan - 1) / std::max(adjusted_total_timespan,uint64_t(1));
     if (next_diff < 1) next_diff = 1;
-    LOG_PRINT_L2("Total timespan: " << total_timespan << ", Adjusted total timespan: " << adjusted_total_timespan << ", Total work: " << total_work << ", Next diff: " << next_diff << ", Hashrate (H/s): " << next_diff / target_seconds);
+    LOG_PRINT_L2("Total timespan: " << total_timespan << ", Adjusted total timespan: " << adjusted_total_timespan << ", Total work: " << total_work << ", Next diff: " << next_diff << ", Hashrate (H/s): " << next_diff / DIFFICULTY_TARGET);
 
     return next_diff;
   }
-
-
 }

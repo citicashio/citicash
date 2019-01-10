@@ -45,6 +45,8 @@ using namespace epee;
 
 #include "wallet/wallet2.h"
 
+#include <algorithm>
+
 namespace cryptonote
 {
 
@@ -1205,37 +1207,85 @@ namespace cryptonote
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
-  bool core_rpc_server::on_get_info_json(const COMMAND_RPC_GET_INFO::request& req, COMMAND_RPC_GET_INFO::response& res, epee::json_rpc::error& error_resp)
+  bool core_rpc_server::on_get_info_json(const COMMAND_RPC_GET_TIMESTAMP_AND_DIFFICULTIES::request& req, COMMAND_RPC_GET_TIMESTAMP_AND_DIFFICULTIES::response& res, epee::json_rpc::error& error_resp)
   {
-    if(!check_core_busy())
-    {
+    if(!check_core_busy()) {
       error_resp.code = CORE_RPC_ERROR_CODE_CORE_BUSY;
       error_resp.message = "Core is busy.";
       return false;
     }
 
-    crypto::hash top_hash;
-    if (!m_core.get_blockchain_top(res.height, top_hash))
-    {
-      res.status = "Failed";
-      return false;
+    res.height = req.height;
+    res.timestamp = m_core.get_blockchain_storage().get_db().get_block_timestamp(req.height);
+    //res.difficulty = m_core.get_blockchain_storage().get_db().get_block_difficulty(req.height);
+    res.cumulative_difficulty = m_core.get_blockchain_storage().get_db().get_block_cumulative_difficulty(req.height);
+    std::vector<std::uint64_t> timestamps;
+    std::vector<difficulty_type> cumulative_difficulties;
+    for (int i = 0; i != 29; ++i) {
+      timestamps.emplace_back(m_core.get_blockchain_storage().get_db().get_block_timestamp(req.height-29+i));
+      cumulative_difficulties.emplace_back(m_core.get_blockchain_storage().get_db().get_block_cumulative_difficulty(req.height-29+i));
     }
-    ++res.height; // turn top block height into blockchain height
-    res.top_block_hash = string_tools::pod_to_hex(top_hash);
-    res.target_height = m_core.get_target_blockchain_height();
-    res.difficulty = m_core.get_blockchain_storage().get_difficulty_for_next_block();
-    res.target = DIFFICULTY_TARGET;
-    res.tx_count = m_core.get_blockchain_storage().get_total_transactions() - res.height; //without coinbase
-    res.tx_pool_size = m_core.get_pool_transactions_count();
-    res.alt_blocks_count = m_core.get_blockchain_storage().get_alternative_blocks_count();
-    uint64_t total_conn = m_p2p.get_connections_count();
-    res.outgoing_connections_count = m_p2p.get_outgoing_connections_count();
-    res.incoming_connections_count = total_conn - res.outgoing_connections_count;
-    res.white_peerlist_size = m_p2p.get_peerlist_manager().get_white_peers_count();
-    res.grey_peerlist_size = m_p2p.get_peerlist_manager().get_gray_peers_count();
-    res.testnet = m_testnet;
-    res.cumulative_difficulty = m_core.get_blockchain_storage().get_db().get_block_cumulative_difficulty(res.height - 1);
-    res.hash_rate = res.difficulty/res.target;
+    for (auto& timestamp : timestamps)
+      cout << timestamp << endl;
+    sort(timestamps.begin(), timestamps.end());
+    cout << "sorted: " << endl;
+    for (auto& timestamp : timestamps)
+      cout << timestamp << endl;
+    uint64_t total_timespan = timestamps[22] - timestamps[6]; // proc zrovna rozdil 16?
+    cout << "total_timespan: " << total_timespan << endl;
+    if (total_timespan == 0)
+  	  total_timespan = 1;
+    std::vector<std::uint64_t> time_spans;
+    for (auto i = 14; i < 28; ++i) { // proc zrovna 14 iteraci?
+      uint64_t time_span = timestamps[i + 1] - timestamps[i];
+      cout << "time_span: " << time_span << endl;
+      if (time_span == 0)
+        time_span = 1;
+      time_spans.push_back(time_span);
+    }
+    cout << "inserted: " << endl;
+    for (auto& time_span : time_spans)
+      cout << time_span << endl;
+    uint64_t timespan_median = epee::misc_utils::median(time_spans);
+    cout << "timespan_median: " << timespan_median << endl;
+
+    uint64_t adjusted_total_timespan = (total_timespan * 8 + (timespan_median * 16/* why not 14? */) * 3) / 10; //  0.8A + 0.3M (the median of a poisson distribution is 70% of the mean, so 0.25A = 0.25/0.7 = 0.285M) // LUKAS wtf?
+    cout << "adjusted_total_timespan: " << adjusted_total_timespan << endl;
+    if (adjusted_total_timespan > 360 * 16)
+      adjusted_total_timespan = 360 * 16;
+    if (adjusted_total_timespan < 2 * 16)
+      adjusted_total_timespan = 2 * 16;
+
+    difficulty_type total_work = cumulative_difficulties[22] - cumulative_difficulties[6];
+    cout << "total_work: " << total_work << endl;
+
+    // total_work   = ab = a * 2^32 + b
+    // DIFFICULTY_TARGET = cd = c * 2^32 + d
+    // ab * cd = a * c * 2^64 + (a * d + b * c) * 2^32 + b * d
+    uint64_t a = total_work >> 32;
+    cout << "a: " << a << endl;
+    uint64_t b = total_work & 0xFFFFFFFF;
+    cout << "b: " << b << endl;
+    uint64_t d = DIFFICULTY_TARGET & 0xFFFFFFFF;
+    cout << "d: " << d << endl;
+
+    uint64_t ad = a * d;
+    cout << "ad: " << ad << endl;
+    uint64_t bd = b * d;
+    cout << "bd: " << bd << endl;
+
+    // total_work * DIFFICULTY_TARGET = &high * 2^64 + low
+    uint64_t low = bd + (ad << 32);
+    cout << "low: " << low << endl;
+    uint64_t product_lo_carry = low < bd ? 1 : 0;
+    cout << "product_lo_carry: " << product_lo_carry << endl;
+    uint64_t high = (ad >> 32) + product_lo_carry;
+    cout << "high: " << high << endl;
+    if (high)
+      res.difficulty = 0;
+
+    res.difficulty = (low + adjusted_total_timespan - 1) / adjusted_total_timespan;
+    cout << "difficulty: " << res.difficulty << endl;
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }
