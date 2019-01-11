@@ -2804,7 +2804,7 @@ uint64_t Blockchain::get_adjusted_time() const
 bool Blockchain::check_block_timestamp(std::vector<uint64_t>& timestamps, const block& b, uint64_t& timestamp) const
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
-  if (get_current_hard_fork_version() > 4)
+  if (get_current_hard_fork_version() > 3)
     timestamp = m_db->get_block_timestamp(m_db->height() - 1) + 1;
   else
     timestamp = epee::misc_utils::median(timestamps);
@@ -2822,7 +2822,7 @@ bool Blockchain::check_block_timestamp(const block& b, uint64_t& timestamp) cons
   LOG_PRINT_L3("Blockchain::" << __func__);
 
   uint64_t cryptonote_block_future_time_limit;
-  if (get_current_hard_fork_version() > 4)
+  if (get_current_hard_fork_version() > 3)
     cryptonote_block_future_time_limit = CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT;
   else
     cryptonote_block_future_time_limit = CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT_V0;
