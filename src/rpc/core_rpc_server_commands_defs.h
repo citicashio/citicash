@@ -511,35 +511,6 @@ namespace cryptonote
     };
   };
 
-  struct COMMAND_RPC_GET_TIMESTAMP_AND_DIFFICULTIES
-  {
-    struct request
-    {
-      uint64_t height;
-
-      BEGIN_KV_SERIALIZE_MAP()
-        KV_SERIALIZE(height)
-      END_KV_SERIALIZE_MAP()
-    };
-
-    struct response
-    {
-      std::string status;
-      uint64_t height;
-      uint64_t timestamp;
-      uint64_t difficulty;
-      uint64_t cumulative_difficulty;
-
-      BEGIN_KV_SERIALIZE_MAP()
-        KV_SERIALIZE(status)
-        KV_SERIALIZE(height)
-        KV_SERIALIZE(timestamp)
-        KV_SERIALIZE(difficulty)
-        KV_SERIALIZE(cumulative_difficulty)
-      END_KV_SERIALIZE_MAP()
-    };
-  };
-
   struct COMMAND_RPC_GET_INFO
   {
     struct request
@@ -552,10 +523,8 @@ namespace cryptonote
     {
       std::string status;
       uint64_t height;
-      uint64_t timestamp;
-      uint64_t difficulty;
-      uint64_t cumulative_difficulty;
       uint64_t target_height;
+      uint64_t difficulty;
       uint64_t target;
       uint64_t tx_count;
       uint64_t tx_pool_size;
@@ -566,15 +535,14 @@ namespace cryptonote
       uint64_t grey_peerlist_size;
       bool testnet;
       std::string top_block_hash;
+      uint64_t cumulative_difficulty;
       uint64_t hash_rate;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
         KV_SERIALIZE(height)
-        KV_SERIALIZE(timestamp)
-        KV_SERIALIZE(difficulty)
-        KV_SERIALIZE(cumulative_difficulty)
         KV_SERIALIZE(target_height)
+        KV_SERIALIZE(difficulty)
         KV_SERIALIZE(target)
         KV_SERIALIZE(tx_count)
         KV_SERIALIZE(tx_pool_size)
@@ -585,6 +553,7 @@ namespace cryptonote
         KV_SERIALIZE(grey_peerlist_size)
         KV_SERIALIZE(testnet)
         KV_SERIALIZE(top_block_hash)
+        KV_SERIALIZE(cumulative_difficulty)
         KV_SERIALIZE(hash_rate)
       END_KV_SERIALIZE_MAP()
     };
