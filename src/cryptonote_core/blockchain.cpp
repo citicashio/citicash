@@ -1045,6 +1045,8 @@ bool Blockchain::create_block_template(block& b, const account_public_address& m
 
   uint64_t median_timestamp;
   if (!check_block_timestamp(b, median_timestamp))
+    //b.timestamp = median_timestamp;
+    //b.timestamp = get_db().get_block(b.prev_id).timestamp+1;
     b.timestamp = median_timestamp;
 
   diffic = get_difficulty_for_next_block();
@@ -2805,15 +2807,17 @@ uint64_t Blockchain::get_adjusted_time() const
 bool Blockchain::check_block_timestamp(std::vector<uint64_t>& timestamps, const block& b, uint64_t& median_ts) const
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
-  median_ts = epee::misc_utils::median(timestamps);
+  //median_ts = epee::misc_utils::median(timestamps);
+  median_ts = m_db->get_block_timestamp(m_db->height() - 1) + 1;
   
-  if (get_current_hard_fork_version() > 4 && b.timestamp < timestamps.back() - CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT) {
+  /*if (get_current_hard_fork_version() > 4 && b.timestamp < timestamps.back() - CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT) {
     LOG_PRINT_L3("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << ", is less than top block timestamp - FTL " << timestamps.back() - CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT);
     return false;
-  }
+  }*/
 
+  //if (b.timestamp < median_ts) {
   if (b.timestamp < median_ts) {
-    LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << ", less than median of last " << BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW << " blocks, " << median_ts);
+    LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << ", less than timestamp of last block, " << get_db().get_block_timestamp(m_db->height()-1));
     return false;
   }
 
@@ -2837,28 +2841,20 @@ bool Blockchain::check_block_timestamp(const block& b, uint64_t& median_ts) cons
   else
     cryptonote_block_future_time_limit = CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT_UNTIL_267500;
 
-  if (b.timestamp > get_adjusted_time() + cryptonote_block_future_time_limit)
-  {
+  if (b.timestamp > get_adjusted_time() + cryptonote_block_future_time_limit) {
     LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << ", bigger than adjusted time + " << cryptonote_block_future_time_limit << " seconds");
     median_ts = get_adjusted_time() + cryptonote_block_future_time_limit;
     return false;
   }
 
-  // if not enough blocks, no proper median yet, return true
   if (m_db->height() < BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW)
-  {
     return true;
-  }
 
   std::vector<uint64_t> timestamps;
-  auto h = m_db->height();
+  auto height = m_db->height();
 
-  // need most recent 60 blocks, get index of first of those
-  size_t offset = h - BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW;
-  for(;offset < h; ++offset)
-  {
+  for (size_t offset = height - BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW; offset < height; ++offset)
     timestamps.push_back(m_db->get_block_timestamp(offset));
-  }
 
   return check_block_timestamp(timestamps, b, median_ts);
 }
