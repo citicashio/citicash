@@ -1045,8 +1045,6 @@ bool Blockchain::create_block_template(block& b, const account_public_address& m
 
   uint64_t median_timestamp;
   if (!check_block_timestamp(b, median_timestamp))
-    //b.timestamp = median_timestamp;
-    //b.timestamp = get_db().get_block(b.prev_id).timestamp+1;
     b.timestamp = median_timestamp;
 
   diffic = get_difficulty_for_next_block();
@@ -2794,8 +2792,7 @@ bool Blockchain::check_tx_input(size_t tx_version, const txin_to_key& txin, cons
   // rct_signatures will be expanded after this
   return true;
 }
-//------------------------------------------------------------------
-//TODO: Is this intended to do something else?  Need to look into the todo there.
+
 uint64_t Blockchain::get_adjusted_time() const
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
@@ -2804,34 +2801,23 @@ uint64_t Blockchain::get_adjusted_time() const
 }
 //------------------------------------------------------------------
 //TODO: revisit, has changed a bit on upstream
-bool Blockchain::check_block_timestamp(std::vector<uint64_t>& timestamps, const block& b, uint64_t& median_ts) const
+bool Blockchain::check_block_timestamp(std::vector<uint64_t>& timestamps, const block& b, uint64_t& timestamp) const
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
-  //median_ts = epee::misc_utils::median(timestamps);
-  median_ts = m_db->get_block_timestamp(m_db->height() - 1) + 1;
+  if (get_current_hard_fork_version() > 4)
+    timestamp = m_db->get_block_timestamp(m_db->height() - 1) + 1;
+  else
+    timestamp = epee::misc_utils::median(timestamps);
   
-  /*if (get_current_hard_fork_version() > 4 && b.timestamp < timestamps.back() - CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT) {
-    LOG_PRINT_L3("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << ", is less than top block timestamp - FTL " << timestamps.back() - CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT);
-    return false;
-  }*/
-
-  //if (b.timestamp < median_ts) {
-  if (b.timestamp < median_ts) {
-    LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << ", less than timestamp of last block, " << get_db().get_block_timestamp(m_db->height()-1));
+  if (b.timestamp < timestamp) {
+    LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", height: " << m_db->height() << ", " << b.timestamp << ", not higher than timestamp of last block, " << get_db().get_block_timestamp(m_db->height()-1));
     return false;
   }
 
   return true;
 }
-//------------------------------------------------------------------
-// This function grabs the timestamps from the most recent <n> blocks,
-// where n = BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW.  If there are not those many
-// blocks in the blockchain, the timestap is assumed to be valid.  If there
-// are, this function returns:
-//   true if the block's timestamp is not less than the timestamp of the
-//       median of the selected blocks
-//   false otherwise
-bool Blockchain::check_block_timestamp(const block& b, uint64_t& median_ts) const
+
+bool Blockchain::check_block_timestamp(const block& b, uint64_t& timestamp) const
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
 
@@ -2839,11 +2825,11 @@ bool Blockchain::check_block_timestamp(const block& b, uint64_t& median_ts) cons
   if (get_current_hard_fork_version() > 4)
     cryptonote_block_future_time_limit = CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT;
   else
-    cryptonote_block_future_time_limit = CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT_UNTIL_267500;
+    cryptonote_block_future_time_limit = CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT_V0;
 
   if (b.timestamp > get_adjusted_time() + cryptonote_block_future_time_limit) {
     LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << ", bigger than adjusted time + " << cryptonote_block_future_time_limit << " seconds");
-    median_ts = get_adjusted_time() + cryptonote_block_future_time_limit;
+    timestamp = get_adjusted_time() + cryptonote_block_future_time_limit;
     return false;
   }
 
@@ -2856,7 +2842,7 @@ bool Blockchain::check_block_timestamp(const block& b, uint64_t& median_ts) cons
   for (size_t offset = height - BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW; offset < height; ++offset)
     timestamps.push_back(m_db->get_block_timestamp(offset));
 
-  return check_block_timestamp(timestamps, b, median_ts);
+  return check_block_timestamp(timestamps, b, timestamp);
 }
 
 void Blockchain::return_tx_to_pool(const std::vector<transaction> &txs)

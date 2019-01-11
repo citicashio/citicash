@@ -136,7 +136,7 @@ namespace cryptonote {
       return 1;
     }
 
-    //sort(timestamps.begin(), timestamps.end());
+    sort(timestamps.begin(), timestamps.end()); // LUKAS TODO delete in the future
     size_t cut_begin, cut_end;
     static_assert(2 * DIFFICULTY_CUT <= DIFFICULTY_BLOCKS_COUNT - 2, "Cut length is too large");
     if (length <= DIFFICULTY_BLOCKS_COUNT - 2 * DIFFICULTY_CUT) {
