@@ -89,7 +89,8 @@ static const struct {
 #else
   { 1, 1, 0, 1482806500 },
   { 2, 49100, 0, 1534766400 },
-  { 3, 234739, 0, 1546266600 }
+  { 3, 234739, 0, 1546266600 },
+  { 4, 267500, 0, 1547484107 }
 #endif
 };
 static const uint64_t mainnet_hard_fork_version_1_till = (uint64_t)-1;
@@ -1042,11 +1043,9 @@ bool Blockchain::create_block_template(block& b, const account_public_address& m
   b.prev_id = get_tail_id();
   b.timestamp = time(NULL);
 
-  uint64_t median_ts;
-  if (!check_block_timestamp(b, median_ts))
-  {
-    b.timestamp = median_ts;
-  }
+  uint64_t median_timestamp;
+  if (!check_block_timestamp(b, median_timestamp))
+    b.timestamp = median_timestamp;
 
   diffic = get_difficulty_for_next_block();
   CHECK_AND_ASSERT_MES(diffic, false, "difficulty overhead.");
@@ -2807,9 +2806,13 @@ bool Blockchain::check_block_timestamp(std::vector<uint64_t>& timestamps, const 
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
   median_ts = epee::misc_utils::median(timestamps);
+  
+  if (get_current_hard_fork_version() > 4 && b.timestamp < timestamps.back() - CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT) {
+    LOG_PRINT_L3("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << ", is less than top block timestamp - FTL " << timestamps.back() - CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT);
+    return false;
+  }
 
-  if(b.timestamp < median_ts)
-  {
+  if (b.timestamp < median_ts) {
     LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << ", less than median of last " << BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW << " blocks, " << median_ts);
     return false;
   }
@@ -2827,12 +2830,17 @@ bool Blockchain::check_block_timestamp(std::vector<uint64_t>& timestamps, const 
 bool Blockchain::check_block_timestamp(const block& b, uint64_t& median_ts) const
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
-  uint64_t block_future_time_limit = CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT;
 
-  if (b.timestamp > get_adjusted_time() + block_future_time_limit) // this makes sense, but attacker can send premined blockchain branch later than immediatelly
+  uint64_t cryptonote_block_future_time_limit;
+  if (get_current_hard_fork_version() > 4)
+    cryptonote_block_future_time_limit = CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT;
+  else
+    cryptonote_block_future_time_limit = CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT_UNTIL_267500;
+
+  if (b.timestamp > get_adjusted_time() + cryptonote_block_future_time_limit)
   {
-    LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp <<
-      ", bigger than adjusted time + " << "30 minutes");
+    LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << ", bigger than adjusted time + " << cryptonote_block_future_time_limit << " seconds");
+    median_ts = get_adjusted_time() + cryptonote_block_future_time_limit;
     return false;
   }
 
