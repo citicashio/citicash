@@ -943,7 +943,7 @@ namespace tools
       rpc_payment.tx_hash      = epee::string_tools::pod_to_hex(payment.m_tx_hash);
       rpc_payment.amount       = payment.m_amount;
       rpc_payment.block_height = payment.m_block_height;
-      rpc_payment.unlock_height  = payment.m_unlock_time;
+      rpc_payment.unlock_height = payment.m_unlock_time;
       rpc_payment.subaddr_index = payment.m_subaddr_index;
       res.payments.push_back(rpc_payment);
     }

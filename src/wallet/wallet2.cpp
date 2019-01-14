@@ -2719,6 +2719,7 @@ void wallet2::get_payments(std::list<std::pair<std::string, wallet2::payment_det
 			(subaddr_indices.empty() || subaddr_indices.count(x.second.m_subaddr_index.minor) == 1))
 		{
 			payments.push_back(x);
+      payments.back().second.m_payment_id = x.first; // LUKAS TODO refactor, this is just a hotfix, not neat, maybe fix together with 0be661d6321c0af1b534152263b3d301a4663ab7
 		}
 	});
 }
