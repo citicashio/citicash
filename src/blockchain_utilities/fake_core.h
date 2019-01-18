@@ -37,15 +37,6 @@
 
 using namespace cryptonote;
 
-namespace
-{
-  // NOTE: These values should match blockchain.cpp
-  // TODO: Refactor
-  const uint64_t mainnet_hard_fork_version_1_till = (uint64_t)-1;
-  const uint64_t testnet_hard_fork_version_1_till = (uint64_t)-1;
-}
-
-
 struct fake_core_db
 {
   Blockchain m_storage;
@@ -81,8 +72,7 @@ struct fake_core_db
 
     db->check_hard_fork_info();
 
-    uint64_t hard_fork_version_1_till = use_testnet ? testnet_hard_fork_version_1_till : mainnet_hard_fork_version_1_till;
-    m_hardfork = new HardFork(*db, 1, hard_fork_version_1_till);
+    m_hardfork = new HardFork(*db, 1);
 
     m_storage.init(db, m_hardfork, use_testnet);
 

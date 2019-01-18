@@ -93,7 +93,6 @@ static const struct {
   { 4, 280000, 0, 1548248400 }
 #endif
 };
-static const uint64_t mainnet_hard_fork_version_1_till = (uint64_t)-1;
 
 static const struct {
   uint8_t version;
@@ -103,7 +102,6 @@ static const struct {
 } testnet_hard_forks[] = {
   { 1, 1, 0, 1482806500 }
 };
-static const uint64_t testnet_hard_fork_version_1_till = (uint64_t)-1;
 
 //------------------------------------------------------------------
 Blockchain::Blockchain(tx_memory_pool& tx_pool) :
@@ -289,11 +287,11 @@ bool Blockchain::init(BlockchainDB* db, const bool testnet, const cryptonote::te
   if (m_hardfork == nullptr)
   {
     if (fakechain)
-      m_hardfork = new HardFork(*db, 1, 0);
+      m_hardfork = new HardFork(*db, 1);
     else if (m_testnet)
-      m_hardfork = new HardFork(*db, 1, testnet_hard_fork_version_1_till);
+      m_hardfork = new HardFork(*db, 1);
     else
-      m_hardfork = new HardFork(*db, 1, mainnet_hard_fork_version_1_till);
+      m_hardfork = new HardFork(*db, 1);
   }
   if (fakechain)
   {
