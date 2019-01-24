@@ -2803,12 +2803,12 @@ bool Blockchain::check_block_timestamp(std::vector<uint64_t>& timestamps, const 
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
   if (get_current_hard_fork_version() > 3)
-    timestamp = m_db->get_block_timestamp(m_db->height() - 1) + 1;
+    timestamp = m_db->get_block(b.prev_id).timestamp + 1;
   else
     timestamp = epee::misc_utils::median(timestamps);
   
   if (b.timestamp < timestamp) {
-    LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", height: " << m_db->height() << ", " << b.timestamp << ", not higher than timestamp of last block, " << get_db().get_block_timestamp(m_db->height()-1));
+    LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", height: " << m_db->height() << ", " << b.timestamp << ", not higher than timestamp of it's previous block, " << m_db->get_block(b.prev_id).timestamp);
     return false;
   }
 
@@ -2827,7 +2827,7 @@ bool Blockchain::check_block_timestamp(const block& b, uint64_t& timestamp) cons
 
   if (b.timestamp > get_adjusted_time() + cryptonote_block_future_time_limit) {
     LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << ", bigger than adjusted time + " << cryptonote_block_future_time_limit << " seconds");
-    timestamp = get_adjusted_time() + cryptonote_block_future_time_limit;
+    timestamp = get_adjusted_time() + cryptonote_block_future_time_limit; // LUKAS TODO consider deleting in the future
     return false;
   }
 
