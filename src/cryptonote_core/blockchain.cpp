@@ -2802,8 +2802,16 @@ uint64_t Blockchain::get_adjusted_time() const
 bool Blockchain::check_block_timestamp(std::vector<uint64_t>& timestamps, const block& b, uint64_t& timestamp) const
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
-  if (get_current_hard_fork_version() > 3)
-    timestamp = m_db->get_block(b.prev_id).timestamp + 1;
+  if (get_current_hard_fork_version() > 3) {
+    try {
+      timestamp = m_db->get_block(b.prev_id).timestamp + 1;
+    } 
+    catch (...) { // LUKAS TODO make cleaner
+      LOG_PRINT_L1("previous block of incoming block probably missing");
+      timestamp = 0;
+      return false;
+    }
+  }
   else
     timestamp = epee::misc_utils::median(timestamps);
   

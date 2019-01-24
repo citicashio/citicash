@@ -374,7 +374,7 @@ PRAGMA_WARNING_DISABLE_VS(4355)
     // means that all shared_ptr references to the connection object will
     // disappear and the object will be destroyed automatically after this
     // handler returns. The connection class's destructor closes the socket.
-    CATCH_ENTRY_L0("connection<t_protocol_handler>::handle_read", void());
+    CATCH_ENTRY_L3("connection<t_protocol_handler>::handle_read", void());
   }
   //---------------------------------------------------------------------------------
   template<class t_protocol_handler>
