@@ -684,31 +684,36 @@ difficulty_type Blockchain::get_difficulty_for_next_block()
   std::vector<uint64_t> timestamps;
   std::vector<difficulty_type> difficulties;
   auto height = m_db->height();
+  size_t difficult_block_count = DIFFICULTY_BLOCKS_COUNT;
 
   // ND: Speedup
-  // 1. Keep a list of the last 17 (or less) blocks that is used to compute difficulty,
+  // 1. Keep a list of the last 735 (or less) blocks that is used to compute difficulty,
   //    then when the next block difficulty is queried, push the latest height data and
   //    pop the oldest one from the list. This only requires 1x read per height instead
-  //    of doing 17 (DIFFICULTY_BLOCKS_COUNT).
-  if (m_timestamps_and_difficulties_height != 0 && m_timestamps_and_difficulties_height + 1 == height) {
+  //    of doing 735 (DIFFICULTY_BLOCKS_COUNT).
+  if (m_timestamps_and_difficulties_height != 0 && ((height - m_timestamps_and_difficulties_height) == 1))
+  {
     uint64_t index = height - 1;
     m_timestamps.push_back(m_db->get_block_timestamp(index));
     m_difficulties.push_back(m_db->get_block_cumulative_difficulty(index));
 
-    while (m_timestamps.size() > DIFFICULTY_BLOCKS_COUNT)
+    while (m_timestamps.size() > difficult_block_count)
       m_timestamps.erase(m_timestamps.begin());
-    while (m_difficulties.size() > DIFFICULTY_BLOCKS_COUNT)
+    while (m_difficulties.size() > difficult_block_count)
       m_difficulties.erase(m_difficulties.begin());
 
     m_timestamps_and_difficulties_height = height;
     timestamps = m_timestamps;
     difficulties = m_difficulties;
   }
-  else {
-    size_t offset = height - std::min<size_t>(height, static_cast<size_t>(DIFFICULTY_BLOCKS_COUNT));
+  else
+  {
+    size_t offset = height - std::min < size_t >(height, static_cast<size_t>(difficult_block_count));
     if (offset == 0)
       ++offset;
 
+    timestamps.clear();
+    difficulties.clear();
     for (; offset < height; offset++)
     {
       timestamps.push_back(m_db->get_block_timestamp(offset));
@@ -719,7 +724,8 @@ difficulty_type Blockchain::get_difficulty_for_next_block()
     m_timestamps = timestamps;
     m_difficulties = difficulties;
   }
-  return next_difficulty(timestamps, difficulties);
+  size_t target = DIFFICULTY_TARGET;
+  return next_difficulty(timestamps, difficulties, target);
 }
 //------------------------------------------------------------------
 // This function removes blocks from the blockchain until it gets to the
@@ -919,8 +925,11 @@ difficulty_type Blockchain::get_next_difficulty_for_alternative_chain(const std:
     }
   }
 
+  // FIXME: This will fail if fork activation heights are subject to voting
+  size_t target = DIFFICULTY_TARGET;
+
   // calculate the difficulty target for the block and return it
-  return next_difficulty(timestamps, cumulative_difficulties);
+  return next_difficulty(timestamps, cumulative_difficulties, target);
 }
 //------------------------------------------------------------------
 // This function does a sanity check on basic things that all miner
@@ -1041,9 +1050,11 @@ bool Blockchain::create_block_template(block& b, const account_public_address& m
   b.prev_id = get_tail_id();
   b.timestamp = time(NULL);
 
-  uint64_t median_timestamp;
-  if (!check_block_timestamp(b, median_timestamp))
-    b.timestamp = median_timestamp;
+  uint64_t median_ts;
+  if (!check_block_timestamp(b, median_ts))
+  {
+    b.timestamp = median_ts;
+  }
 
   diffic = get_difficulty_for_next_block();
   CHECK_AND_ASSERT_MES(diffic, false, "difficulty overhead.");
@@ -2790,7 +2801,8 @@ bool Blockchain::check_tx_input(size_t tx_version, const txin_to_key& txin, cons
   // rct_signatures will be expanded after this
   return true;
 }
-
+//------------------------------------------------------------------
+//TODO: Is this intended to do something else?  Need to look into the todo there.
 uint64_t Blockchain::get_adjusted_time() const
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
@@ -2799,56 +2811,56 @@ uint64_t Blockchain::get_adjusted_time() const
 }
 //------------------------------------------------------------------
 //TODO: revisit, has changed a bit on upstream
-bool Blockchain::check_block_timestamp(std::vector<uint64_t>& timestamps, const block& b, uint64_t& timestamp) const
+bool Blockchain::check_block_timestamp(std::vector<uint64_t>& timestamps, const block& b, uint64_t& median_ts) const
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
-  if (get_current_hard_fork_version() > 3) {
-    try {
-      timestamp = m_db->get_block(b.prev_id).timestamp + 1;
-    } 
-    catch (...) { // LUKAS TODO make cleaner
-      LOG_PRINT_L1("previous block of incoming block probably missing");
-      timestamp = 0;
-      return false;
-    }
-  }
-  else
-    timestamp = epee::misc_utils::median(timestamps);
-  
-  if (b.timestamp < timestamp) {
-    LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", height: " << m_db->height() << ", " << b.timestamp << ", not higher than timestamp of it's previous block, " << m_db->get_block(b.prev_id).timestamp);
+  median_ts = epee::misc_utils::median(timestamps);
+
+  if(b.timestamp < median_ts)
+  {
+    LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << ", less than median of last " << BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW << " blocks, " << median_ts);
     return false;
   }
 
   return true;
 }
-
-bool Blockchain::check_block_timestamp(const block& b, uint64_t& timestamp) const
+//------------------------------------------------------------------
+// This function grabs the timestamps from the most recent <n> blocks,
+// where n = BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW.  If there are not those many
+// blocks in the blockchain, the timestap is assumed to be valid.  If there
+// are, this function returns:
+//   true if the block's timestamp is not less than the timestamp of the
+//       median of the selected blocks
+//   false otherwise
+bool Blockchain::check_block_timestamp(const block& b, uint64_t& median_ts) const
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
+  uint64_t block_future_time_limit = CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT;
 
-  uint64_t cryptonote_block_future_time_limit;
-  if (get_current_hard_fork_version() > 3)
-    cryptonote_block_future_time_limit = CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT;
-  else
-    cryptonote_block_future_time_limit = CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT_V0;
-
-  if (b.timestamp > get_adjusted_time() + cryptonote_block_future_time_limit) {
-    LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp << ", bigger than adjusted time + " << cryptonote_block_future_time_limit << " seconds");
-    timestamp = get_adjusted_time() + cryptonote_block_future_time_limit; // LUKAS TODO consider deleting in the future
+  if (b.timestamp > get_adjusted_time() + block_future_time_limit)
+  {
+    LOG_PRINT_L1("Timestamp of block with id: " << get_block_hash(b) << ", " << b.timestamp <<
+      ", bigger than adjusted time + " << "30 minutes");
     return false;
   }
 
+  // if not enough blocks, no proper median yet, return true
   if (m_db->height() < BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW)
+  {
     return true;
+  }
 
   std::vector<uint64_t> timestamps;
-  auto height = m_db->height();
+  auto h = m_db->height();
 
-  for (size_t offset = height - BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW; offset < height; ++offset)
+  // need most recent 60 blocks, get index of first of those
+  size_t offset = h - BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW;
+  for(;offset < h; ++offset)
+  {
     timestamps.push_back(m_db->get_block_timestamp(offset));
+  }
 
-  return check_block_timestamp(timestamps, b, timestamp);
+  return check_block_timestamp(timestamps, b, median_ts);
 }
 
 void Blockchain::return_tx_to_pool(const std::vector<transaction> &txs)
@@ -3173,9 +3185,12 @@ leave:
   }
 
   TIME_MEASURE_FINISH(vmt);
-  size_t block_size = cumulative_block_size;
-  difficulty_type cumulative_difficulty = current_diffic;
+  size_t block_size;
+  difficulty_type cumulative_difficulty;
 
+  // populate various metadata about the block to be stored alongside it.
+  block_size = cumulative_block_size;
+  cumulative_difficulty = current_diffic;
   // In the "tail" state when the minimum subsidy (implemented in get_block_reward) is in effect, the number of
   // coins will eventually exceed MONEY_SUPPLY and overflow a uint64. To prevent overflow, cap already_generated_coins
   // at MONEY_SUPPLY. already_generated_coins is only used to compute the block subsidy and MONEY_SUPPLY yields a

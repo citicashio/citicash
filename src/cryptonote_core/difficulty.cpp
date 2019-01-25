@@ -123,7 +123,8 @@ namespace cryptonote {
     return !carry;
   }
 
-  difficulty_type next_difficulty(std::vector<std::uint64_t> timestamps, std::vector<difficulty_type> cumulative_difficulties) {
+  difficulty_type next_difficulty(std::vector<std::uint64_t> timestamps, std::vector<difficulty_type> cumulative_difficulties, size_t target_seconds) {
+
     if (timestamps.size() > DIFFICULTY_BLOCKS_COUNT)
     {
       timestamps.resize(DIFFICULTY_BLOCKS_COUNT);
@@ -136,7 +137,7 @@ namespace cryptonote {
       return 1;
     }
 
-    sort(timestamps.begin(), timestamps.end()); // LUKAS TODO delete in the future
+    sort(timestamps.begin(), timestamps.end());
     size_t cut_begin, cut_end;
     static_assert(2 * DIFFICULTY_CUT <= DIFFICULTY_BLOCKS_COUNT - 2, "Cut length is too large");
     if (length <= DIFFICULTY_BLOCKS_COUNT - 2 * DIFFICULTY_CUT) {
@@ -184,14 +185,17 @@ namespace cryptonote {
     assert(total_work > 0);
 
     uint64_t low, high;
-    mul(total_work, DIFFICULTY_TARGET, low, high);
-    if (high)
+    mul(total_work, target_seconds, low, high);
+    if (high != 0) {
       return 0;
+    }
 
     uint64_t next_diff = (low + adjusted_total_timespan - 1) / std::max(adjusted_total_timespan,uint64_t(1));
     if (next_diff < 1) next_diff = 1;
-    LOG_PRINT_L2("Total timespan: " << total_timespan << ", Adjusted total timespan: " << adjusted_total_timespan << ", Total work: " << total_work << ", Next diff: " << next_diff << ", Hashrate (H/s): " << next_diff / DIFFICULTY_TARGET);
+    LOG_PRINT_L2("Total timespan: " << total_timespan << ", Adjusted total timespan: " << adjusted_total_timespan << ", Total work: " << total_work << ", Next diff: " << next_diff << ", Hashrate (H/s): " << next_diff / target_seconds);
 
     return next_diff;
   }
+
+
 }
